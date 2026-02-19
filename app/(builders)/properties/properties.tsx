@@ -9,7 +9,7 @@ const PropertiesScreen = () => {
   const router = useRouter();
   
   const handleNavigation = () => {
-    router.replace("/create-property");
+    router.replace("/projects/projects");
   };
 
   return (

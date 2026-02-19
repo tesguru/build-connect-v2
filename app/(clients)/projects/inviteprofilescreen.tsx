@@ -4,8 +4,8 @@ import { useLocalSearchParams } from 'expo-router';
 import { Check, Star } from 'lucide-react-native';
 import AppLayout from '@/components/Layouts/AppLayout';
 import GradientButton from '@/components/Buttons/GradientButton';
-import { useProjects } from '@/core/hooks/useProjects';
 import { useBids } from '@/core/hooks/UseBids';
+import SuccessScreen from '@/components/Notifications/SucessScreen';
 
 interface Contractor {
   name: string;
@@ -189,11 +189,35 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
 };
 
 const Inviteprofilescreen: React.FC<InviteProfileScreenProps> = ({ contractor = contractorData }) => {
-  const { contractorId } = useLocalSearchParams<{ contractorId: string }>();
-  const { singleContractorQuery } = useBids();
+  const { contractorId, projectId} = useLocalSearchParams<{ contractorId: string, projectId: string }>();
+  const { singleContractorQuery, inviteBidMutation, inviteBidsuccess } = useBids();
 
   const { data, isLoading } = singleContractorQuery(contractorId || "");
-  console.log(data);
+    
+  const handleInviteToBid = () => {
+  const inviteData = {  // Better naming
+    projectId: projectId,
+    contractorId: contractorId,
+    message: "ayyaa",
+    expiresInDays: 30
+  }
+
+  console.log(inviteData)
+  inviteBidMutation.mutate(inviteData);
+}
+
+   if (inviteBidsuccess) {
+     return (
+      <SuccessScreen
+  title="Invitation Sent"
+  message="Invitation Sent Successfully"
+  buttonTitle="View my Projects"
+  navigateTo="/(tabs)/projects" 
+/>
+     );
+   }
+
+
 
   return (
     <AppLayout screenName="Elite Builders">
@@ -313,7 +337,7 @@ const Inviteprofilescreen: React.FC<InviteProfileScreenProps> = ({ contractor = 
               </View>
 
               <View className="mt-14">
-                <GradientButton title="Invite to bids" />
+                <GradientButton loading={inviteBidMutation.isPending} onPress={handleInviteToBid} title="Invite to bids" />
               </View>
             </View>
           </View>

@@ -136,7 +136,7 @@ const SubmitBidScreen = () => {
       <SuccessScreen
         title="Bid Submitted"
         message="Your bid has been successfully submitted."
-        navigateTo="/my-bids"
+        navigateTo="clients/projects/projects"
         buttonTitle="View my Bids"
       />
     );

@@ -164,6 +164,11 @@ export const linkMortgageSchema = z.object({
   document: z.any().nullable().optional(),
 });
 
+export const revisionSchema = z.object({
+  message: z.string().min(1, 'Please enter your revision request'),
+});
+
+export type RevisionInput = z.infer<typeof revisionSchema>;
 export type LinkMortgageInput = z.infer<typeof linkMortgageSchema>;
 export type SubmitBidInput = z.infer<typeof submitBidSchema>;
 export type RatingInput = z.infer<typeof ratingSchema>;

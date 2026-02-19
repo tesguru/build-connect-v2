@@ -8,33 +8,3 @@ export  const formatCurrency = (amount: number) => {
 
 
 
-export const useAppNavigation = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
-  const navigateTo = (screen: keyof RootStackParamList, params?: any) => {
-    navigation.navigate(screen, params);
-  };
-
-  const replaceTo = (screen: keyof RootStackParamList, params?: any) => {
-    navigation.replace(screen, params);
-  };
-
-  const goBack = () => {
-    navigation.goBack();
-  };
-
-  const resetTo = (screen: keyof RootStackParamList, params?: any) => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: screen, params }],
-    });
-  };
-
-  return {
-    navigateTo,
-    replaceTo,
-    goBack,
-    resetTo,
-    navigation, 
-  };
-};

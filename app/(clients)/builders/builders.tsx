@@ -57,6 +57,7 @@ const BuildersScreen = () => {
             reviews: item.reviews
           }}
           contractorid={item.id}
+          projectId={projectId}
         />
       </View>
     );

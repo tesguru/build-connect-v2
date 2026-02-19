@@ -4,7 +4,7 @@ import EmptyComponent from "@/components/Miscallaneous/EmptyComponent";
 import DashboardHeader from "@/components/PagesComponent/Dashboard/Shared/DashboardHeader";
 import QuickAccessCard from "@/components/PagesComponent/Dashboard/Shared/QuickAccessCard";
 import SearchBarWithFilter from "@/components/PagesComponent/Dashboard/Shared/SearchBarWithFilter";
-import { AbeyyMortgageBankBanner } from "@/constants/banner";
+import { HomeBaseMortgageBankBanner } from "@/constants/banner";
 import { BankIcon, PlusIcon, SupportIcon } from "@/constants/icon";
 import { useProjects } from "@/core/hooks/useProjects";
 import { useAuthStore } from "@/store/Authstore";
@@ -95,7 +95,7 @@ const ClientHome = ({ navigation }: any) => {
         />
 
         <View className="mx-2">
-          <ImageBanner imageSrc={AbeyyMortgageBankBanner} />
+          <ImageBanner imageSrc={HomeBaseMortgageBankBanner} />
         </View>
 
         <View className="px-4">
@@ -123,7 +123,7 @@ const ClientHome = ({ navigation }: any) => {
 
 
         {/* My Projects */}
-        <View className="mt-8 mx-2 bg-white rounded-xl p-4">
+        <View className="mt-8 mx-2  rounded-xl p-4">
           <View className="flex-row justify-between items-center mb-4">
             <Text className="font-interbold text-xl text-gray-900">
               My Projects

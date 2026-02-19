@@ -13,16 +13,18 @@ interface Contractor {
 interface ContractorCardProps {
   contractor: Contractor;
   contractorid: string; 
+  projectId: string;
 }
 
-export const ContractorCard: React.FC<ContractorCardProps> = ({ contractor, contractorid }) => {
+export const ContractorCard: React.FC<ContractorCardProps> = ({ contractor, contractorid, projectId }) => {
   const router = useRouter();
   
   const Invitetobids = () => {
     router.replace({
-      pathname: "/invite-profile-screen",
+      pathname: "/projects/inviteprofilescreen",
       params: { 
-        contractorId: contractorid 
+        contractorId: contractorid,
+        projectId: projectId 
       }
     });
   };

@@ -15,7 +15,7 @@ const ImageBanner: React.FC<ImageData> = ({
     imageSrc, 
     width = '100%', 
     height = 200, 
-    borderRadius = 0,
+    borderRadius = 50,
     className = "",
     imageClassName = ""
 }) => {

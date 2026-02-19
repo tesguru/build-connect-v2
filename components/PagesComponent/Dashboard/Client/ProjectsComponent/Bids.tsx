@@ -50,8 +50,9 @@ const Bids = ({ projectId }: { projectId: string }) => {
     error: bidsError 
   } = getClientsBidsQuery(projectId, queryParams);  
     
-  const clientBidsList: Bid[] = bidsData?.data?.data || [];
-  
+ const clientBidsList: Bid[] = bidsData?.data?.data?.bids || [];
+  const clientProjects: Bid[] = bidsData?.data?.data?.project || [];
+
   const contractorsDataFromApi = contractorsData?.data?.data?.contractors || [];
   
   const contractors: Contractor[] = contractorsDataFromApi.length > 0 
@@ -83,14 +84,14 @@ const Bids = ({ projectId }: { projectId: string }) => {
 
   const navigateToBuilders = () => {
     router.push({
-      pathname: "/list-builders-screen",
+      pathname: "/builders/builders",
       params: { projectId }
     });
   }
 
   const handleContractorPress = (contractorId: string | number) => {
     router.push({
-      pathname: "/invite-to-bid-screen",
+      pathname: "/projects/inviteprofilescreen",
       params: { 
         projectId, 
         contractorId: contractorId.toString() 
@@ -145,7 +146,8 @@ const Bids = ({ projectId }: { projectId: string }) => {
           {displayedContractors.map(contractor => (
             <View key={contractor.id} className="mr-3">
               <ContractorCard 
-                contractor={contractor} 
+                contractor={contractor}
+                projectId={projectId} 
                 contractorid={contractor.id.toString()}
                 onPress={() => handleContractorPress(contractor.id)}
               />
@@ -179,7 +181,7 @@ const Bids = ({ projectId }: { projectId: string }) => {
         
         {clientBidsList.length > 0 ? (
           clientBidsList.slice(0, 3).map((bid: Bid) => (
-            <ClientBidCard key={bid.id} bid={bid} />
+            <ClientBidCard key={bid.id} bid={bid} project={clientProjects} />
           ))
         ) : (
           <View className="items-center justify-center py-8 bg-gray-50 rounded-lg">
@@ -188,7 +190,7 @@ const Bids = ({ projectId }: { projectId: string }) => {
         )}
       </View>
 
-      {/* Selected Builders Section */}
+    
       <View className="px-4 pt-6">
         <Text className="font-interbold text-xl mb-4 text-gray-900">
           Selected Builders ({contractors.length})

@@ -37,9 +37,13 @@ export const ENDPOINTS = {
       PROJECTS:"/projects",
     MARKETPLACE:"/marketplace"
   },
+   CONTRACT: {
+    CONTRACT: "/contracts/",
+  },
   CONTRACTORS: {
     GET_CONTRACTOR: "/contractors/",
     CREATE_COMPLETE_PROFILE: "/profile/contractor/complete",
+        VIEW_PROFILE: "/profile/contractor/complete",
   },
     BID:{
     BIDS:"/bids/"

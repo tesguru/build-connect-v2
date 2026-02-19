@@ -7,13 +7,13 @@ type AccountSuccessScreenProps = {
 };
 
 const AccountSuccessScreen: React.FC<AccountSuccessScreenProps> = ({
-  delay = 3000, 
+  delay = 4000, 
 }) => {
   const router = useRouter();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.replace("/dashboard");
+      router.replace("/(tab)");
     }, delay);
 
     return () => clearTimeout(timer);
@@ -21,12 +21,12 @@ const AccountSuccessScreen: React.FC<AccountSuccessScreenProps> = ({
 
   return (
     <View className="flex-1 justify-center items-center bg-white">
-      {/* Party Emoji with Confetti - Centered in upper third */}
+   
       <View className="mb-12">
         <Text style={{ fontSize: 100, textAlign: "center" }}>🥳</Text>
       </View>
 
-      {/* Congratulations Message - Centered */}
+  
       <Text className="text-2xl font-interbold text-center text-black leading-8 px-6">
         Congratulations, your account{"\n"}has been created. Let's get you{"\n"}started
       </Text>

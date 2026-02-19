@@ -153,7 +153,7 @@ const AddProject = () => {
         description: data.description,
         location: data.location,
         projectTypeId: selectedProjectType.id,
-        budget: budgetStr,
+        exactBudget: budgetStr,
         timelineId: "1c597cb4-185c-4a37-8192-c41227a56ca0",
         startDate: formatDate(data.startDate),
         endDate: formatDate(data.endDate),

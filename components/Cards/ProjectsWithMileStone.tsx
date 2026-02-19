@@ -37,7 +37,7 @@ const ProjectsWithMilestone: React.FC<ProjectsComponentProps> = ({
 
 }) => {
   return (
-    <TouchableOpacity className="m-4 p-4 bg-white rounded-xl" onPress={onPress}>
+    <TouchableOpacity className=" mt-2 p-4 bg-white rounded-xl" onPress={onPress}>
     
 
       <View>

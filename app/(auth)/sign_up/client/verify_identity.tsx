@@ -99,7 +99,7 @@ export default function VerifyIdentityScreen() {
   };
 
   const handleSkipAndContinueLater = () => {
-    router.replace("/sign_up/client/create_project");
+    router.replace("/"); 
   };
 
   return (
