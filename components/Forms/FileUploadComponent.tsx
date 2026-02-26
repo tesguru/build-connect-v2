@@ -1,11 +1,9 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Image, Alert } from "react-native";
-import * as ImagePicker from "expo-image-picker";
+import React, { useRef, useState } from "react";
 import { Control, Controller } from "react-hook-form";
-import { fileerror, markicon, reportImage } from "@/constants/icon";
 
 export interface FileUploadResult {
-  uri: string;
+  file: File;          
+  uri: string;         
   name: string;
   type: string;
   width?: number;
@@ -19,137 +17,77 @@ interface FileUploadComponentProps {
   label: string;
   title?: string;
   note?: string;
-  icon?: any;
   error?: string;
   maxSizeMB?: number;
-  allowedTypes?: string[];
+  accept?: string;      
   onFileSelected?: (file: FileUploadResult) => void;
   onError?: (error: string) => void;
-  containerClassName?: string;
 }
 
-/**
- * Reusable file upload component with file size validation
- * Supports image and document uploads with exact file size checking
- */
 export default function FileUploadComponent({
   control,
   name,
   label,
   title = "Upload Document",
   note = "PNG, JPG, PDF (max. 5MB)",
-  icon = reportImage,
   error: externalError,
   maxSizeMB = 5,
-  allowedTypes = ["image", "pdf"],
+  accept = "image/*",
   onFileSelected,
   onError,
-  containerClassName = "",
 }: FileUploadComponentProps) {
   const [localError, setLocalError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Helper function to get proper mime type from file
-  const getMimeType = (
-    uri: string,
-    fileName: string,
-    fallbackType?: string
-  ): string => {
-    if (fallbackType && fallbackType.includes("/")) {
-      return fallbackType;
+  const getImageDimensions = (file: File): Promise<{ width: number; height: number }> =>
+    new Promise((resolve) => {
+      if (!file.type.startsWith("image/")) return resolve({ width: 0, height: 0 });
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        resolve({ width: img.naturalWidth, height: img.naturalHeight });
+        URL.revokeObjectURL(url);
+      };
+      img.onerror = () => resolve({ width: 0, height: 0 });
+      img.src = url;
+    });
+
+  const handleFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    onChange: (value: any) => void
+  ) => {
+    setLocalError(null);
+    if (onError) onError("");
+
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate size
+    const sizeMB = file.size / (1024 * 1024);
+    if (sizeMB > maxSizeMB) {
+      const msg = `File is too big (max ${maxSizeMB}MB)`;
+      setLocalError(msg);
+      if (onError) onError(msg);
+      return;
     }
 
-    // Get extension from file name or URI
-    const extension =
-      fileName.split(".").pop()?.toLowerCase() ||
-      uri.split(".").pop()?.toLowerCase() ||
-      "";
+    const dimensions = await getImageDimensions(file);
+    const uri = URL.createObjectURL(file); // for preview
 
-    // Map extensions to mime types
-    const mimeTypes: { [key: string]: string } = {
-      jpg: "image/jpeg",
-      jpeg: "image/jpeg",
-      png: "image/png",
-      gif: "image/gif",
-      webp: "image/webp",
-      pdf: "application/pdf",
-      doc: "application/msword",
-      docx:
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    const result: FileUploadResult = {
+      file,
+      uri,
+      name: file.name,
+      type: file.type || "image/jpeg",
+      size: file.size,
+      ...dimensions,
     };
 
-    return mimeTypes[extension] || "image/jpeg";
-  };
+    onChange(result);
+    if (onFileSelected) onFileSelected(result);
 
-  const pickFile = async (onChange: (value: any) => void) => {
-    try {
-      setLocalError(null);
-      if (onError) onError("");
-
-      const permission =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permission.granted) {
-        const errorMsg = "Please allow access to your photos.";
-        Alert.alert("Permission required", errorMsg);
-        setLocalError(errorMsg);
-        if (onError) onError(errorMsg);
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        const file = result.assets[0];
-        let fileSizeInBytes = 0;
-
-        // Get exact file size using fetch
-        try {
-          const response = await fetch(file.uri);
-          const blob = await response.blob();
-          fileSizeInBytes = blob.size;
-          const fileSizeInMB = fileSizeInBytes / (1024 * 1024);
-
-          // Check file size
-          if (fileSizeInMB > maxSizeMB) {
-            const errorMsg = `File is too big (max ${maxSizeMB}MB)`;
-            setLocalError(errorMsg);
-            if (onError) onError(errorMsg);
-            return;
-          }
-        } catch (sizeError) {
-          console.error("Error getting file size:", sizeError);
-        }
-
-        // Get proper mime type
-        const mimeType = getMimeType(
-          file.uri,
-          file.fileName || "document.jpg",
-          file.type
-        );
-
-        const fileData: FileUploadResult = {
-          uri: file.uri,
-          name: file.fileName || "document.jpg",
-          type: mimeType,
-          width: file.width,
-          height: file.height,
-          size: fileSizeInBytes,
-        };
-
-        onChange(fileData);
-        setLocalError(null);
-        if (onFileSelected) onFileSelected(fileData);
-        if (onError) onError("");
-      }
-    } catch (error) {
-      const errorMsg = "Failed to pick document";
-      Alert.alert("Error", errorMsg);
-      setLocalError(errorMsg);
-      if (onError) onError(errorMsg);
-    }
+    // Reset input so the same file can be re-selected if needed
+    e.target.value = "";
   };
 
   const handleReUpload = (onChange: (value: any) => void) => {
@@ -168,81 +106,78 @@ export default function FileUploadComponent({
         const isUploaded = !!value;
 
         return (
-          <View className={containerClassName}>
-            <Text className="font-inter text-base mb-3 px-4">{label}</Text>
+          <div className="mb-4">
+            <label className="block text-base font-medium mb-2">{label}</label>
 
+            {/* Hidden file input */}
+            <input
+              ref={inputRef}
+              type="file"
+              accept={accept}
+              className="hidden"
+              onChange={(e) => handleFileChange(e, onChange)}
+            />
+
+            {/* Idle state */}
             {!isUploaded && !displayError && (
-              <TouchableOpacity
-                onPress={() => pickFile(onChange)}
-                className="mx-4 border-2 border-dashed border-gray-300 rounded-3xl py-6 items-center justify-center"
+              <div
+                onClick={() => inputRef.current?.click()}
+                className="border-2 border-dashed border-gray-300 rounded-2xl py-8 flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
               >
-                <Image
-                  className="w-10 h-10"
-                  source={icon}
-                  resizeMode="contain"
-                />
-                <Text className="text-md pt-4 font-inter text-gray-800 mb-2 text-center">
-                  {title}
-                </Text>
-                <Text className="text-gray-500 text-sm font-inter text-center mb-4">
-                  {note}
-                </Text>
-                <TouchableOpacity
-                  className="border border-gray-200 px-12 py-3 rounded-xl"
-                  onPress={() => pickFile(onChange)}
+                <p className="text-gray-800 font-medium mb-1">{title}</p>
+                <p className="text-gray-500 text-sm mb-4">{note}</p>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
+                  className="border border-gray-300 px-8 py-2 rounded-xl text-gray-700 hover:bg-gray-50"
                 >
-                  <Text className="text-gray font-inter">Upload</Text>
-                </TouchableOpacity>
-              </TouchableOpacity>
+                  Upload
+                </button>
+              </div>
             )}
 
+            {/* Uploaded state */}
             {isUploaded && !displayError && (
-              <View className="mx-4 border-2 border-blue-400 rounded-3xl py-6 items-center bg-blue-50">
-                <View className="w-10 h-10 rounded-full bg-green-500 items-center justify-center mb-2">
-                  <Text className="text-white text-xl font-bold">✓</Text>
-                </View>
-                <Text className="text-xl font-semibold font-inter text-blue-600 mb-2">
-                  Upload successful
-                </Text>
-                <Text className="text-gray-600 text-center font-inter mb-4">
-                  {note}
-                </Text>
-                <TouchableOpacity
-                  className="border border-gray-300 px-10 py-3 rounded-full"
-                  onPress={() => handleReUpload(onChange)}
+              <div className="border-2 border-blue-400 rounded-2xl py-8 flex flex-col items-center bg-blue-50">
+                {/* Preview thumbnail */}
+                {value?.uri && value.type?.startsWith("image/") && (
+                  <img
+                    src={value.uri}
+                    alt="preview"
+                    className="w-16 h-16 object-cover rounded-lg mb-3"
+                  />
+                )}
+                <span className="text-green-600 text-2xl mb-2">✓</span>
+                <p className="font-semibold text-blue-600 mb-1">Upload successful</p>
+                <p className="text-gray-500 text-sm mb-4">{note}</p>
+                <button
+                  type="button"
+                  onClick={() => handleReUpload(onChange)}
+                  className="border border-gray-300 px-8 py-2 rounded-full text-gray-700 hover:bg-gray-100"
                 >
-                  <Text className="text-gray-700 font-inter text-base">
-                    Re-upload
-                  </Text>
-                </TouchableOpacity>
-              </View>
+                  Re-upload
+                </button>
+              </div>
             )}
 
+            {/* Error state */}
             {displayError && (
-              <View className="mx-4 border-2 border-red-400 rounded-3xl py-6 items-center bg-red-50">
-                <View className="w-10 h-10 rounded-full bg-red-500 items-center justify-center mb-2">
-                  <Text className="text-white text-xl font-bold">i</Text>
-                </View>
-                <Text className="text-xl font-semibold font-inter text-red-600 mb-2">
-                  {displayError}
-                </Text>
-                <Text className="text-gray-600 text-center font-inter mb-4">
-                  {note}
-                </Text>
-                <TouchableOpacity
-                  className="border border-red-300 px-10 py-3 rounded-full"
-                  onPress={() => pickFile(onChange)}
+              <div className="border-2 border-red-400 rounded-2xl py-8 flex flex-col items-center bg-red-50">
+                <span className="text-red-600 text-2xl mb-2">!</span>
+                <p className="font-semibold text-red-600 mb-1">{displayError}</p>
+                <p className="text-gray-500 text-sm mb-4">{note}</p>
+                <button
+                  type="button"
+                  onClick={() => inputRef.current?.click()}
+                  className="border border-red-300 px-8 py-2 rounded-full text-red-700 hover:bg-red-100"
                 >
-                  <Text className="text-red-700 font-inter text-base">
-                    Try Again
-                  </Text>
-                </TouchableOpacity>
-              </View>
+                  Try Again
+                </button>
+              </div>
             )}
-          </View>
+          </div>
         );
       }}
     />
   );
 }
-

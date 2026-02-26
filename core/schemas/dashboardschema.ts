@@ -168,6 +168,33 @@ export const revisionSchema = z.object({
   message: z.string().min(1, 'Please enter your revision request'),
 });
 
+
+
+export const scheduleMeetingSchema = z.object({
+  milestoneId: z.string().min(1, "Please select a milestone"),
+
+  title: z
+    .string()
+    .min(3, "Meeting title must be at least 3 characters")
+    .max(100, "Title is too long"),
+
+  attendees: z
+    .number({ invalid_type_error: "Please enter number of attendees" })
+    .min(1, "At least 1 attendee is required"),
+
+  date:     z.string().min(1, "Please select a date"),
+  time:     z.string().min(1, "Please enter a time"),
+
+  // ✅ plain string — NOT an enum, NOT .url()
+  platform:    z.string().min(1, "Please select a platform"),
+  meetingLink: z.string().optional(),  // ✅ no url() — serves link, phone & address
+  location:    z.string().optional(),
+  agenda:      z.string().optional(),
+});
+
+export type ScheduleMeetingInput = z.infer<typeof scheduleMeetingSchema>;
+
+
 export type RevisionInput = z.infer<typeof revisionSchema>;
 export type LinkMortgageInput = z.infer<typeof linkMortgageSchema>;
 export type SubmitBidInput = z.infer<typeof submitBidSchema>;

@@ -9,7 +9,7 @@ import BuildConnectImage from "../assets/images/app_image.png"
 import AppleImage from "../assets/images/prime_apple.png";
 import GoggleImage from "../assets/images/flat-color-icons_google.png";
 import BlueMark from "../assets/icons/bluemark.png";
-import AvatarImage from "../assets/images/av.png";
+import AvatarImage from "../assets/images/woman.jpg";
 import EmptyBackground from "../assets/images/emptybackground.png"
 import CustomSurvey from "../assets/images/Customersurveyform.png";
 import UserNotify from "../assets/images/usernotify.png";

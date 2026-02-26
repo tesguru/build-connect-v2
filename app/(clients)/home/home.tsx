@@ -102,17 +102,17 @@ const ClientHome = ({ navigation }: any) => {
           <Text className="font-interbold text-xl mb-4 text-gray-900">
             Quick Access
           </Text>
-          <View className="flex-row justify-between">
+          <View className="flex-row gap-6">
             <QuickAccessCard
               icon={PlusIcon}
               title="Add Project"
               onPress={handleAddProject}
             />
-            <QuickAccessCard
+            {/* <QuickAccessCard
               icon={BankIcon}
               title="Escrow Account"
               onPress={handleEscrowAccount}
-            />
+            /> */}
             <QuickAccessCard
               icon={SupportIcon}
               title="Support"

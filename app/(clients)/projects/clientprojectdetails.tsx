@@ -1,6 +1,7 @@
 
 import AppLayout from '@/components/Layouts/AppLayout'
 import Bids from '@/components/PagesComponent/Dashboard/Client/ProjectsComponent/Bids'
+import UpcomingMeetingsScreen from '@/components/PagesComponent/Dashboard/Client/ProjectsComponent/Meeting'
 import Milestone from '@/components/PagesComponent/Dashboard/Client/ProjectsComponent/Milestone'
 import Overview from '@/components/PagesComponent/Dashboard/Client/ProjectsComponent/Overview'
 import { useRoute } from '@react-navigation/native'
@@ -17,7 +18,7 @@ const ClientProjectDetails = () => {
     { name: 'Overview', component:<Overview projectId = {projectId}/> },
     { name: 'Bids', component: <Bids projectId={projectId}/>},
     { name: 'Milestones', component: <Milestone projectId={projectId}/>},
-    { name: 'Media', component: <Text>Yaya</Text> },
+    { name: 'Meeting', component: <UpcomingMeetingsScreen projectId={projectId}/> },
   ]
 
   const activeComponent = tabs.find(tab => tab.name === activeTab)?.component

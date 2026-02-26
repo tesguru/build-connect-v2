@@ -1,52 +1,17 @@
 import { UploadService } from "@/core/services/upload/UploadService";
 import { FileUploadResult } from "@/components/Forms/FileUploadComponent";
 
-
-export const getMimeType = (
-  uri: string,
-  fileName: string,
-  fallbackType?: string
-): string => {
-  if (fallbackType && fallbackType.includes("/")) {
-    return fallbackType;
-  }
-
-  
-  const extension =
-    fileName.split(".").pop()?.toLowerCase() ||
-    uri.split(".").pop()?.toLowerCase() ||
-    "";
-
-  // Map extensions to mime types
-  const mimeTypes: { [key: string]: string } = {
-    jpg: "image/jpeg",
-    jpeg: "image/jpeg",
-    png: "image/png",
-    gif: "image/gif",
-    webp: "image/webp",
-    pdf: "application/pdf",
-    doc: "application/msword",
-    docx:
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  };
-
-  return mimeTypes[extension] || "image/jpeg"; 
-};
-
-
 export const uploadFile = async (
   file: FileUploadResult,
   fileType: string,
   description?: string
 ) => {
   try {
- 
-    const mimeType = getMimeType(file.uri, file.name, file.type);
-
+    // Step 1: Prepare upload (same API call as RN)
     const prepareData = {
       fileName: file.name,
       fileSize: file.size,
-      mimeType: mimeType,
+      mimeType: file.type,
       type: fileType,
       width: file.width || undefined,
       height: file.height || undefined,
@@ -57,45 +22,37 @@ export const uploadFile = async (
     const prepareResult = prepareResponse.data;
 
     if (!prepareResult.success || !prepareResult.data) {
-      const errorMessage = prepareResult.message || "Failed to prepare upload";
-      throw new Error(errorMessage);
+      throw new Error(prepareResult.message || "Failed to prepare upload");
     }
 
     const { uploadUrl, uploadParams, publicUrl, fileId } = prepareResult.data;
 
-    if (!uploadUrl) {
-      throw new Error("Upload URL not received from server");
-    }
+    if (!uploadUrl) throw new Error("Upload URL not received from server");
 
- 
+    // Step 2: Upload to Cloudinary
     const formData = new FormData();
 
-   
-    formData.append("file", {
-      uri: file.uri,
-      type: mimeType,
-      name: file.name,
-    } as any);
+    // ✅ Web: append the actual File object directly (no uri/type/name hack needed)
+    formData.append("file", file.file);
 
- 
     if (uploadParams) {
-      Object.keys(uploadParams).forEach((key) => {
-        formData.append(key, String(uploadParams[key]));
+      Object.entries(uploadParams).forEach(([key, value]) => {
+        formData.append(key, String(value));
       });
     }
 
-  
     const uploadResponse = await fetch(uploadUrl, {
       method: "POST",
       body: formData,
+      // ⚠️ Do NOT set Content-Type header — browser sets it with the correct boundary
     });
 
     if (!uploadResponse.ok) {
       const errorText = await uploadResponse.text();
-      throw new Error(
-        `Failed to upload file: ${uploadResponse.statusText} - ${errorText}`
-      );
+      throw new Error(`Upload failed: ${uploadResponse.statusText} - ${errorText}`);
     }
+
+    // Step 3: Confirm upload
     const cloudinaryPublicId = uploadParams?.public_id;
     const cloudinarySecureUrl = publicUrl;
 
@@ -103,16 +60,11 @@ export const uploadFile = async (
       throw new Error("Missing required information for confirmation");
     }
 
-    const confirmData = {
-      cloudinaryPublicId: cloudinaryPublicId,
-      cloudinarySecureUrl: cloudinarySecureUrl,
+    const confirmResponse = await UploadService.confirmUpload(fileId, {
+      cloudinaryPublicId,
+      cloudinarySecureUrl,
       actualFileSize: file.size,
-    };
-
-    const confirmResponse = await UploadService.confirmUpload(
-      fileId,
-      confirmData
-    );
+    });
 
     return {
       success: true,
@@ -120,19 +72,12 @@ export const uploadFile = async (
       fileId,
     };
   } catch (error: any) {
-    console.error(`Error uploading ${fileType}:`, error);
+    const errorMessage =
+      error?.response?.data?.message ||
+      error?.response?.data?.data?.message ||
+      error?.message ||
+      "Failed to upload file. Please try again.";
 
-    let errorMessage = "Failed to upload file. Please try again.";
-
-    if (error?.response?.data) {
-   
-      const apiError = error.response.data;
-      errorMessage =
-        apiError.message || apiError.data?.message || errorMessage;
-    } else if (error?.message) {
-      errorMessage = error.message;
-    }
     throw new Error(errorMessage);
   }
 };
-

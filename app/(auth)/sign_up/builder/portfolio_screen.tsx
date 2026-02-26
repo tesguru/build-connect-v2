@@ -160,7 +160,7 @@ export default function PortfolioScreen() {
         }
       });
 
-      // Step 4: Format the data to match API expectations
+      
       const formatTime = (time: string) => time;
 
       const formatDays = (days: string[]) => {
@@ -218,7 +218,7 @@ export default function PortfolioScreen() {
     }
   };
 
-  // Handle mutation loading state
+ 
   const isLoading = isUploading || createProfileMutation.isPending;
 
   return (

@@ -47,5 +47,8 @@ export const ENDPOINTS = {
   },
     BID:{
     BIDS:"/bids/"
+  },
+   MEETINGS:{
+    MEETINGS:"/meetings/"
   }
 };

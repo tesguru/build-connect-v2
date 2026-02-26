@@ -3,6 +3,7 @@ import GradientButton from '@/components/Buttons/GradientButton'
 import ProjectTimeline from '@/components/Cards/ProjectTimeline'
 import AppLayout from '@/components/Layouts/AppLayout'
 import { MarkCircle, MarkEmoji } from '@/constants/icon'
+import { useBids } from '@/core/hooks/UseBids'
 import { useLocalSearchParams } from 'expo-router'
 import React from 'react'
 import { Image, View, Text } from 'react-native'
@@ -12,7 +13,6 @@ const ClientContractdetailsScreen = () => {
 
 const parsedBidsData = bidsData ? JSON.parse(bidsData) : {};
 const parsedcontractData =  contractData ? JSON.parse(contractData) : {};
-console.log(parsedcontractData);
 const milestones = parsedBidsData?.milestones || [];
 const startDate = milestones[0]?.completionDate;
 const endDate = milestones[milestones.length - 1]?.completionDate;
@@ -22,7 +22,18 @@ const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
   return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 };
+  const {
+     sendContractMutation,
+     downloadContractMutation
+  
+   } = useBids();
+const sendContract = () =>{
+sendContractMutation.mutate(parsedcontractData.contractorId)
+}
 
+const downloadContract = () =>{
+  downloadContractMutation.mutate(parsedcontractData.contractorId)
+}
 
   return (
     <AppLayout screenName='Contract Details'>
@@ -78,10 +89,10 @@ const formatDate = (dateStr: string) => {
 
       <View className="mx-4 pt-8">
         
-       <GradientButton title="Send Contract Via Email" />
+       <GradientButton loading={sendContractMutation.isPending} onPress={sendContract} title="Send Contract Via Email" />
      
      <View className="pt-4">
-        <PrimaryButton title="Download Contract" textColor="black" backgroundColor="white" className="border  border-gray-300"/>
+        <PrimaryButton loading={downloadContractMutation.isPending} onPress={downloadContract} title="Download Contract" textColor="black" backgroundColor="white" className="border  border-gray-300"/>
         </View>
       </View>
     </View>

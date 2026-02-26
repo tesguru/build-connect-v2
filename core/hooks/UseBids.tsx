@@ -164,6 +164,63 @@ export const useBids = () => {
     },
   });
 
+     const sendContractMutation = useMutation({
+    mutationFn: BidService.sendContract,
+    onSuccess: (res: any) => {
+      const sendContractData = res?.data;
+      if (
+        (sendContractData.statusCode === 200 || sendContractData.statusCode === 201) &&
+        sendContractData.success === true
+      ) {
+       Toast.show({
+                 type: "success",
+                 text1: "Sent",
+                 text2: "Contract Sent successfully.",
+               });
+       
+      }
+    },
+    onError: (error: any) => {
+         const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to send Revision request.";
+      Toast.show({
+        type: "error",
+        text1: "Submit Failed",
+        text2: errorMessage
+      });   
+    },
+  });
+     const downloadContractMutation = useMutation({
+    mutationFn: BidService.downloadContract,
+    onSuccess: (res: any) => {
+      const downloadContractData = res?.data;
+      if (
+        (downloadContractData.statusCode === 200 || downloadContractData.statusCode === 201) &&
+        downloadContractData.success === true
+      ) {
+          Toast.show({
+                 type: "success",
+                 text1: "Download",
+                 text2: "Contract downloaded successfully.",
+               });
+       
+      }
+    },
+    onError: (error: any) => {
+         const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to send Revision request.";
+      Toast.show({
+        type: "error",
+        text1: "Submit Failed",
+        text2: errorMessage
+      });   
+    },
+  });
+
 
     
   return {
@@ -181,6 +238,9 @@ export const useBids = () => {
   contractSuccess,
    contractData,
    revisionSuccess,
-   bidRevisionMutation
+   bidRevisionMutation,
+   sendContractMutation,
+   downloadContractMutation
+  
   };
 };
