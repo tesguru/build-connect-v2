@@ -1,9 +1,8 @@
-import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Image, Alert } from "react-native";
 import GradientButton from "@/components/Buttons/GradientButton";
-import { useNavigation } from "@react-navigation/native";
-import { Clipboard } from "react-native";
 import AppLayout from "@/components/Layouts/AppLayout";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import { Alert, Clipboard, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 interface FAQItem {
   id: string;
@@ -14,7 +13,7 @@ interface FAQItem {
 const SupportScreen = () => {
 
   const [expandedFAQ, setExpandedFAQ] = useState<string | null>(null);
-
+     const router = useRouter();
   const faqItems: FAQItem[] = [
     {
       id: "1",
@@ -48,11 +47,11 @@ const SupportScreen = () => {
   };
 
   const handleSubmitTicket = () => {
-    // Navigate to submit ticket screen
+   router.push("/support/submitticket");
   };
 
   const handleMyTickets = () => {
-    // Navigate to my tickets screen
+     router.push("/support/myticket");
   };
 
   return (

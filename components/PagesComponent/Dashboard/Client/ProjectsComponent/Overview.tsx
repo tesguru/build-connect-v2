@@ -1,10 +1,10 @@
-import { View, Text, ActivityIndicator } from 'react-native'
-import React from 'react'
+import PrimaryButton from '@/components/Buttons/Button';
+import { useProjects } from '@/core/hooks/useProjects';
 import { useRouter } from 'expo-router';
-import ProgressBar from '../../../../Miscallaneous/ProgressBar'
-import ProjectTimeline from '../../../../Cards/ProjectTimeline'
-import PrimaryButton from '@/components/Buttons/Button'
-import { useProjects } from '@/core/hooks/useProjects'
+import React from 'react';
+import { ActivityIndicator, Text, View } from 'react-native';
+import ProjectTimeline from '../../../../Cards/ProjectTimeline';
+import ProgressBar from '../../../../Miscallaneous/ProgressBar';
 
 const Overview = (projectId:{projectId : string}) => {
     const router = useRouter();
@@ -43,7 +43,7 @@ const Overview = (projectId:{projectId : string}) => {
     return (
         <View>
             <View className="pt-4 bg-white m-4 rounded-xl">
-                <Text className="font-interbold px-4 text-2xl">Project Description</Text>
+                <Text className="font-interbold px-4 text-xl pb-2">Project Description</Text>
                 <Text className="font-inter px-4 pt-4">
                     {projectData?.description || "No description available"}
                 </Text>

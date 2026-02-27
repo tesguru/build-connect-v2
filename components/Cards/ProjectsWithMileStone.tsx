@@ -1,8 +1,8 @@
+import { DollarCircle, HeartIcon, LocationIcon, MarkCircle } from '@/constants/icon';
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, ImageSourcePropType, Button } from 'react-native';
-import { ClockIcon, DollarCircle, HeartIcon, LocationIcon, MarkCircle, UserIcon } from '@/constants/icon';
-import StatusBar from '../Miscallaneous/StatusBar';
+import { Image, ImageSourcePropType, Text, TouchableOpacity, View } from 'react-native';
 import ProgressBar from '../Miscallaneous/ProgressBar';
+import StatusBar from '../Miscallaneous/StatusBar';
 import InfoCard from './InfoCard';
 
 
@@ -42,12 +42,12 @@ const ProjectsWithMilestone: React.FC<ProjectsComponentProps> = ({
 
       <View>
         <View className="flex-row justify-between">
-        <Text className="text-xl font-worksanssemibold">{projectName}</Text>
-        <StatusBar title={"Active"}/>
+        <Text className="text-xl font-worksanssemibold pb-4">{projectName}</Text>
+       
        </View>
 
 
-           <Text className="py-3 font-inter">{description}</Text>
+           {/* <Text className="py-3 font-inter">{description}</Text> */}
       <ProgressBar progress={progress}/>
         <View className="flex-row gap-2 py-3 items-center">
           <Image source={locationIcon} style={{ width: 15, height: 15 }} resizeMode="contain" />

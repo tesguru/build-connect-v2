@@ -1,3 +1,7 @@
+import GradientButton from '@/components/Buttons/GradientButton'
+import EmptyScreenComponent from '@/components/Miscallaneous/EmptyScreenComponent'
+import { useMeetings } from '@/core/hooks/useMeetings'
+import { useRouter } from 'expo-router'
 import React, { useMemo, useState } from 'react'
 import {
   ActivityIndicator,
@@ -6,11 +10,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import AppLayout from '@/components/Layouts/AppLayout'
-import GradientButton from '@/components/Buttons/GradientButton'
-import EmptyScreenComponent from '@/components/Miscallaneous/EmptyScreenComponent'
-import { useMeetings } from '@/core/hooks/useMeetings'
-import { useRouter } from 'expo-router'
 
 
 type Platform = 'zoom' | 'google_meet' | 'microsoft_teams' | 'physical' | 'phone'
@@ -195,7 +194,7 @@ const UpcomingMeetingsScreen: React.FC<UpcomingMeetingsScreenProps> = ({
 
         {/* ── Body ── */}
         {isLoading ? (
-          <View className="flex-1 justify-center items-center py-20">
+          <View className="flex-1 justify-center items-center py-40">
             <ActivityIndicator size="large" color="#2463EB" />
             <Text className="mt-4 text-gray-600 font-inter">Loading meetings...</Text>
           </View>

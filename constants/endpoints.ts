@@ -1,4 +1,3 @@
-import { PROJECTS } from "../utils/data";
 
 export const ENDPOINTS = {
   AUTH: {
@@ -23,6 +22,7 @@ export const ENDPOINTS = {
     AVAILABILITY_OPTIONS: "/lookups/lookups/availability-options",
     TIMELINES: "/lookups/timelines",
     BUDGET_RANGES: "/lookups/budget-ranges",
+    MEETING_TYPES: "/lookups/meeting-platforms",
   },
 
   DASHBOARD: {
@@ -50,5 +50,8 @@ export const ENDPOINTS = {
   },
    MEETINGS:{
     MEETINGS:"/meetings/"
+  },
+   SUPPORT:{
+    TICKETS:"/support/tickets"
   }
 };

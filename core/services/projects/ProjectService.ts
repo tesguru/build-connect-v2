@@ -33,5 +33,6 @@ getSingleProjectsMarketPlace: (id: any): Promise<any> =>
 getSingleProject: (id: any): Promise<any> => 
     axiosInstance.get(`${ENDPOINTS.PROJECTS.PROJECTS}/${id}`),
   projectMilestone: (projectId:string, params:any) => axiosInstance.get(`${ENDPOINTS.PROJECTS.GET_PROJECTS}${projectId}/milestones`,  { params }),
+    projectMilestoneDetails: (projectId:string, milestoneId:any) => axiosInstance.get(`${ENDPOINTS.PROJECTS.GET_PROJECTS}${projectId}/milestones/${milestoneId}`),
 };
 

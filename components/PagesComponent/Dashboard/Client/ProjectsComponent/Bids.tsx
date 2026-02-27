@@ -1,12 +1,9 @@
-import GradientButton from "@/components/Buttons/GradientButton";
 import { ClientBidCard } from "@/components/Cards/ClientBidCard";
-import { ContractorCard } from "@/components/Cards/ContractCard"
-import { ContractorListItem } from "@/components/Cards/ContractorListItem";
+import { ContractorCard } from "@/components/Cards/ContractCard";
 import { useBids } from "@/core/hooks/UseBids";
 import { useRouter } from "expo-router";
-import React from "react";
-import { useState } from "react";
-import { ScrollView, TouchableOpacity, View, Text, ActivityIndicator } from "react-native"
+import React, { useState } from "react";
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 type QueryParams = {
   page: number;
@@ -191,7 +188,7 @@ const Bids = ({ projectId }: { projectId: string }) => {
       </View>
 
     
-      <View className="px-4 pt-6">
+      {/* <View className="px-4 pt-6">
         <Text className="font-interbold text-xl mb-4 text-gray-900">
           Selected Builders ({contractors.length})
         </Text>
@@ -208,10 +205,10 @@ const Bids = ({ projectId }: { projectId: string }) => {
             <Text className="text-gray-500">No builders selected yet</Text>
           </View>
         )}
-      </View>
+      </View> */}
       
       {/* Compare Bids Button */}
-      <View className="mx-4 my-6 mb-10">
+      {/* <View className="mx-4 my-6 mb-10">
         <GradientButton 
           onPress={comparebids} 
           title="Compare Bids" 
@@ -222,7 +219,7 @@ const Bids = ({ projectId }: { projectId: string }) => {
             Need at least 2 bids to compare
           </Text>
         )}
-      </View>
+      </View> */}
     </ScrollView>
   )
 }

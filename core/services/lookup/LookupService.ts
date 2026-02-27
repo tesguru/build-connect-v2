@@ -35,5 +35,8 @@ export const LookupService = {
 
   getAvailabilityOptions: () =>
     axiosInstance.get<LookupResponse>(ENDPOINTS.LOOKUP.AVAILABILITY_OPTIONS),
+
+  meetingTypes: () =>
+    axiosInstance.get<LookupResponse>(ENDPOINTS.LOOKUP.MEETING_TYPES),
 };
 

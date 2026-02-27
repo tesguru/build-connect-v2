@@ -5,16 +5,16 @@ import DashboardHeader from "@/components/PagesComponent/Dashboard/Shared/Dashbo
 import QuickAccessCard from "@/components/PagesComponent/Dashboard/Shared/QuickAccessCard";
 import SearchBarWithFilter from "@/components/PagesComponent/Dashboard/Shared/SearchBarWithFilter";
 import { HomeBaseMortgageBankBanner } from "@/constants/banner";
-import { BankIcon, PlusIcon, SupportIcon } from "@/constants/icon";
+import { PlusIcon, SupportIcon } from "@/constants/icon";
 import { useProjects } from "@/core/hooks/useProjects";
+import { MarketplaceProperty, Project, ProjectQueryParams } from "@/core/types/api";
 import { useAuthStore } from "@/store/Authstore";
-import { Project, ProjectQueryParams, MarketplaceProperty } from "@/core/types/api";
 
+import { CustomSurvey } from "@/constants/image";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { CustomSurvey } from "@/constants/image";
 import ClientPropertiesComponent from "../properties/ClientPropertiesComponent";
-import { useRouter } from "expo-router";
 
 const ClientHome = ({ navigation }: any) => {
   const { user } = useAuthStore();
@@ -123,7 +123,7 @@ const ClientHome = ({ navigation }: any) => {
 
 
         {/* My Projects */}
-        <View className="mt-8 mx-2  rounded-xl p-4">
+        <View className="mt-8   rounded-xl px-2">
           <View className="flex-row justify-between items-center mb-4">
             <Text className="font-interbold text-xl text-gray-900">
               My Projects

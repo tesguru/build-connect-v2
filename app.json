@@ -9,12 +9,12 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ivantage.build-connect-v2"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE"
-      
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,

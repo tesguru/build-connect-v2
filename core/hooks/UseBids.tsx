@@ -12,8 +12,8 @@ export const useBids = () => {
   const [inviteBidsuccess, setinviteBidsuccess] = useState(false);
   const [respondBidSucess, setrespondBidSucess] = useState(false);
   const [contractSuccess, setContractSuccess] = useState(false);
-   const [contractData, setContractData] = useState(false);
-    const [revisionSuccess, setBidRevisionSucess] = useState(false);
+  const [contractData, setContractData] = useState(false);
+  const [revisionSuccess, setBidRevisionSucess] = useState(false);
   const submitBidMutation = useMutation({
     mutationFn: BidService.submitBid,
     onSuccess: (res: any) => {
@@ -22,11 +22,11 @@ export const useBids = () => {
         (submitBidData.statusCode === 200 || submitBidData.statusCode === 201) &&
         submitBidData.success === true
       ) {
-         setSubmitBidSuccess(true);
+        setSubmitBidSuccess(true);
       }
     },
     onError: (error: any) => {
-         const errorMessage =
+      const errorMessage =
         error?.response?.data?.message ||
         error?.message ||
         "Failed to create Bids.";
@@ -34,11 +34,11 @@ export const useBids = () => {
         type: "error",
         text1: "Submit Failed",
         text2: errorMessage
-      });   
+      });
     },
   });
 
-   const inviteBidMutation = useMutation({
+  const inviteBidMutation = useMutation({
     mutationFn: BidService.inviteToBids,
     onSuccess: (res: any) => {
       const inviteBidData = res?.data;
@@ -46,11 +46,11 @@ export const useBids = () => {
         (inviteBidData.statusCode === 200 || inviteBidData.statusCode === 201) &&
         inviteBidData.success === true
       ) {
-         setinviteBidsuccess(true);
+        setinviteBidsuccess(true);
       }
     },
     onError: (error: any) => {
-         const errorMessage =
+      const errorMessage =
         error?.response?.data?.message ||
         error?.message ||
         "Failed to create Bids.";
@@ -58,39 +58,39 @@ export const useBids = () => {
         type: "error",
         text1: "Submit Failed",
         text2: errorMessage
-      });   
+      });
     },
   });
 
 
   const getContractorsQuery = () => {
-  return useQuery({
-    queryKey: ['getContractors'], 
-    queryFn: () => BidService.getContractors(),
-  });
-};
-
- const getClientsBidsQuery = (id :any, params:any) => {
     return useQuery({
-      queryKey: ['getClientsBids', id], 
+      queryKey: ['getContractors'],
+      queryFn: () => BidService.getContractors(),
+    });
+  };
+
+  const getClientsBidsQuery = (id: any, params: any) => {
+    return useQuery({
+      queryKey: ['getClientsBids', id],
       queryFn: () => BidService.clientBids(id, params),
     });
   };
-   const singleContractorQuery = (id :any) => {
-      return useQuery({
-        queryKey: ['singleContractor', id], 
-        queryFn: () => BidService.singleContractor(id),
-      });
-    };
+  const singleContractorQuery = (id: any) => {
+    return useQuery({
+      queryKey: ['singleContractor', id],
+      queryFn: () => BidService.singleContractor(id),
+    });
+  };
 
-     const singleBidQuery = (id :any) => {
-      return useQuery({
-        queryKey: ['singleBidQuery', id], 
-        queryFn: () => BidService.getBidsDetails(id),
-      });
-    };
+  const singleBidQuery = (id: any) => {
+    return useQuery({
+      queryKey: ['singleBidQuery', id],
+      queryFn: () => BidService.getBidsDetails(id),
+    });
+  };
 
-      const respondToBidMutation = useMutation({
+  const respondToBidMutation = useMutation({
     mutationFn: BidService.bidRespond,
     onSuccess: (res: any) => {
       const respondToBidData = res?.data;
@@ -98,11 +98,11 @@ export const useBids = () => {
         (respondToBidData.statusCode === 200 || respondToBidData.statusCode === 201) &&
         respondToBidData.success === true
       ) {
-         setrespondBidSucess(true);
+        setrespondBidSucess(true);
       }
     },
     onError: (error: any) => {
-         const errorMessage =
+      const errorMessage =
         error?.response?.data?.message ||
         error?.message ||
         "Failed to create Bids.";
@@ -110,7 +110,7 @@ export const useBids = () => {
         type: "error",
         text1: "Submit Failed",
         text2: errorMessage
-      });   
+      });
     },
   });
 
@@ -122,12 +122,12 @@ export const useBids = () => {
         (createContractData.statusCode === 200 || createContractData.statusCode === 201) &&
         createContractData.success === true
       ) {
-         setContractSuccess(true);
-         setContractData(createContractData )
+        setContractSuccess(true);
+        setContractData(createContractData)
       }
     },
     onError: (error: any) => {
-         const errorMessage =
+      const errorMessage =
         error?.response?.data?.message ||
         error?.message ||
         "Failed to create Bids.";
@@ -135,11 +135,11 @@ export const useBids = () => {
         type: "error",
         text1: "Submit Failed",
         text2: errorMessage
-      });   
+      });
     },
   });
 
-    const bidRevisionMutation = useMutation({
+  const bidRevisionMutation = useMutation({
     mutationFn: BidService.bidRevisionRequest,
     onSuccess: (res: any) => {
       const bidRevisionData = res?.data;
@@ -147,12 +147,12 @@ export const useBids = () => {
         (bidRevisionData.statusCode === 200 || bidRevisionData.statusCode === 201) &&
         bidRevisionData.success === true
       ) {
-         setBidRevisionSucess(true);
-       
+        setBidRevisionSucess(true);
+
       }
     },
     onError: (error: any) => {
-         const errorMessage =
+      const errorMessage =
         error?.response?.data?.message ||
         error?.message ||
         "Failed to send Revision request.";
@@ -160,11 +160,11 @@ export const useBids = () => {
         type: "error",
         text1: "Submit Failed",
         text2: errorMessage
-      });   
+      });
     },
   });
 
-     const sendContractMutation = useMutation({
+  const sendContractMutation = useMutation({
     mutationFn: BidService.sendContract,
     onSuccess: (res: any) => {
       const sendContractData = res?.data;
@@ -172,16 +172,16 @@ export const useBids = () => {
         (sendContractData.statusCode === 200 || sendContractData.statusCode === 201) &&
         sendContractData.success === true
       ) {
-       Toast.show({
-                 type: "success",
-                 text1: "Sent",
-                 text2: "Contract Sent successfully.",
-               });
-       
+        Toast.show({
+          type: "success",
+          text1: "Sent",
+          text2: "Contract Sent successfully.",
+        });
+
       }
     },
     onError: (error: any) => {
-         const errorMessage =
+      const errorMessage =
         error?.response?.data?.message ||
         error?.message ||
         "Failed to send Revision request.";
@@ -189,10 +189,10 @@ export const useBids = () => {
         type: "error",
         text1: "Submit Failed",
         text2: errorMessage
-      });   
+      });
     },
   });
-     const downloadContractMutation = useMutation({
+  const downloadContractMutation = useMutation({
     mutationFn: BidService.downloadContract,
     onSuccess: (res: any) => {
       const downloadContractData = res?.data;
@@ -200,16 +200,16 @@ export const useBids = () => {
         (downloadContractData.statusCode === 200 || downloadContractData.statusCode === 201) &&
         downloadContractData.success === true
       ) {
-          Toast.show({
-                 type: "success",
-                 text1: "Download",
-                 text2: "Contract downloaded successfully.",
-               });
-       
+        Toast.show({
+          type: "success",
+          text1: "Download",
+          text2: "Contract downloaded successfully.",
+        });
+
       }
     },
     onError: (error: any) => {
-         const errorMessage =
+      const errorMessage =
         error?.response?.data?.message ||
         error?.message ||
         "Failed to send Revision request.";
@@ -217,30 +217,30 @@ export const useBids = () => {
         type: "error",
         text1: "Submit Failed",
         text2: errorMessage
-      });   
+      });
     },
   });
 
 
-    
+
   return {
-  submitBidMutation,
-  submitBidSuccess,
-  getContractorsQuery,
-  getClientsBidsQuery,
-  singleContractorQuery,
-  inviteBidMutation,
-  inviteBidsuccess,
-  singleBidQuery,
-  respondToBidMutation,
-  respondBidSucess,
-  createContractMutation,
-  contractSuccess,
-   contractData,
-   revisionSuccess,
-   bidRevisionMutation,
-   sendContractMutation,
-   downloadContractMutation
-  
+    submitBidMutation,
+    submitBidSuccess,
+    getContractorsQuery,
+    getClientsBidsQuery,
+    singleContractorQuery,
+    inviteBidMutation,
+    inviteBidsuccess,
+    singleBidQuery,
+    respondToBidMutation,
+    respondBidSucess,
+    createContractMutation,
+    contractSuccess,
+    contractData,
+    revisionSuccess,
+    bidRevisionMutation,
+    sendContractMutation,
+    downloadContractMutation
+
   };
 };

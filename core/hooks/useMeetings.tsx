@@ -1,6 +1,5 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ProjectService } from "../services/projects/ProjectService";
 import Toast from "react-native-toast-message";
 
 
@@ -34,10 +33,16 @@ export const useMeetings = () => {
       mutationFn: meetingService.createMeeting,
       onSuccess: (res: any) => {
         const scheduleMeeting = res?.data;
+        console.log('Schedule Meeting Response:', scheduleMeeting);
         if (
-          (scheduleMeeting.statusCode === 200 || scheduleMeeting.statusCode === 201) &&
           scheduleMeeting.success === true
         ) {
+
+          Toast.show({
+                    type: "success",
+                    text1: "Meeting Scheduled",
+                    text2: "Your meeting has been scheduled successfully",
+                  });
            setMeetingSuccess(true);
          
         }
@@ -56,14 +61,19 @@ export const useMeetings = () => {
     });
 
  
-
+const meetingsLookupQuery = ( params: object) => {
+  return useQuery({
+    queryKey: ['getAllMeetings',  params], 
+    queryFn: () => meetingService.getMeeting(params),
+  });
+};
   
   
   return {
    getAllMeetings,
    getMeetingsDetails,
    scheduleMeetingMutation,
-   scheduleMeetingSuccess
-  
+   scheduleMeetingSuccess,
+   meetingsLookupQuery
   };
 };

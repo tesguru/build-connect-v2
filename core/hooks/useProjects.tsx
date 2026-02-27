@@ -1,7 +1,7 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ProjectService } from "../services/projects/ProjectService";
 import Toast from "react-native-toast-message";
+import { ProjectService } from "../services/projects/ProjectService";
 
 
 import { useState } from "react";
@@ -76,6 +76,13 @@ export const useProjects = () => {
       queryFn: () => ProjectService.getSingleProjectsMarketPlace(id),
     });
   };
+  
+  const singleMilestoneDetailsQuery = (projectId :any, milestoneId: any ) => {
+    return useQuery({
+      queryKey: ['singleMilestonequery', projectId, milestoneId],
+      queryFn: () => ProjectService.projectMilestoneDetails(projectId, milestoneId),
+    });
+  };
 
   const submitBidMutation = createProjectMutation;
 
@@ -88,6 +95,7 @@ export const useProjects = () => {
    projectsMarketPlaceQuery,
    singleProjectMarketPlaceQuery,
    getSingleProjectQuery,
-   getProjectMilestonesQuery
+   getProjectMilestonesQuery,
+   singleMilestoneDetailsQuery
   };
 };

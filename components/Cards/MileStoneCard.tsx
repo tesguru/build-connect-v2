@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ImageSourcePropType } from 'react-native';
-import StatusBar from '../Miscallaneous/StatusBar';
+import { Text, TouchableOpacity, View } from 'react-native';
 import ProgressBar from '../Miscallaneous/ProgressBar';
+import StatusBar from '../Miscallaneous/StatusBar';
 
 interface MilestoneProps {
   milestoneName: string;
@@ -22,7 +22,7 @@ const Milestone: React.FC<MilestoneProps> = ({
 }) => {
   return (
     <TouchableOpacity 
-      className="m-4 p-4 bg-white rounded-xl shadow-sm" 
+      className="m-4 p-4 bg-white rounded-xl " 
       onPress={onPress}
     >
       {/* Header with title and status */}
