@@ -38,6 +38,12 @@ export const useBids = () => {
     },
   });
 
+    const getAllBids = ( params: object) => {
+    return useQuery({
+      queryKey: ['getAllBids',  params], 
+      queryFn: () => BidService.myBids(params),
+    });
+  };
   const inviteBidMutation = useMutation({
     mutationFn: BidService.inviteToBids,
     onSuccess: (res: any) => {
@@ -83,10 +89,19 @@ export const useBids = () => {
     });
   };
 
+  const singleContractQuery = (id: any) => {
+    return useQuery({
+      queryKey: ['singleContract', id],
+      queryFn: () => BidService.getContract(id),
+         enabled: !!id, 
+    });
+  };
+
   const singleBidQuery = (id: any) => {
     return useQuery({
       queryKey: ['singleBidQuery', id],
       queryFn: () => BidService.getBidsDetails(id),
+       enabled: !!id, 
     });
   };
 
@@ -192,6 +207,35 @@ export const useBids = () => {
       });
     },
   });
+
+    const signContractMutation = useMutation({
+    mutationFn: BidService.signContract,
+    onSuccess: (res: any) => {
+      const sendContractData = res?.data;
+      if (
+        (sendContractData.statusCode === 200 || sendContractData.statusCode === 201) &&
+        sendContractData.success === true
+      ) {
+        Toast.show({
+          type: "success",
+          text1: "Sent",
+          text2: "Contract Sign successfully.",
+        });
+
+      }
+    },
+    onError: (error: any) => {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to send Revision request.";
+      Toast.show({
+        type: "error",
+        text1: "Submit Failed",
+        text2: errorMessage
+      });
+    },
+  });
   const downloadContractMutation = useMutation({
     mutationFn: BidService.downloadContract,
     onSuccess: (res: any) => {
@@ -240,7 +284,10 @@ export const useBids = () => {
     revisionSuccess,
     bidRevisionMutation,
     sendContractMutation,
-    downloadContractMutation
+    downloadContractMutation,
+    signContractMutation,
+    getAllBids,
+    singleContractQuery
 
   };
 };

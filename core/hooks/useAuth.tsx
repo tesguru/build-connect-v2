@@ -1,12 +1,10 @@
 import { useAuthStore } from "@/store/Authstore";
-import { useNavigation } from "@react-navigation/native";
-import { AuthService } from "../services/auth/AuthService";
 import { useMutation } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { AuthService } from "../services/auth/AuthService";
 
-import { AuthResponseData } from "../services/auth/authType";
 import { useRouter } from "expo-router";
+import { AuthResponseData } from "../services/auth/authType";
 
 export const useAuth = () => {
   const { setAuthData } = useAuthStore();
@@ -97,6 +95,8 @@ const router = useRouter();
      },
    });
 
+
+
   const registerMutation = useMutation({
     mutationFn: AuthService.register,
     onSuccess: (res) => {
@@ -166,6 +166,54 @@ const router = useRouter();
         type: "error",
         text1: "An error occurred",
         text2: error instanceof Error ? error.message : "Invalid email address",
+      });
+    },
+  });
+  
+    const changePasswordMutation = useMutation({
+    mutationFn: AuthService.changePassword,
+    onSuccess: (res: any) => {
+      const responseData = res?.data;
+      if (
+        (responseData.statusCode === 200 || responseData.statusCode === 201) &&
+        responseData.success === true
+      ) {
+        Toast.show({
+          type: "success",
+          text1: "Password Change",
+          text2: "Password Change Sucessfully",
+        });
+      }
+    },
+    onError: (error: any) => {
+      Toast.show({
+        type: "error",
+        text1: "An error occurred",
+        text2: error instanceof Error ? error.message : "Failed to change password",
+      });
+    },
+  });
+
+      const changeProfileMutation = useMutation({
+    mutationFn: AuthService.changeProfile,
+    onSuccess: (res: any) => {
+      const responseData = res?.data;
+      if (
+        (responseData.statusCode === 200 || responseData.statusCode === 201) &&
+        responseData.success === true
+      ) {
+        Toast.show({
+          type: "success",
+          text1: "Profile Updated",
+          text2: "Profile Updated Sucessfully",
+        });
+      }
+    },
+    onError: (error: any) => {
+      Toast.show({
+        type: "error",
+        text1: "An error occurred",
+        text2: error instanceof Error ? error.message : "Failed to Update Profile",
       });
     },
   });
@@ -289,6 +337,8 @@ const router = useRouter();
     verifyOTPMutation,
     resendOtpMutation,
     ResetPasswordMutation,
-    createProfileMutation
+    createProfileMutation,
+    changePasswordMutation, 
+    changeProfileMutation
   };
 };

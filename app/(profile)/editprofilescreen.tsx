@@ -1,95 +1,94 @@
-import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Image, Alert } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import AuthHeader from "@/components/Miscallaneous/PageHeader";
-import FormInput from "@/components/Forms/Formnput";
-import { FormTextArea } from "@/components/Forms/TextArea";
-import { AvatarImage } from "@/constants/image";
-import { useAuthStore } from "@/store/Authstore";
+import { zodResolver } from "@hookform/resolvers/zod";
 import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { z } from "zod";
+
 import GradientButton from "@/components/Buttons/GradientButton";
-import { useRouter } from "expo-router"; // Add Expo Router import
+import FormInput from "@/components/Forms/Formnput";
+import AuthHeader from "@/components/Miscallaneous/PageHeader";
+import { AvatarImage } from "@/constants/image";
+import { useAuth } from "@/core/hooks/useAuth";
+import { useAuthStore } from "@/store/Authstore";
+
+/* ─── Validation schema ─────────────────────────────────── */
+const editProfileSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  mobileNumber: z
+    .string()
+    .min(1, "Phone number is required")
+    .min(10, "Enter a valid phone number"),
+});
+
+type EditProfileInput = z.infer<typeof editProfileSchema>;
 
 const EditProfileScreen = () => {
   const { user, updateUser } = useAuthStore();
-  const router = useRouter(); // Initialize router
-  
-  const [firstName, setFirstName] = useState(user?.firstName || "");
-  const [lastName, setLastName] = useState(user?.lastName || "");
-  const [email, setEmail] = useState(user?.email || "");
-  const [phoneNumber, setPhoneNumber] = useState(user?.mobileNumber || "");
-  const [address, setAddress] = useState("");
+  const router = useRouter();
+  const { changeProfileMutation } = useAuth();
+
   const [profileImage, setProfileImage] = useState<string | null>(null);
 
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<EditProfileInput>({
+    resolver: zodResolver(editProfileSchema),
+    defaultValues: {
+      firstName: user?.firstName ?? "",
+      lastName: user?.lastName ?? "",
+      mobileNumber: user?.mobileNumber ?? "",
+    },
+  });
+
+  /* ── Image picker ── */
   const handleChangePhoto = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
-    if (permissionResult.granted === false) {
+    if (!permissionResult.granted) {
       Alert.alert("Permission Required", "Permission to access camera roll is required!");
       return;
     }
-
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
     });
-
     if (!result.canceled && result.assets[0]) {
       setProfileImage(result.assets[0].uri);
     }
   };
 
   const handleChangePassword = () => {
-    // Navigate to ChangePassword screen
-    router.push("/changepasswordscreen"); // Adjust path based on your structure
-  };
-
-  const handleSave = () => {
-    if (user) {
-      const updatedUser = {
-        ...user,
-        firstName,
-        lastName,
-        email: email.toLowerCase(),
-        mobileNumber: phoneNumber,
-      };
-      updateUser(updatedUser);
-      
-      Alert.alert("Success", "Profile updated successfully", [
-        { 
-          text: "OK", 
-          onPress: () => {
-            // Navigate back to Profile screen
-            if (router.canGoBack()) {
-              router.back();
-            } else {
-              router.replace("/(profile)/profilescreen"); // Fallback if no history
-            }
-          }
-        },
-      ]);
-    }
+    router.push("/changepasswordscreen");
   };
 
   const handleBack = () => {
-    // Simple back navigation
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.replace("/profilescreen"); // Fallback to profile
+      router.replace("/profilescreen");
     }
   };
 
-  // Alternative: Create a reusable goBackOrTo function for Expo Router
-  const goBackOrTo = (fallbackRoute: string) => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace(fallbackRoute);
-    }
-  };
+  /* ── Submit ── */
+  const onSubmit = (data: EditProfileInput) => {
+    if (user) {
+      updateUser({ ...user, ...data });
+
+      const apiPayload: EditProfileInput = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        mobileNumber: data.mobileNumber,
+      };
+
+      changeProfileMutation.mutate(apiPayload);
+    }   
+  };    
 
   return (
     <View className="flex-1 bg-white">
@@ -99,7 +98,7 @@ const EditProfileScreen = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        {/* Profile Picture Section */}
+     
         <View className="items-center pt-6 pb-4">
           <View className="relative">
             <Image
@@ -118,71 +117,98 @@ const EditProfileScreen = () => {
             </TouchableOpacity>
           </View>
           <TouchableOpacity onPress={handleChangePhoto} className="mt-3">
-            <Text className="text-blue-600 font-interbold text-base">
-              Change Photo
-            </Text>
+            <Text className="text-blue-600 font-interbold text-base">Change Photo</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Form Fields */}
+      
         <View className="px-4">
+
+     
           <View className="flex-row gap-4">
             <View className="flex-1">
-              <FormInput
-                label="First name"
-                value={firstName}
-                onChangeText={setFirstName}
-                placeholder="Enter name"
-                autoCapitalize="words"
+              <Controller
+                control={control}
+                name="firstName"
+                render={({ field: { onChange, value } }) => (
+                  <FormInput
+                    label="First Name"
+                    value={value}
+                    onChangeText={onChange}
+                    placeholder="Enter first name"
+                    autoCapitalize="words"
+                    hasError={!!errors.firstName}
+                  />
+                )}
               />
+              {errors.firstName && (
+                <Text className="font-inter pt-1 text-red-500 text-sm">
+                  {errors.firstName.message}
+                </Text>
+              )}
             </View>
+
             <View className="flex-1">
-              <FormInput
-                label="Last name"
-                value={lastName}
-                onChangeText={setLastName}
-                placeholder="Last name"
-                autoCapitalize="words"
+              <Controller
+                control={control}
+                name="lastName"
+                render={({ field: { onChange, value } }) => (
+                  <FormInput
+                    label="Last Name"
+                    value={value}
+                    onChangeText={onChange}
+                    placeholder="Enter last name"
+                    autoCapitalize="words"
+                    hasError={!!errors.lastName}
+                  />
+                )}
               />
+              {errors.lastName && (
+                <Text className="font-inter pt-1 text-red-500 text-sm">
+                  {errors.lastName.message}
+                </Text>
+              )}
             </View>
           </View>
 
+        
           <FormInput
             label="Email Address"
-            value={email}
-            onChangeText={(text) => setEmail(text.toLowerCase())}
+            value={user?.email ?? ""}
+            onChangeText={() => {}}
             placeholder="user@gmail.com"
             keyboardType="email-address"
             autoCapitalize="none"
             editable={false}
           />
 
-          <FormInput
-            label="Phone Number"
-            value={phoneNumber}
-            onChangeText={setPhoneNumber}
-            placeholder="070********"
-            keyboardType="phone-pad"
-          />
-
-          <View className="mt-4">
-            <FormTextArea
-              label="Address"
-              value={address}
-              onChangeText={setAddress}
-              placeholder="Enter your address..."
-              numberOfLines={4}
-              minHeight={100}
+          <View className="mt-1">
+            <Controller
+              control={control}
+              name="mobileNumber"
+              render={({ field: { onChange, value } }) => (
+                <FormInput
+                  label="Phone Number"
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="070********"
+                  keyboardType="phone-pad"
+                  hasError={!!errors.mobileNumber}
+                />
+              )}
             />
+            {errors.mobileNumber && (
+              <Text className="font-inter pt-1 text-red-500 text-sm">
+                {errors.mobileNumber.message}
+              </Text>
+            )}
           </View>
 
           <TouchableOpacity
             onPress={handleChangePassword}
             className="bg-white rounded-xl p-4 mt-6 border border-gray-200 flex-row items-center justify-between"
           >
-            <Text className="font-interbold text-base text-gray-900">
-              Change Password
-            </Text>
+            <Text className="font-interbold text-base text-gray-900">Change Password</Text>
             <Image
               source={require("@/assets/icons/arrow-left.png")}
               className="w-5 h-5"
@@ -192,8 +218,9 @@ const EditProfileScreen = () => {
 
           <View className="mt-8 mb-4">
             <GradientButton
+              loading={changeProfileMutation.isPending}
               title="Save Changes"
-              onPress={handleSave}
+              onPress={handleSubmit(onSubmit)}
             />
           </View>
         </View>

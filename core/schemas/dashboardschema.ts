@@ -100,26 +100,41 @@ export const addPropertySchema = z.object({
 });
 
 export const addProjectSchema = z.object({
-    projectName: z
+  projectName: z
     .string()
     .trim()
     .min(1, "Project name is required"),
 
-    projectType: z
+  projectType: z
     .string()
     .trim()
-    .min(1, "Proposed type is required"),
-       location: z
+    .min(1, "Project type is required"),
+
+  // ✅ Added
+  budgetRangeId: z
+    .string()
+    .trim()
+    .min(1, "Budget range is required"),
+
+  // ✅ Added
+  timelineId: z
+    .string()
+    .trim()
+    .min(1, "Timeline is required"),
+
+  location: z
     .string()
     .trim()
     .min(1, "Location is required"),
+
   budget: z
     .string()
     .trim()
     .min(1, "Budget is required"),
 
-    startDate: z.string().min(1, "Select start date"),
-    endDate: z.string().min(1, "Select end date"),
+  startDate: z.string().min(1, "Select start date"),
+  endDate:   z.string().min(1, "Select end date"),
+
   description: z
     .string()
     .trim()
@@ -141,10 +156,10 @@ export const addProjectSchema = z.object({
       })
     )
     .min(1, "At least one milestone is required"),
-  
+
   projectMedia: fileSchema.refine((val) => !!val, {
-  message: "projectMedia is required",
-}),
+    message: "Project media is required",
+  }),
 });
 export const ratingSchema = z.object({
 

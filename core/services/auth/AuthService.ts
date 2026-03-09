@@ -9,5 +9,7 @@ export const AuthService = {
   forgotPassword: (data: any) => axiosInstance.post(ENDPOINTS.AUTH.FORGOT_PASSWORD, data),
   resendOtp: (data: any) => axiosInstance.post(ENDPOINTS.AUTH.RESEND_OTP, data),
   resetPassword: (data: any) => axiosInstance.post(ENDPOINTS.AUTH.RESET_PASSWORD, data),
+  changePassword: (data: any) => axiosInstance.patch(ENDPOINTS.AUTH.CHANGE_PASSWORD, data),
+    changeProfile: (data: any) => axiosInstance.patch(ENDPOINTS.AUTH.CHANGE_PROFILE, data),
   refreshToken: (refreshToken: string) => axiosInstance.post(ENDPOINTS.AUTH.REFRESH_TOKEN, { refreshToken }),
 };

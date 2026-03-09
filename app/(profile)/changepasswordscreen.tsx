@@ -1,28 +1,28 @@
-import React from "react";
-import { View, Text, ScrollView, Alert, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import AuthHeader from "@/components/Miscallaneous/PageHeader";
-import PasswordInput from "@/components/Forms/PasswordInput";
 import GradientButton from "@/components/Buttons/GradientButton";
-import { Controller, useForm } from "react-hook-form";
+import PasswordInput from "@/components/Forms/PasswordInput";
+import AuthHeader from "@/components/Miscallaneous/PageHeader";
+import { useAuth } from "@/core/hooks/useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "expo-router";
+import React from "react";
+import { Controller, useForm } from "react-hook-form";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { z } from "zod";
-import { useRouter } from "expo-router"; 
 
 const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1, "Current password is required"),
-  newPassword: z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword: z.string().min(8, "Please confirm your password"),
-}).refine((data) => data.newPassword === data.confirmPassword, {
+  currentPassword:    z.string().min(1, "Current password is required"),
+  newPassword:        z.string().min(8, "Password must be at least 8 characters"),
+  confirmNewPassword: z.string().min(8, "Please confirm your password"),
+}).refine((data) => data.newPassword === data.confirmNewPassword, {
   message: "Passwords do not match",
-  path: ["confirmPassword"],
+  path: ["confirmNewPassword"],
 });
 
 type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
 
 const ChangePasswordScreen = () => {
-  const router = useRouter(); 
-  
+  const router = useRouter();
+
   const {
     control,
     handleSubmit,
@@ -30,54 +30,26 @@ const ChangePasswordScreen = () => {
   } = useForm<ChangePasswordForm>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: {
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
+      currentPassword:    "",
+      newPassword:        "",
+      confirmNewPassword: "",
     },
   });
 
+  const { changePasswordMutation } = useAuth();
+
   const onSubmit = (data: ChangePasswordForm) => {
- 
-    Alert.alert("Success", "Password changed successfully", [
-      { 
-        text: "OK", 
-        onPress: () => {
-   
-          if (router.canGoBack()) {
-            router.back();
-          } else {
-            router.replace("/profile"); // Fallback to profile
-          }
-        }
-      },
-    ]);
+    changePasswordMutation.mutate(data);
   };
 
   const handleBack = () => {
-   
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace("/profile"); 
-    }
+    if (router.canGoBack()) router.back();
+    else router.replace("/profile");
   };
 
   const handleCancel = () => {
-
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace("/profile");
-    }
-  };
-
-
-  const goBackOrTo = (fallbackRoute: string) => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace(fallbackRoute);
-    }
+    if (router.canGoBack()) router.back();
+    else router.replace("/profile");
   };
 
   return (
@@ -89,6 +61,8 @@ const ChangePasswordScreen = () => {
         contentContainerStyle={{ paddingBottom: 40 }}
       >
         <View className="px-4 pt-6">
+
+          {/* Current Password */}
           <Controller
             control={control}
             name="currentPassword"
@@ -108,6 +82,7 @@ const ChangePasswordScreen = () => {
             </Text>
           )}
 
+          {/* New Password */}
           <Controller
             control={control}
             name="newPassword"
@@ -127,28 +102,31 @@ const ChangePasswordScreen = () => {
             </Text>
           )}
 
+          {/* ✅ Fixed: name was "confirmPassword", must be "confirmNewPassword" */}
           <Controller
             control={control}
-            name="confirmPassword"
+            name="confirmNewPassword"
             render={({ field: { onChange, value } }) => (
               <PasswordInput
                 label="Confirm New Password"
                 value={value}
                 onChangeText={onChange}
                 placeholder="Confirm your new password"
-                hasError={!!errors.confirmPassword}
+                hasError={!!errors.confirmNewPassword}
               />
             )}
           />
-          {errors.confirmPassword && (
+          {/* ✅ Fixed: was errors.confirmPassword (undefined), now errors.confirmNewPassword */}
+          {errors.confirmNewPassword && (
             <Text className="text-red-500 text-sm mt-1 font-inter">
-              {errors.confirmPassword.message}
+              {errors.confirmNewPassword.message}
             </Text>
           )}
 
-          {/* Action Buttons */}
           <View className="mt-8 gap-4">
+            {/* ✅ Fixed: added loading prop */}
             <GradientButton
+              loading={changePasswordMutation.isPending}
               title="Update Password"
               onPress={handleSubmit(onSubmit)}
             />
@@ -156,9 +134,7 @@ const ChangePasswordScreen = () => {
               onPress={handleCancel}
               className="bg-white border-2 border-gray-300 rounded-full py-4 items-center"
             >
-              <Text className="text-gray-700 font-interbold text-base">
-                Cancel
-              </Text>
+              <Text className="text-gray-700 font-interbold text-base">Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>

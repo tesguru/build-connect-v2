@@ -9,6 +9,8 @@ export const ENDPOINTS = {
     VERIFY_OTP: "/auth/verify-otp",
     CLIENT_VERIFY_IDENTITY: "/auth/client-verify-identity",
     RESET_PASSWORD: "/auth/reset-password",
+    CHANGE_PASSWORD: "/auth/change-password",
+    CHANGE_PROFILE: "/auth/profile",
   },
 
   UPLOAD: {
@@ -23,12 +25,12 @@ export const ENDPOINTS = {
     TIMELINES: "/lookups/timelines",
     BUDGET_RANGES: "/lookups/budget-ranges",
     MEETING_TYPES: "/lookups/meeting-platforms",
+    MILESTONE_STATUS: "/lookups/milestone-statuses",
   },
 
   DASHBOARD: {
     GET_PROFILE: "/user/profile",
-    UPDATE_PROFILE: "/user/update",
-     
+    UPDATE_PROFILE: "/user/update",  
   },
 
   PROJECTS: {
@@ -53,5 +55,8 @@ export const ENDPOINTS = {
   },
    SUPPORT:{
     TICKETS:"/support/tickets"
+  },
+    ESCROW:{
+    ESCROW:"/escrow/"
   }
 };

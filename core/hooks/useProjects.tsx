@@ -60,7 +60,30 @@ export const useProjects = () => {
       });
     },
   });
-
+  const updateMileStoneMutation = useMutation({
+    mutationFn: ProjectService.updateMilestone,
+    onSuccess: (res: any) => {
+      const responseData = res?.data;
+      if (
+        (responseData.statusCode === 200 || responseData.statusCode === 201) &&
+        responseData.success === true
+      ) {
+        Toast.show({
+          type: "success",
+          text1: "Milestone Updated",
+          text2: "Your updated has been created successfully",
+        });
+        // setSubmitBidSuccess(true);
+      }
+    },
+    onError: (error: any) => {
+      Toast.show({
+        type: "error",
+        text1: "Update Milestone Failed",
+        text2: error?.response?.data?.message || error instanceof Error ? error.message : "Failed to create project",
+      });
+    },
+  });
 
   const projectsMarketPlaceQuery = ( params: object) => {
   return useQuery({
@@ -96,6 +119,7 @@ export const useProjects = () => {
    singleProjectMarketPlaceQuery,
    getSingleProjectQuery,
    getProjectMilestonesQuery,
-   singleMilestoneDetailsQuery
+   singleMilestoneDetailsQuery,
+   updateMileStoneMutation
   };
 };

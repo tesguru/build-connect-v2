@@ -1,13 +1,14 @@
-import ProjectsWithMilestone from '@/components/Cards/ProjectsWithMileStone'
+import { BidsCard } from '@/components/Cards/BidsCard'
 import AppLayout from '@/components/Layouts/AppLayout'
 import EmptyScreenComponent from '@/components/Miscallaneous/EmptyScreenComponent'
-import { useProjects } from '@/core/hooks/useProjects'
+import { bidImage } from '@/constants/image'
+import { useBids } from '@/core/hooks/UseBids'
 import { Project, ProjectQueryParams } from '@/core/types/api'
+import { useRouter } from 'expo-router'
 import React, { useMemo, useState } from 'react'
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'
-import { useRouter } from 'expo-router'
 
-const MyProjects = () => {
+const MyBids = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
   const [queryParams, setQueryParams] = useState<ProjectQueryParams>({
     page: 1,
@@ -15,43 +16,47 @@ const MyProjects = () => {
     includeProgress: true
   });
 
-  const { getAllProjectsQuery } = useProjects();
-  const router = useRouter(); 
+  const { getAllBids } = useBids();
+  const router = useRouter();
 
   const {
     data: apiResponse,
     isLoading: isLoadingProjects,
     error: projectsError
-  } = getAllProjectsQuery(queryParams);
+  } = getAllBids(queryParams);
 
-  const projectsList: Project[] = apiResponse?.data?.data?.projects ||
-    apiResponse?.data?.projects ||
-    apiResponse?.projects ||
-    [];
 
+  const bidsList: Project[] = apiResponse?.data?.data?.bids ?? [];
+
+ 
   const statusFilters = useMemo(() => {
     const counts: Record<string, number> = {
-      draft: 0,
-      posted: 0,
-      in_progress: 0,
-      completed: 0,
-      cancelled: 0,
+      pending: 0,
+      revision_requested: 0,
+      under_review: 0,
+      shortlisted: 0,
+      accepted: 0,
+      rejected: 0,
+      withdrawn: 0,
     };
-    for (const p of projectsList) {
+
+    for (const p of bidsList) {
       if (p.status && counts[p.status] !== undefined) {
         counts[p.status]++;
       }
     }
-    const allCount = projectsList.length;
+
     return [
-      { id: 'all', label: 'All Projects', count: allCount },
-      { id: 'draft', label: 'Draft', count: counts.draft },
-      { id: 'posted', label: 'Posted', count: counts.posted },
-      { id: 'in_progress', label: 'In Progress', count: counts.in_progress },
-      { id: 'completed', label: 'Completed', count: counts.completed },
-      { id: 'cancelled', label: 'Cancelled', count: counts.cancelled },
+      { id: 'all', label: 'All Bids', count: bidsList.length },
+      { id: 'pending', label: 'Pending', count: counts.pending },
+      { id: 'under_review', label: 'Under Review', count: counts.under_review },
+      { id: 'revision_requested', label: 'Revision', count: counts.revision_requested },
+      { id: 'shortlisted', label: 'Shortlisted', count: counts.shortlisted },
+      { id: 'accepted', label: 'Accepted', count: counts.accepted },
+      { id: 'rejected', label: 'Rejected', count: counts.rejected },
+      { id: 'withdrawn', label: 'Withdrawn', count: counts.withdrawn },
     ];
-  }, [projectsList]);
+  }, [bidsList]);
 
   const handleStatusFilter = (status: string) => {
     setSelectedFilter(status);
@@ -61,7 +66,6 @@ const MyProjects = () => {
       page: 1,
     };
 
-    // Remove status filter if 'all' is selected
     if (status === 'all') {
       delete newParams.status;
     } else {
@@ -71,46 +75,42 @@ const MyProjects = () => {
     setQueryParams(newParams);
   };
 
-  const getFilteredProjects = () => {
-    if (selectedFilter === 'all') {
-      return projectsList;
-    }
-    return projectsList.filter(project => project.status === selectedFilter);
-  };
 
-  const filteredProjects = getFilteredProjects();
+  const filteredProjects = useMemo(() => {
+    if (selectedFilter === 'all') {
+      return bidsList;
+    }
+    return bidsList.filter(bid => bid.status === selectedFilter);
+  }, [bidsList, selectedFilter]);
 
   const formatStatusLabel = (status: string) => {
     const statusMap: Record<string, string> = {
-      'draft': 'Draft',
-      'posted': 'Posted',
-      'in_progress': 'In Progress',
-      'completed': 'Completed',
-      'cancelled': 'Cancelled',
+      'pending': 'Pending',
+      'revision_requested': 'Revision Requested',
+      'under_review': 'Under Review',
+      'shortlisted': 'Shortlisted',
+      'accepted': 'Accepted',
+      'rejected': 'Rejected',
+      'withdrawn': 'Withdrawn',
       'all': 'All'
     };
 
     return statusMap[status] || status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ');
   };
 
-  const handleAddProject = () => {
-    
-    router.push('/projects/addproject'); 
- 
-  };
-
   const handleProjectPress = (projectId: string) => {
-        router.push({
-                    pathname: '/projects/clientprojectdetails',
-                    params: { projectId: projectId }
-              })
+    router.push({
+      pathname: '/projects/clientprojectdetails',
+      params: { projectId }
+    });
   };
 
   return (
-    <AppLayout screenName="Projects" fullHeightContent>
+    <AppLayout screenName="My Bids" fullHeightContent>
       <View className="flex-1">
-        
         <View className="mt-8 flex-1">
+
+        
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -120,14 +120,17 @@ const MyProjects = () => {
             {statusFilters.map((filter) => (
               <TouchableOpacity
                 key={filter.id}
-                className={`px-5 py-3.5 rounded-full border min-w-[90px] items-center justify-center ${selectedFilter === filter.id
+                className={`px-5 py-3.5 rounded-full border min-w-[90px] items-center justify-center ${
+                  selectedFilter === filter.id
                     ? 'bg-blue-600 border-blue-600'
                     : 'bg-white border-gray-200'
-                  }`}
+                }`}
                 onPress={() => handleStatusFilter(filter.id)}
               >
                 <Text
-                  className={`text-md font-inter font-medium text-center ${selectedFilter === filter.id ? 'text-white' : 'text-gray-800'}`}
+                  className={`text-md font-inter font-medium text-center ${
+                    selectedFilter === filter.id ? 'text-white' : 'text-gray-800'
+                  }`}
                 >
                   {filter.label} ({filter.count})
                 </Text>
@@ -135,19 +138,20 @@ const MyProjects = () => {
             ))}
           </ScrollView>
 
+     
           {isLoadingProjects ? (
             <View className="flex-1 justify-center items-center py-20">
               <ActivityIndicator size="large" color="#2463EB" />
-              <Text className="mt-4 text-gray-600">Loading projects...</Text>
+              <Text className="mt-4 text-gray-600">Loading bids...</Text>
             </View>
           ) : projectsError ? (
             <View className="flex-1 justify-center items-center p-4">
               <Text className="text-red-500 text-center mb-4">
-                Error loading projects. Please try again.
+                Error loading bids. Please try again.
               </Text>
               <TouchableOpacity
                 className="bg-blue-600 px-6 py-3 rounded-lg"
-                onPress={() => { /* Add retry logic here */ }}
+                onPress={() => setQueryParams(prev => ({ ...prev }))}
               >
                 <Text className="text-white font-medium">Retry</Text>
               </TouchableOpacity>
@@ -155,14 +159,9 @@ const MyProjects = () => {
           ) : filteredProjects.length === 0 ? (
             <View className="flex-1 justify-center items-center py-20 px-4">
               <EmptyScreenComponent
-                title={selectedFilter !== 'all'
-                  ? `No "${formatStatusLabel(selectedFilter)}" Projects`
-                  : "No Projects Found"}
-                description={selectedFilter !== 'all'
-                  ? `You don't have any ${formatStatusLabel(selectedFilter).toLowerCase()} projects yet`
-                  : "You haven't created any projects yet"}
-                buttonText="Add Your First Project"
-                onButtonPress={handleAddProject}
+                message={selectedFilter !== 'all'
+                  ? `No "${formatStatusLabel(selectedFilter)}" Bids`
+                  : "No Bids Found"}
               />
             </View>
           ) : (
@@ -172,26 +171,15 @@ const MyProjects = () => {
               contentContainerStyle={{ paddingBottom: 20 }}
             >
               {filteredProjects.map((project) => (
-                <View key={project.id} className="mb-4 px-4">
-                  <ProjectsWithMilestone
-                    postedTime="Posted 1 hour ago"
-                    projectName={project.title}
-                    progress={project?.progress?.progressPercentage || 0}
-                    location={project.location}
-                    description={project.description}
-                    budget={project.budgetRange?.label || "N/A"}
-                    duration={project.timeline?.label || "N/A"}
-                    role="client"
-                    bids={String(project.bidCount || 0)}
-                    onPress={() => handleProjectPress(project.id)}
-                  />
+                <View key={project.id} className="mb-4 px-4 py-6">
+                 <BidsCard image={bidImage}  projectName={project?.project?.title} projectId={project.id} amount={project.bidAmount} bidStatus={project.status} contractId={project.contractId} bidId={project.id}  />
                 </View>
               ))}
 
               {apiResponse?.data?.data?.pagination && (
                 <View className="py-6 items-center">
                   <Text className="text-gray-500 text-sm mb-2">
-                    Showing {filteredProjects.length} of {apiResponse.data.data.pagination.total} projects
+                    Showing {filteredProjects.length} of {apiResponse.data.data.pagination.total} bids
                   </Text>
                   {apiResponse.data.data.pagination.page < apiResponse.data.data.pagination.totalPages && (
                     <TouchableOpacity
@@ -203,7 +191,7 @@ const MyProjects = () => {
                         }));
                       }}
                     >
-                      <Text className="text-white font-medium">Load More Projects</Text>
+                      <Text className="text-white font-medium">Load More Bids</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -213,7 +201,7 @@ const MyProjects = () => {
         </View>
       </View>
     </AppLayout>
-  )
-}
+  );
+};
 
-export default MyProjects
+export default MyBids;

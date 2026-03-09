@@ -1,4 +1,3 @@
-
 import AppLayout from '@/components/Layouts/AppLayout'
 import Bids from '@/components/PagesComponent/Dashboard/Client/ProjectsComponent/Bids'
 import UpcomingMeetingsScreen from '@/components/PagesComponent/Dashboard/Client/ProjectsComponent/Meeting'
@@ -6,26 +5,39 @@ import Milestone from '@/components/PagesComponent/Dashboard/Client/ProjectsComp
 import Overview from '@/components/PagesComponent/Dashboard/Client/ProjectsComponent/Overview'
 import { useRoute } from '@react-navigation/native'
 import React, { useState } from 'react'
-import { View, Text, Pressable, ScrollView } from 'react-native'
+import { Pressable, ScrollView, Text, View } from 'react-native'
 
+type TabName = 'Overview' | 'Bids' | 'Milestones' | 'Meeting'
+
+const VALID_TABS: TabName[] = ['Overview', 'Bids', 'Milestones', 'Meeting']
+
+const isValidTab = (tab?: string): tab is TabName =>
+  VALID_TABS.includes(tab as TabName)
 
 const ClientProjectDetails = () => {
-  const [activeTab, setActiveTab] = useState('Overview')
- const route = useRoute();
-  const { projectId } = route.params as { projectId: string };
-    console.log("projectid" , projectId)
-  const tabs = [
-    { name: 'Overview', component:<Overview projectId = {projectId}/> },
-    { name: 'Bids', component: <Bids projectId={projectId}/>},
-    { name: 'Milestones', component: <Milestone projectId={projectId}/>},
-    { name: 'Meeting', component: <UpcomingMeetingsScreen projectId={projectId}/> },
+  const route = useRoute()
+  const { projectId, initialTab } = route.params as {
+    projectId: string
+    initialTab?: string
+  }
+
+  const [activeTab, setActiveTab] = useState<TabName>(
+    isValidTab(initialTab) ? initialTab : 'Overview'
+  )
+
+  const tabs: { name: TabName; component: React.ReactNode }[] = [
+    { name: 'Overview',   component: <Overview projectId={projectId} /> },
+    { name: 'Bids',       component: <Bids projectId={projectId} /> },
+    { name: 'Milestones', component: <Milestone projectId={projectId} /> },
+    { name: 'Meeting',    component: <UpcomingMeetingsScreen projectId={projectId} /> },
   ]
 
   const activeComponent = tabs.find(tab => tab.name === activeTab)?.component
 
   return (
     <AppLayout screenName={activeTab}>
-      <View className="">
+      <View>
+        {/* ── Tab Bar ── */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -54,7 +66,9 @@ const ClientProjectDetails = () => {
             ))}
           </View>
         </ScrollView>
-        <View>{activeComponent}</View>
+
+        {/* ── Active Tab Content — key forces remount + fresh API call on every tab switch ── */}
+        <View key={activeTab}>{activeComponent}</View>
       </View>
     </AppLayout>
   )

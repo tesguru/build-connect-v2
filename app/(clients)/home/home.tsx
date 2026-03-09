@@ -3,9 +3,8 @@ import ProjectsWithMilestone from "@/components/Cards/ProjectsWithMileStone";
 import EmptyComponent from "@/components/Miscallaneous/EmptyComponent";
 import DashboardHeader from "@/components/PagesComponent/Dashboard/Shared/DashboardHeader";
 import QuickAccessCard from "@/components/PagesComponent/Dashboard/Shared/QuickAccessCard";
-import SearchBarWithFilter from "@/components/PagesComponent/Dashboard/Shared/SearchBarWithFilter";
 import { HomeBaseMortgageBankBanner } from "@/constants/banner";
-import { PlusIcon, SupportIcon } from "@/constants/icon";
+import { BankIcon, PlusIcon, SupportIcon } from "@/constants/icon";
 import { useProjects } from "@/core/hooks/useProjects";
 import { MarketplaceProperty, Project, ProjectQueryParams } from "@/core/types/api";
 import { useAuthStore } from "@/store/Authstore";
@@ -59,7 +58,7 @@ const ClientHome = ({ navigation }: any) => {
 
   const handleEscrowAccount = () => {
 
-    router.push("/escrow/escrowaccount")
+    router.push("/(clients)/escrow/escrowaccount")
   };
 
   const handleSupport = () => {
@@ -89,10 +88,6 @@ const ClientHome = ({ navigation }: any) => {
         contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 8 }}
       >
 
-        <SearchBarWithFilter
-          placeholder="Search..."
-          onFilterPress={() => { }}
-        />
 
         <View className="mx-2">
           <ImageBanner imageSrc={HomeBaseMortgageBankBanner} />
@@ -108,11 +103,11 @@ const ClientHome = ({ navigation }: any) => {
               title="Add Project"
               onPress={handleAddProject}
             />
-            {/* <QuickAccessCard
+            <QuickAccessCard
               icon={BankIcon}
               title="Escrow Account"
               onPress={handleEscrowAccount}
-            /> */}
+            />
             <QuickAccessCard
               icon={SupportIcon}
               title="Support"
@@ -162,6 +157,7 @@ const ClientHome = ({ navigation }: any) => {
                   description={project.description}
                   budget={project.budgetRange?.label || "N/A"}
                   duration={project.timeline?.label || "N/A"}
+                   status={project.statusDetails?.value || "N/A"}
                   role="client"
                   bids="0"
                   onPress={() =>

@@ -78,3 +78,143 @@ export interface MarketplaceProperty {
   metadata?: Record<string, unknown>;
   [key: string]: unknown;
 }
+
+// ─────────────────────────────────────────────────────────
+//  Add these to your existing @/core/types/api.ts file
+// ─────────────────────────────────────────────────────────
+
+export type PaymentStatus =
+  | 'instruction_sent'
+  | 'processing'
+  | 'paid'
+  | 'failed'
+  | 'reversed'
+  | 'cancelled'
+
+export interface PaymentInstructionQueryParams {
+  page?: number
+  limit?: number
+  status?: PaymentStatus
+  projectId?: string   // uuid
+}
+
+export interface PaymentInstruction {
+  id: string
+  projectId: string
+  milestoneId: string
+  amount: number
+  currency: string
+  status: PaymentStatus
+  instructionSentAt?: string   // ISO datetime
+  statusUpdatedAt?: string
+  paidAt?: string
+  cancelledAt?: string
+  note?: string
+  statusUpdateNote?: string
+  createdAt?: string
+  updatedAt?: string
+
+  project?: {
+    id: string
+    title: string
+  }
+
+  milestone?: {
+    id: string
+    name: string
+    completionDate?: string    // "YYYY-MM-DD"
+  }
+
+  client?: {
+    id: string
+    name: string
+    email: string
+  }
+
+  builder?: {
+    id: string
+    name: string
+    email: string
+  }
+}
+
+
+export interface PaymentInstructionsApiResponse {
+  code: string
+  message: string
+  reqId: string
+  statusCode: number
+  success: boolean
+  data: {
+    instructions: PaymentInstruction[]
+    pagination: {
+      currentPage: number
+      totalItems: number
+      itemsPerPage: number
+      totalPages: number
+      hasNextPage: boolean
+      hasPreviousPage: boolean
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+//  Add these to your existing @/core/types/api.ts file
+// ─────────────────────────────────────────────────────────
+
+export type FundingStatus =
+  | 'pending_verification'
+  | 'verified'
+  | 'rejected'
+  | 'cancelled'
+
+export interface FundingLogQueryParams {
+  page?: number
+  limit?: number
+  status?: FundingStatus
+}
+
+export interface ProofDocument {
+  id: string
+  fileName: string
+  originalName: string
+  mimeType: string
+  fileSize: number
+  publicUrl: string
+}
+
+export interface FundingLog {
+  id: string
+  amount: number
+  currency: string
+  paymentDate: string          // "YYYY-MM-DD"
+  reference: string
+  note?: string
+  status: FundingStatus
+  statusUpdatedAt?: string     // ISO datetime
+  verifiedAt?: string
+  statusUpdateNote?: string
+  proofDocument?: ProofDocument
+  createdAt?: string
+  updatedAt?: string
+}
+
+/* Full API response shape */
+export interface FundingLogsApiResponse {
+  code: string
+  message: string
+  reqId: string
+  statusCode: number
+  success: boolean
+  data: {
+    fundings: FundingLog[]
+    pagination: {
+      currentPage: number
+      totalItems: number
+      itemsPerPage: number
+      totalPages: number
+      hasNextPage: boolean
+      hasPreviousPage: boolean
+    }
+  }
+}

@@ -1,20 +1,20 @@
-import { View, Text, TouchableOpacity } from "react-native";
-import React, { useState } from "react"; 
-import { useLocalSearchParams } from "expo-router";
-import { SubmitBidInput, submitBidSchema } from "@/core/schemas/dashboardschema";
-import { Controller, useForm, useFieldArray } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import FormInput from "@/components/Forms/Formnput";
-import { FormTextArea } from "@/components/Forms/TextArea";
-import { FormDatePicker } from "@/components/Forms/DatePicker";
-import { X, Plus, AlertCircle } from "lucide-react-native";
-import { reportImage } from "@/constants/icon";
 import GradientButton from "@/components/Buttons/GradientButton";
-import SuccessScreen from "@/components/Notifications/SucessScreen";
+import { FormDatePicker } from "@/components/Forms/DatePicker";
+import FormInput from "@/components/Forms/Formnput";
+import ImageUploadComponent from "@/components/Forms/ImageForm";
+import { FormTextArea } from "@/components/Forms/TextArea";
 import AppLayout from "@/components/Layouts/AppLayout";
+import SuccessScreen from "@/components/Notifications/SucessScreen";
+import { reportImage } from "@/constants/icon";
 import { useBids } from "@/core/hooks/UseBids";
+import { SubmitBidInput, submitBidSchema } from "@/core/schemas/dashboardschema";
 import { uploadFile } from "@/core/utils/fileUpload";
-import FileUploadComponent from "@/components/Forms/FileUploadComponent";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useLocalSearchParams } from "expo-router";
+import { AlertCircle, Plus, X } from "lucide-react-native";
+import React, { useState } from "react";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Text, TouchableOpacity, View } from "react-native";
 
 const SubmitBidScreen = () => {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
@@ -360,7 +360,7 @@ const SubmitBidScreen = () => {
 
         {/* Portfolio Reference Upload */}
         <View>
-          <FileUploadComponent
+          <ImageUploadComponent
             control={control}
             name="portfolioReferences"
             label="Portfolio Reference"

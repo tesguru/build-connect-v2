@@ -1,11 +1,11 @@
-import { View, Text, ImageBackground, TouchableOpacity, Image, ScrollView } from 'react-native'
-import React from 'react'
+import GradientButton from '@/components/Buttons/GradientButton';
+import AppLayout from '@/components/Layouts/AppLayout';
+import SuccessScreen from '@/components/Notifications/SucessScreen';
+import { useBids } from '@/core/hooks/UseBids';
 import { useLocalSearchParams } from 'expo-router';
 import { Check, Star } from 'lucide-react-native';
-import AppLayout from '@/components/Layouts/AppLayout';
-import GradientButton from '@/components/Buttons/GradientButton';
-import { useBids } from '@/core/hooks/UseBids';
-import SuccessScreen from '@/components/Notifications/SucessScreen';
+import React from 'react';
+import { Image, ImageBackground, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 interface Contractor {
   name: string;
@@ -211,8 +211,9 @@ const Inviteprofilescreen: React.FC<InviteProfileScreenProps> = ({ contractor = 
       <SuccessScreen
   title="Invitation Sent"
   message="Invitation Sent Successfully"
-  buttonTitle="View my Projects"
-  navigateTo="/(tabs)/projects" 
+  buttonTitle="View Project Bids"
+  navigateTo="projects/clientprojectdetails"
+      params={{ projectId: projectId, initialTab: 'Bids' }}
 />
      );
    }

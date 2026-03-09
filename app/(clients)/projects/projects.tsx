@@ -3,9 +3,9 @@ import AppLayout from '@/components/Layouts/AppLayout'
 import EmptyScreenComponent from '@/components/Miscallaneous/EmptyScreenComponent'
 import { useProjects } from '@/core/hooks/useProjects'
 import { Project, ProjectQueryParams } from '@/core/types/api'
+import { useRouter } from 'expo-router'
 import React, { useMemo, useState } from 'react'
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'
-import { useRouter } from 'expo-router'
 
 const ClientProjectsScreen = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
@@ -38,18 +38,20 @@ const ClientProjectsScreen = () => {
       cancelled: 0,
     };
     for (const p of projectsList) {
-      if (p.status && counts[p.status] !== undefined) {
-        counts[p.status]++;
+      // ✅ Fixed: status lives in statusDetails.value not project.status
+      const val = p.statusDetails?.value;
+      if (val && counts[val] !== undefined) {
+        counts[val]++;
       }
     }
     const allCount = projectsList.length;
     return [
-      { id: 'all', label: 'All Projects', count: allCount },
-      { id: 'draft', label: 'Draft', count: counts.draft },
-      { id: 'posted', label: 'Posted', count: counts.posted },
-      { id: 'in_progress', label: 'In Progress', count: counts.in_progress },
-      { id: 'completed', label: 'Completed', count: counts.completed },
-      { id: 'cancelled', label: 'Cancelled', count: counts.cancelled },
+      { id: 'all',         label: 'All Projects', count: allCount          },
+      { id: 'draft',       label: 'Draft',        count: counts.draft       },
+      { id: 'posted',      label: 'Posted',       count: counts.posted      },
+      { id: 'in_progress', label: 'In Progress',  count: counts.in_progress },
+      { id: 'completed',   label: 'Completed',    count: counts.completed   },
+      { id: 'cancelled',   label: 'Cancelled',    count: counts.cancelled   },
     ];
   }, [projectsList]);
 
@@ -61,7 +63,6 @@ const ClientProjectsScreen = () => {
       page: 1,
     };
 
-    // Remove status filter if 'all' is selected
     if (status === 'all') {
       delete newParams.status;
     } else {
@@ -75,7 +76,10 @@ const ClientProjectsScreen = () => {
     if (selectedFilter === 'all') {
       return projectsList;
     }
-    return projectsList.filter(project => project.status === selectedFilter);
+    // ✅ Fixed: filter by statusDetails.value not project.status
+    return projectsList.filter(
+      (project) => project.statusDetails?.value === selectedFilter
+    );
   };
 
   const filteredProjects = getFilteredProjects();
@@ -94,16 +98,14 @@ const ClientProjectsScreen = () => {
   };
 
   const handleAddProject = () => {
-    
     router.push('/projects/addproject'); 
- 
   };
 
   const handleProjectPress = (projectId: string) => {
-        router.push({
-                    pathname: '/projects/clientprojectdetails',
-                    params: { projectId: projectId }
-              })
+    router.push({
+      pathname: '/projects/clientprojectdetails',
+      params: { projectId: projectId }
+    })
   };
 
   return (
@@ -177,6 +179,7 @@ const ClientProjectsScreen = () => {
                     postedTime="Posted 1 hour ago"
                     projectName={project.title}
                     progress={project?.progress?.progressPercentage || 0}
+                    status={project.statusDetails?.value || "N/A"}
                     location={project.location}
                     description={project.description}
                     budget={project.budgetRange?.label || "N/A"}

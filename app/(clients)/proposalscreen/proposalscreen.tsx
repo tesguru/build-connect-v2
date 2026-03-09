@@ -1,14 +1,14 @@
-import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
-import React, { useState } from 'react';
-import { formatCurrency } from '@/core/utils';
-import AppLayout from '@/components/Layouts/AppLayout';
-import GradientButton from '@/components/Buttons/GradientButton';
 import PrimaryButton from '@/components/Buttons/Button';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useBids } from '@/core/hooks/UseBids';
+import GradientButton from '@/components/Buttons/GradientButton';
+import AppLayout from '@/components/Layouts/AppLayout';
 import AcceptProposalModal from '@/components/Miscallaneous/AcceptProposalModal';
-import Toast from 'react-native-toast-message';
 import DeclineProposalModal from '@/components/Miscallaneous/DeclineProposalModal';
+import { useBids } from '@/core/hooks/UseBids';
+import { formatCurrency } from '@/core/utils';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 
 
@@ -139,7 +139,7 @@ const Proposalscreen = () => {
 
       setAcceptModalVisible(false);
 
-      // ✅ Step 3 — navigate with real contract data from response
+     
       router.push({
         pathname: '/projects/contractscreen',
         params: {
@@ -161,7 +161,6 @@ const Proposalscreen = () => {
     }
   };
 
-  // ── Decline ──
   const handleDeclinePress  = () => setDeclineModalVisible(true);
   const handleDeclineCancel = () => setDeclineModalVisible(false);
 

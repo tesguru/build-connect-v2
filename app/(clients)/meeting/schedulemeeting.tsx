@@ -167,17 +167,18 @@ const ScheduleMeetingScreen = () => {
 
 
   if (scheduleMeetingSuccess) {
-    return (
-      <SuccessScreen
-        title="Meeting Scheduled!"
-        message="Your meeting has been scheduled. All participants will be notified."
-        buttonTitle="View Meetings"
-        navigateTo="/meetings"
-      />
-    );
-  }
+  return (  
+    <SuccessScreen
+      title="Meeting Scheduled!"
+      message="Your meeting has been successfully scheduled."
+      buttonTitle="View Meeting"
+      navigateTo="projects/clientprojectdetails"
+      params={{ projectId: projectId, initialTab: 'Meeting' }}
+    />
+  );
+}
 
-  // ─── Render ──────────────────────────────────────────────────────────────
+
   return (
     <AppLayout screenName="Schedule New Meeting">
       <ScrollView

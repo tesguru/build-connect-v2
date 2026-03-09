@@ -155,11 +155,7 @@ const SubmitTicket = () => {
         title="Ticket Submitted Successfully"
         message="Your support ticket has been submitted. Our team will get back to you shortly."
         buttonTitle="Back to Dashboard"
-        navigateTo={{
-          route: "/home/home",
-          screen: "Home",
-          params: {},
-        }}
+        navigateTo={"home/home"}
       />
     );
   }

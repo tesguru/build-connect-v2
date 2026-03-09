@@ -1,23 +1,23 @@
-import { View, Text, Image, ScrollView, ActivityIndicator } from "react-native";
-import { useRoute } from "@react-navigation/native";
 import GradientButton from "@/components/Buttons/GradientButton";
 import AppLayout from "@/components/Layouts/AppLayout";
-import { useProjects } from "@/core/hooks/useProjects";
 import EmptyScreenComponent from "@/components/Miscallaneous/EmptyScreenComponent";
+import { ConstructionBuilding } from "@/constants/image";
+import { useProjects } from "@/core/hooks/useProjects";
+import { useRoute } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import {
-  MapPin,
-  Calendar,
-  Users,
+  AlertCircle,
   Briefcase,
+  Calendar,
+  CheckCircle,
   Clock,
   DollarSign,
   FileText,
-  CheckCircle,
-  AlertCircle,
+  MapPin,
+  Users,
 } from "lucide-react-native";
 import React from "react";
-import { ConstructionBuilding } from "@/constants/image";
-import { useRouter } from "expo-router";
+import { ActivityIndicator, Image, ScrollView, Text, View } from "react-native";
 
 const ProjectDetailsScreen = ({ navigation }: any) => {
   const route = useRoute();
@@ -417,13 +417,7 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
               </View>
             )}
 
-            {status !== "posted" && !deadlinePassed && (
-              <View className="bg-gray-50 p-3 rounded-lg mt-3">
-                <Text className="text-gray-600 text-center font-inter">
-                  This project is not currently accepting bids
-                </Text>
-              </View>
-            )}
+            
           </View>
         </View>
       </ScrollView>

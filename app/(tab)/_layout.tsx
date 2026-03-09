@@ -1,8 +1,8 @@
-import { Tabs } from 'expo-router';
-import { Image, View } from 'react-native';
 import { Home, House, Question, Vector } from '@/constants/icon';
 import { useAuthStore } from '@/store/Authstore';
+import { Tabs } from 'expo-router';
 import React from 'react';
+import { Image, View } from 'react-native';
 
 const TabIcon = ({ focused, icon }: { focused: boolean; icon: any }) => (
   <View style={{ alignItems: "center", justifyContent: "center", height: 32 }}>
@@ -65,10 +65,10 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="project"
+        name="mybids"
         options={{
           tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon={Vector} />,
-          tabBarLabel: "Projects",
+           tabBarLabel: isClient ? "Projects" : "My bids",
         }}
       />
 

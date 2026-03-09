@@ -1,13 +1,13 @@
-import ProjectsWithMilestone from '@/components/Cards/ProjectsWithMileStone'
+
+import ProjectsComponent from '@/components/Cards/ProjectsComponent'
 import AppLayout from '@/components/Layouts/AppLayout'
 import EmptyScreenComponent from '@/components/Miscallaneous/EmptyScreenComponent'
 import { useProjects } from '@/core/hooks/useProjects'
 import { Project, ProjectQueryParams } from '@/core/types/api'
+import { formatTimeAgo } from '@/core/utils/data'
+import { useRouter } from 'expo-router'
 import React, { useMemo, useState } from 'react'
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'
-import { useRouter } from 'expo-router'
-import ProjectsComponent from '@/components/Cards/ProjectsComponent'
-import { formatTimeAgo } from '@/core/utils/data'
 
 const FindProject = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>('all');

@@ -38,5 +38,12 @@ export const LookupService = {
 
   meetingTypes: () =>
     axiosInstance.get<LookupResponse>(ENDPOINTS.LOOKUP.MEETING_TYPES),
+
+  milestoneStatuses: () =>
+    axiosInstance.get<LookupResponse>(ENDPOINTS.LOOKUP.MILESTONE_STATUS),
 };
+
+
+
+
 
