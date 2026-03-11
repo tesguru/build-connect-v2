@@ -1,18 +1,17 @@
-import { View, Text, Image } from "react-native";
-import React from "react";
+import GradientButton from "@/components/Buttons/GradientButton";
+import { FormTextArea } from "@/components/Forms/TextArea";
 import AppLayout from "@/components/Layouts/AppLayout";
 import StarRating from "@/components/Miscallaneous/Starrating";
-import { FormTextArea } from "@/components/Forms/TextArea";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { RatingInput, ratingSchema } from "@/core/schemas/dashboardschema";
-import GradientButton from "@/components/Buttons/GradientButton";
 import { markicon } from "@/constants/icon";
+import { RatingInput, ratingSchema } from "@/core/schemas/dashboardschema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import React from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Image, Text, View } from "react-native";
 
 const ClosedProjects = () => {
   const {
     control,
-    handleSubmit,
     formState: { errors },
   } = useForm<RatingInput>({
     resolver: zodResolver(ratingSchema),

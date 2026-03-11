@@ -1,13 +1,13 @@
-import { QuestionImage } from '@/constants/image'
-import React from 'react'
-import { View, Text, Image } from 'react-native'
+import { QuestionImage } from '@/constants/image';
+import React from 'react';
+import { Image, Text, View } from 'react-native';
 
 interface EmptyScreenComponentProps {
   message?: string;
 }
 
 const EmptyScreenComponent: React.FC<EmptyScreenComponentProps> = ({
-  message = 'No projects yet',
+  message = 'No Data yet',
 }) => {
   return (
     <View className="flex items-center justify-center py-20">

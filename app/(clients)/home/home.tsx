@@ -19,7 +19,7 @@ const ClientHome = ({ navigation }: any) => {
   const { user } = useAuthStore();
   const [queryParams, setQueryParams] = useState<ProjectQueryParams>({
     page: 1,
-    limit: 2,
+    limit: 4,
     includeProgress: true
   });
 
@@ -33,10 +33,7 @@ const ClientHome = ({ navigation }: any) => {
 
   const { data: marketplaceResponse } = projectsMarketPlaceQuery({});
 
-  const projectsList: Project[] = apiResponse?.data?.data?.projects ||
-    apiResponse?.data?.projects ||
-    apiResponse?.data?.projects ||
-    [];
+  const projectsList: Project[] = apiResponse?.data?.data?.projects || [];
 
   const marketplaceProperties: MarketplaceProperty[] =
     marketplaceResponse?.data?.data?.properties ??
@@ -66,7 +63,7 @@ const ClientHome = ({ navigation }: any) => {
   };
 
   const handleProject = () => {
-    navigation.navigate("AllProjects");
+   router.push("/(clients)/projects/projects")
   }
 
   const handleViewAllRecommendations = () => {
@@ -75,7 +72,7 @@ const ClientHome = ({ navigation }: any) => {
 
   return (
     <View className="flex-1 ">
-      {/* Header */}
+   
       <DashboardHeader
         userName={firstName}
         showDropdown={true}
@@ -117,7 +114,7 @@ const ClientHome = ({ navigation }: any) => {
         </View>
 
 
-        {/* My Projects */}
+     
         <View className="mt-8   rounded-xl px-2">
           <View className="flex-row justify-between items-center mb-4">
             <Text className="font-interbold text-xl text-gray-900">

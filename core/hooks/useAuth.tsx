@@ -213,7 +213,7 @@ const router = useRouter();
       Toast.show({
         type: "error",
         text1: "An error occurred",
-        text2: error instanceof Error ? error.message : "Failed to Update Profile",
+    text2: error?.response?.data?.message || "Failed to Update Profile",
       });
     },
   });

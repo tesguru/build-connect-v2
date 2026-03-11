@@ -1,7 +1,6 @@
 import PrimaryButton from '@/components/Buttons/Button'
 import GradientButton from '@/components/Buttons/GradientButton'
 import AppLayout from '@/components/Layouts/AppLayout'
-import { MarkCircle, MarkEmoji, MarkPending } from '@/constants/icon'
 import { useBids } from '@/core/hooks/UseBids'
 import axiosInstance from '@/core/services/axios'
 import * as FileSystem from 'expo-file-system'
@@ -140,7 +139,7 @@ const ClientContractdetailsScreen = () => {
             <Text className="font-inter">Contract generated</Text>
           </View>
 
-          {/* Client Signed */}
+      
           <View className="flex-row py-2 gap-4 items-center">
             <Image style={{ width: 20, height: 20 }} source={isClientSigned ? MarkCircle : MarkPending} />
             <Text className="font-inter">

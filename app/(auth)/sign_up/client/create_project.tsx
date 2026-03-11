@@ -1,25 +1,25 @@
-import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
-import { Controller, useForm, useFieldArray } from "react-hook-form";
+import GradientButton from "@/components/Buttons/GradientButton";
+import { FormDatePicker } from "@/components/Forms/DatePicker";
+import DropdownField from "@/components/Forms/DropDown";
+import { FileUploadResult } from "@/components/Forms/FileUploadComponent";
+import FormInput from "@/components/Forms/Formnput";
+import ImageUploadComponent from "@/components/Forms/ImageForm";
+import { FormTextArea } from "@/components/Forms/TextArea";
+import KeyboardAvoidingLayout from "@/components/Layouts/KeyboardAvoidLayout";
+import PageHeader from "@/components/Miscallaneous/PageHeader";
+import { reportImage } from "@/constants/icon";
+import { useProjects } from "@/core/hooks/useProjects";
+import { AddProjectInput, addProjectSchema } from "@/core/schemas/dashboardschema";
+import { LookupService } from "@/core/services/lookup/LookupService";
+import { uploadFile } from "@/core/utils/fileUpload";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { X, Plus } from "lucide-react-native";
-import GradientButton from "@/components/Buttons/GradientButton";
-import KeyboardAvoidingLayout from "@/components/Layouts/KeyboardAvoidLayout";
-import DropdownField from "@/components/Forms/DropDown";
-import { FormTextArea } from "@/components/Forms/TextArea";
-import { FormDatePicker } from "@/components/Forms/DatePicker";
-import FormInput from "@/components/Forms/Formnput";
-import ImageUploadComponent from "@/components/Forms/ImageForm";
-import PageHeader from "@/components/Miscallaneous/PageHeader";
-import { LookupService } from "@/core/services/lookup/LookupService";
-import { useProjects } from "@/core/hooks/useProjects";
+import { Plus, X } from "lucide-react-native";
+import React from "react";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Text, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
-import { AddProjectInput, addProjectSchema } from "@/core/schemas/dashboardschema";
-import { uploadFile } from "@/core/utils/fileUpload";
-import { FileUploadResult } from "@/components/Forms/FileUploadComponent";
-import { reportImage } from "@/constants/icon";
 
 export default function CreateProjectScreen() {
   const router = useRouter();
@@ -195,7 +195,7 @@ export default function CreateProjectScreen() {
 
         <Text className="font-interbold text-lg px-4 pt-4">Project Details</Text>
 
-        {/* Project Name */}
+      
         <View className="px-4 pt-4">
           <Controller
             control={control}
@@ -217,7 +217,7 @@ export default function CreateProjectScreen() {
           )}
         </View>
 
-        {/* Project Type */}
+     
         <View className="px-4 pt-3">
           <DropdownField
             name="projectType"
@@ -229,7 +229,7 @@ export default function CreateProjectScreen() {
           />
         </View>
 
-        {/* Location */}
+     
         <View className="px-4 pt-3">
           <Controller
             control={control}
@@ -251,7 +251,6 @@ export default function CreateProjectScreen() {
           )}
         </View>
 
-        {/* Budget */}
         <View className="px-4 pt-3">
           <Controller
             control={control}
@@ -421,7 +420,7 @@ export default function CreateProjectScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Project Media */}
+     
         <View className="px-4">
           <Controller
             control={control}
@@ -440,7 +439,7 @@ export default function CreateProjectScreen() {
           />
         </View>
 
-        {/* Buttons */}
+    
         <View className="pt-6 pb-4 px-4 space-y-3">
           <GradientButton
             title="Complete Setup"

@@ -35,7 +35,7 @@ export const ENDPOINTS = {
 
   PROJECTS: {
     GET_PROJECTS: "/projects/",
-    CREATE_PROJECT: "/projects/",
+    CREATE_PROJECT: "/projects/enhanced",
       PROJECTS:"/projects",
     MARKETPLACE:"/marketplace"
   },

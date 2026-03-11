@@ -120,7 +120,7 @@ const Home = () => {
           </View>
         </View>
 
-        {/* ── Available Projects ───────────────────────────── */}
+      
         <View className="mt-8 rounded-xl px-2">
           <View className="flex-row justify-between items-center mb-4 mx-4">
             <Text className="font-interbold text-xl text-gray-900">Available Projects</Text>

@@ -61,7 +61,7 @@ export interface Project {
 
 export type ApiResponse<T> = APISuccessResponse<T> | ApiErrorResponse;
 
-/** Marketplace property (v1/marketplace response item) */
+
 export interface MarketplaceProperty {
   id: string;
   title?: string;
@@ -79,9 +79,7 @@ export interface MarketplaceProperty {
   [key: string]: unknown;
 }
 
-// ─────────────────────────────────────────────────────────
-//  Add these to your existing @/core/types/api.ts file
-// ─────────────────────────────────────────────────────────
+
 
 export type PaymentStatus =
   | 'instruction_sent'
@@ -95,7 +93,7 @@ export interface PaymentInstructionQueryParams {
   page?: number
   limit?: number
   status?: PaymentStatus
-  projectId?: string   // uuid
+  projectId?: string 
 }
 
 export interface PaymentInstruction {
@@ -105,7 +103,7 @@ export interface PaymentInstruction {
   amount: number
   currency: string
   status: PaymentStatus
-  instructionSentAt?: string   // ISO datetime
+  instructionSentAt?: string   
   statusUpdatedAt?: string
   paidAt?: string
   cancelledAt?: string
@@ -122,7 +120,7 @@ export interface PaymentInstruction {
   milestone?: {
     id: string
     name: string
-    completionDate?: string    // "YYYY-MM-DD"
+    completionDate?: string    
   }
 
   client?: {
@@ -158,9 +156,7 @@ export interface PaymentInstructionsApiResponse {
   }
 }
 
-// ─────────────────────────────────────────────────────────
-//  Add these to your existing @/core/types/api.ts file
-// ─────────────────────────────────────────────────────────
+
 
 export type FundingStatus =
   | 'pending_verification'
@@ -187,11 +183,11 @@ export interface FundingLog {
   id: string
   amount: number
   currency: string
-  paymentDate: string          // "YYYY-MM-DD"
+  paymentDate: string          
   reference: string
   note?: string
   status: FundingStatus
-  statusUpdatedAt?: string     // ISO datetime
+  statusUpdatedAt?: string     
   verifiedAt?: string
   statusUpdateNote?: string
   proofDocument?: ProofDocument
@@ -199,7 +195,7 @@ export interface FundingLog {
   updatedAt?: string
 }
 
-/* Full API response shape */
+
 export interface FundingLogsApiResponse {
   code: string
   message: string

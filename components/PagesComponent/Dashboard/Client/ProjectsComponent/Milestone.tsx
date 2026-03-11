@@ -27,15 +27,14 @@ const Milestone = ({ projectId }: { projectId: string }) => {
   const {
     data: apiResponse,
     isLoading,
-    isFetching,
     error,
   } = getProjectMilestonesQuery(projectId, queryParams);
 
-  const isDataReady = apiResponse !== undefined;
 
-  const milestonesList = apiResponse?.data?.data?.milestones ||
-    apiResponse?.data?.milestones ||
-    [];
+
+  const milestonesList =
+  apiResponse?.data?.data?.milestones ||
+  [];
 
   const statusFilters = useMemo(() => {
     const counts: Record<string, number> = {
@@ -99,14 +98,14 @@ const Milestone = ({ projectId }: { projectId: string }) => {
   };
 
 
-  if (isLoading || isFetching || !isDataReady) {
-    return (
-      <View className="flex-1 justify-center items-center py-20">
-        <ActivityIndicator size="large" color="#2463EB" />
-        <Text className="mt-4 text-gray-600">Loading milestones...</Text>
-      </View>
-    );
-  }
+  if (isLoading) {
+  return (
+    <View className="flex-1 justify-center items-center py-20">
+      <ActivityIndicator size="large" color="#2463EB" />
+      <Text className="mt-4 text-gray-600">Loading milestones...</Text>
+    </View>
+  )
+}
 
   if (error) {
     return (

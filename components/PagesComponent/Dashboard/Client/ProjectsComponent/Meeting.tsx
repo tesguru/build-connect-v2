@@ -21,7 +21,6 @@ interface MeetingQueryParams {
   platform?: Platform
 }
 
-
 const PLATFORM_FILTERS: { id: Platform | 'all'; label: string }[] = [
   { id: 'all',             label: 'All'         },
   { id: 'zoom',            label: 'Zoom'        },
@@ -192,7 +191,7 @@ const UpcomingMeetingsScreen: React.FC<UpcomingMeetingsScreenProps> = ({
           ))}
         </ScrollView>
 
-        {/* ── Body ── */}
+    
         {isLoading ? (
           <View className="flex-1 justify-center items-center py-40">
             <ActivityIndicator size="large" color="#2463EB" />

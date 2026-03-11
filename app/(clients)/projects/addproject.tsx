@@ -26,7 +26,7 @@ const AddProject = () => {
   const [openDatePicker, setOpenDatePicker] = React.useState<'start' | 'end' | null>(null);
   const [isUploading, setIsUploading] = React.useState(false);
 
-  /* ── Lookups ── */
+
   const { data: getTimelineResponse, isLoading: isLoadingTimeline } = useQuery({
     queryKey: ["getTimeline"],
     queryFn: async () => {
@@ -51,7 +51,7 @@ const AddProject = () => {
     },
   });
 
-  /* ── Dropdown data ── */
+
   const projectTypesData = projectTypesResponse?.map((item) => ({
     label: item.label,
     value: item.value,
@@ -79,8 +79,8 @@ const AddProject = () => {
     defaultValues: {
       projectName: "",
       projectType: "",
-      budgetRangeId: "",   // ✅ added
-      timelineId: "",      // ✅ added
+      budgetRangeId: "",   
+      timelineId: "",      
       location: "",
       budget: "",
       startDate: "",
@@ -108,7 +108,7 @@ const AddProject = () => {
     try {
       setIsUploading(true);
 
-      // STEP 1: Upload project media
+     
       let mediaFileId: string | null = null;
       if (data.projectMedia) {
         let fileData: FileUploadResult;
@@ -140,7 +140,6 @@ const AddProject = () => {
         (item) => item.value === data.projectType
       );
 
-      // ✅ Find selected budget range and timeline by value to get their IDs
       const selectedBudgetRange = getBudgetRangesResponse?.find(
         (item) => item.value === data.budgetRangeId
       );
@@ -168,7 +167,7 @@ const AddProject = () => {
         return;
       }
 
-      // Format dates to YYYY-MM-DD
+     
       const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         const year = date.getFullYear();
@@ -182,9 +181,9 @@ const AddProject = () => {
         description:   data.description,
         location:      data.location,
         projectTypeId: selectedProjectType.id,
-        budgetRangeId: selectedBudgetRange.id,   // ✅ from dropdown
-        exactBudget:   budgetNum,                // ✅ number not string
-        timelineId:    selectedTimeline.id,      // ✅ from dropdown, not hardcoded
+        budgetRangeId: selectedBudgetRange.id,   
+        exactBudget:   budgetNum,               
+        timelineId:    selectedTimeline.id,     
         startDate:     formatDate(data.startDate),
         endDate:       formatDate(data.endDate),
         milestones: data.milestones.map((milestone) => ({
@@ -483,7 +482,7 @@ const AddProject = () => {
                 <ImageUploadComponent
                   title="Click to upload or drag and drop"
                   image={reportImage}
-                  label="Project Media (Optional)"
+                  label="Project Media"
                   note="PNG, JPG, PDF (max. 5MB)"
                   control={control}
                   name="projectMedia"

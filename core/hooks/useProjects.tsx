@@ -5,6 +5,7 @@ import { ProjectService } from "../services/projects/ProjectService";
 
 
 import { useState } from "react";
+import { handleApiError } from "../utils/handleapierror";
 
 
 export type { Project, ProjectsResponse } from "../services/projects/projectTypes";
@@ -30,7 +31,7 @@ export const useProjects = () => {
 
    const getProjectMilestonesQuery = (id :any, params:any) => {
       return useQuery({
-        queryKey: ['getClientsBids', id], 
+        queryKey: ['getMilestoneQuery', id], 
         queryFn: () => ProjectService.projectMilestone(id, params),
       });
     };
@@ -53,12 +54,10 @@ export const useProjects = () => {
       }
     },
     onError: (error: any) => {
-      Toast.show({
-        type: "error",
-        text1: "Create Project Failed",
-        text2: error?.response?.data?.message || error instanceof Error ? error.message : "Failed to create project",
-      });
-    },
+
+      handleApiError(error, "Error creating project")
+  
+},
   });
   const updateMileStoneMutation = useMutation({
     mutationFn: ProjectService.updateMilestone,
@@ -80,7 +79,7 @@ export const useProjects = () => {
       Toast.show({
         type: "error",
         text1: "Update Milestone Failed",
-        text2: error?.response?.data?.message || error instanceof Error ? error.message : "Failed to create project",
+        text2: error?.message || error instanceof Error ? error.message : "Failed to create project",
       });
     },
   });

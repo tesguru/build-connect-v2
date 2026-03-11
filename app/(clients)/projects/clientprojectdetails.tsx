@@ -32,12 +32,10 @@ const ClientProjectDetails = () => {
     { name: 'Meeting',    component: <UpcomingMeetingsScreen projectId={projectId} /> },
   ]
 
-  const activeComponent = tabs.find(tab => tab.name === activeTab)?.component
-
   return (
     <AppLayout screenName={activeTab}>
       <View>
-        {/* ── Tab Bar ── */}
+    
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -67,8 +65,15 @@ const ClientProjectDetails = () => {
           </View>
         </ScrollView>
 
-        {/* ── Active Tab Content — key forces remount + fresh API call on every tab switch ── */}
-        <View key={activeTab}>{activeComponent}</View>
+       
+        {tabs.map((tab) => (
+          <View
+            key={tab.name}
+            style={{ display: activeTab === tab.name ? 'flex' : 'none' }}
+          >
+            {tab.component}
+          </View>
+        ))}
       </View>
     </AppLayout>
   )
