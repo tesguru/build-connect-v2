@@ -1,5 +1,5 @@
 import { useAuthStore } from "@/store/Authstore";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
 import { AuthService } from "../services/auth/AuthService";
 
@@ -95,8 +95,6 @@ const router = useRouter();
      },
    });
 
-
-
   const registerMutation = useMutation({
     mutationFn: AuthService.register,
     onSuccess: (res) => {
@@ -105,7 +103,7 @@ const router = useRouter();
         (registerData.statusCode === 200 || registerData.statusCode === 201) &&
         registerData.success === true
       ) {
-        // Save auth tokens and user data after successful signup
+     
         const { authToken, refreshToken, user } = registerData.data;
         if (authToken && refreshToken) {
           setAuthData(authToken, refreshToken, user);
@@ -194,7 +192,7 @@ const router = useRouter();
     },
   });
 
-      const changeProfileMutation = useMutation({
+  const changeProfileMutation = useMutation({
     mutationFn: AuthService.changeProfile,
     onSuccess: (res: any) => {
       const responseData = res?.data;
@@ -235,11 +233,11 @@ const router = useRouter();
         const fromLogin = variables?.fromLogin;
 
         if (role !== undefined || fromLogin !== undefined) {
-          // If coming from login, navigate to Dashboard
+      
           if (fromLogin) {
             router.replace("/(tab)");
           } else {
-            // Navigate based on role for new signups
+       
             if (role === "client") {
               router.replace("/sign_up/client/verify_identity");
             } else {
@@ -330,6 +328,13 @@ const router = useRouter();
     },
   });
 
+   const getUserProfile = () => {
+    return useQuery({
+      queryKey: ['getUserProfile'],
+      queryFn: () => AuthService.getProfile(),
+    });
+  };
+
   return {
     loginMutation,
     registerMutation,
@@ -339,6 +344,7 @@ const router = useRouter();
     ResetPasswordMutation,
     createProfileMutation,
     changePasswordMutation, 
-    changeProfileMutation
+    changeProfileMutation,
+    getUserProfile
   };
 };

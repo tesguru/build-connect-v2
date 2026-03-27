@@ -1,40 +1,232 @@
-import React from "react";
-import { View, Text, ScrollView, TouchableOpacity, Image, Alert } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import AuthHeader from "@/components/Miscallaneous/PageHeader";
 import { AvatarImage } from "@/constants/image";
+import { useAuth } from "@/core/hooks/useAuth";
 import { useAuthStore } from "@/store/Authstore";
-import { useRouter } from "expo-router"; 
+import { useRouter } from "expo-router";
+import React from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
+// ─── Verification Status Config (display only — admin controlled) ─────────────
+// This has nothing to do with navigation or actions
+// It just shows what admin has decided
+const VERIFICATION_STATUS_CONFIG: Record<
+  string,
+  { label: string; badgeBg: string; badgeText: string; dot: string }
+> = {
+  not_started: {
+    label: "Not Verified",
+    badgeBg: "bg-gray-100",
+    badgeText: "text-gray-500",
+    dot: "bg-gray-400",
+  },
+  pending: {
+    label: "Awaiting Approval",
+    badgeBg: "bg-yellow-100",
+    badgeText: "text-yellow-700",
+    dot: "bg-yellow-400",
+  },
+  verified: {
+    label: "Verified",
+    badgeBg: "bg-green-100",
+    badgeText: "text-green-700",
+    dot: "bg-green-500",
+  },
+  rejected: {
+    label: "Verification Rejected",
+    badgeBg: "bg-red-100",
+    badgeText: "text-red-600",
+    dot: "bg-red-500",
+  },
+};
+
+// ─── Badge Component ──────────────────────────────────────────────────────────
+const Badge = ({
+  label,
+  badgeBg,
+  badgeText,
+  dot,
+}: {
+  label: string;
+  badgeBg: string;
+  badgeText: string;
+  dot: string;
+}) => (
+  <View className={`flex-row items-center mt-3 px-4 py-1.5 rounded-full ${badgeBg}`}>
+    <View className={`w-2 h-2 rounded-full mr-2 ${dot}`} />
+    <Text className={`font-interbold text-xs tracking-wide ${badgeText}`}>
+      {label}
+    </Text>
+  </View>
+);
+
+// ─── Menu Item Component ──────────────────────────────────────────────────────
+const MenuItem = ({
+  iconSource,
+  iconBg,
+  iconTint,
+  title,
+  subtitle,
+  onPress,
+  danger = false,
+  disabled = false,
+}: {
+  iconSource: any;
+  iconBg: string;
+  iconTint: string;
+  title: string;
+  subtitle: string;
+  onPress: () => void;
+  danger?: boolean;
+  disabled?: boolean;
+}) => (
+  <TouchableOpacity
+    onPress={onPress}
+    activeOpacity={disabled ? 1 : 0.7}
+    disabled={disabled}
+    className={`bg-white rounded-xl p-4 mb-3 border flex-row items-center justify-between ${
+      danger ? "border-red-200" : "border-gray-200"
+    } ${disabled ? "opacity-50" : ""}`}
+  >
+    <View className="flex-row items-center flex-1">
+      <View
+        className={`w-10 h-10 rounded-full items-center justify-center mr-3 ${iconBg}`}
+      >
+        {typeof iconSource === "string" ? (
+          <Text className={`text-xl font-bold ${iconTint}`}>{iconSource}</Text>
+        ) : (
+          <Image
+            source={iconSource}
+            className="w-5 h-5"
+            style={{ tintColor: iconTint }}
+          />
+        )}
+      </View>
+      <View className="flex-1">
+        <Text
+          className={`font-interbold text-base ${
+            danger ? "text-red-600" : "text-gray-900"
+          }`}
+        >
+          {title}
+        </Text>
+        <Text className="font-inter text-sm text-gray-500 mt-0.5">
+          {subtitle}
+        </Text>
+      </View>
+    </View>
+    {!danger && !disabled && (
+      <Image
+        source={require("@/assets/icons/arrow-left.png")}
+        className="w-5 h-5"
+        style={{ tintColor: "#9CA3AF", transform: [{ rotate: "180deg" }] }}
+      />
+    )}
+  </TouchableOpacity>
+);
+
 
 const ProfileScreen = () => {
   const { user, clearAuthData } = useAuthStore();
-  const router = useRouter(); 
+  const router = useRouter();
+  const { getUserProfile } = useAuth();
+
+  const { data, isLoading } = getUserProfile();
+
+
+  const userData = data?.data?.data;
+  const userRole = user?.role; 
+
+  const fullName = userData
+    ? `${userData.firstName} ${userData.lastName}`
+    : user
+    ? `${user.firstName} ${user.lastName}`
+    : "User Name";
+
+  const email = userData?.email ?? user?.email ?? "user@example.com";
+
+  const verificationStatus = userData?.verificationStatus ?? "not_started";
+  const verificationBadge =
+    VERIFICATION_STATUS_CONFIG[verificationStatus] ??
+    VERIFICATION_STATUS_CONFIG.not_started;
+
   
-  const fullName = user ? `${user.firstName} ${user.lastName}` : "User Name";
-  const email = user?.email || "user@example.com";
+const clientVerification = userData?.verification?.documents?.length > 0 
+  ? userData.verification.documents 
+  : null;
+  const clientHasSubmitted = clientVerification !== null;
+  const contractorProfile = userData?.contractorProfile ?? null;
+  const builderHasSubmitted = contractorProfile !== null && contractorProfile !== undefined;
 
-  const handleEditProfile = () => {
-    router.push("/editprofilescreen"); 
-  };
 
-  const handlePersonalInformation = () => {
-    router.push("/editprofilescreen"); 
-  };
+  const menuConfig =
+    userRole === "builder"
+      ? builderHasSubmitted
+        ? {
+            iconBg: "bg-green-50",
+            iconTint: "#16A34A",
+            title: "Profile Submitted",
+            subtitle: "View your submitted profile & documents",
+          }
+        : {
+            iconBg: "bg-blue-50",
+            iconTint: "#3B82F6",
+            title: "Complete Your Profile",
+            subtitle: "Submit your profile and documents to get verified",
+          }
+      : clientHasSubmitted
+      ? {
+          iconBg: "bg-green-50",
+          iconTint: "#16A34A",
+          title: "Documents Submitted",
+          subtitle: "View your submitted verification documents",
+        }
+      : {
+          iconBg: "bg-blue-50",
+          iconTint: "#3B82F6",
+          title: "Verify Your Identity",
+          subtitle: "Submit your identity documents to get verified",
+        };
 
-  const handleAccountSettings = () => {
-  
-  };
-
-  const handleNotifications = () => {
-   
-  };
 
   const handleBack = () => {
- 
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.replace("/(tab)"); 
+      router.replace("/(tab)");
+    }
+  };
+
+  const handlePersonalInformation = () => router.push("/editprofilescreen");
+
+  const handleVerificationAction = () => {
+    if (userRole === "client") {
+      if (clientHasSubmitted) {
+    
+        router.push("/verification_details");
+      } else {
+       
+        router.push({
+          pathname: "/(auth)/sign_up/client/verify_identity",
+          params: { dontShowSkip: "true" },
+        });
+      }
+    } else {
+      if (builderHasSubmitted) {
+        router.push("/verification_details");
+      } else {
+        router.push({
+          pathname: "/(auth)/sign_up/builder/basic_Info_screen",
+          params: { dontShowSkip: "true" },
+        });
+      }
     }
   };
 
@@ -43,18 +235,13 @@ const ProfileScreen = () => {
       "Logout",
       "Are you sure you want to logout?",
       [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
+        { text: "Cancel", style: "cancel" },
         {
           text: "Logout",
           style: "destructive",
           onPress: async () => {
             await clearAuthData();
-          
-            router.replace("/sign_in/signin"); 
-          
+            router.replace("/sign_in/signin");
           },
         },
       ],
@@ -62,156 +249,92 @@ const ProfileScreen = () => {
     );
   };
 
+  if (isLoading) {
+    return (
+      <View className="flex-1 bg-gray-50">
+        <AuthHeader title="Profile" onBackPress={handleBack} />
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#2463EB" />
+          <Text className="mt-3 font-inter text-gray-500">
+            Loading profile...
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-gray-50">
       <AuthHeader title="Profile" onBackPress={handleBack} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-
-        <View className="items-center pt-6 pb-8">
+       
+        <View className="items-center pt-8 pb-8 bg-white mx-4 mt-4 rounded-2xl border border-gray-100 shadow-sm">
           <View className="relative">
-            <Image
-              source={AvatarImage}
-              className="w-24 h-24 rounded-full"
-            />
-            <TouchableOpacity
-              onPress={handleEditProfile}
-              className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-2 border-2 border-white"
-            >
-              <Image
-                source={require("@/assets/icons/camera.png")}
-                className="w-4 h-4"
-                style={{ tintColor: "white" }}
-              />
-            </TouchableOpacity>
+            <Image source={AvatarImage} className="w-24 h-24 rounded-full" />
+            <View className="absolute bottom-0 right-0 w-6 h-6 bg-blue-500 rounded-full border-2 border-white items-center justify-center">
+              <Text className="text-white text-xs font-bold">✓</Text>
+            </View>
           </View>
+
           <Text className="font-interbold text-xl mt-4 text-gray-900">
             {fullName}
           </Text>
-          <Text className="font-inter text-base mt-1 text-gray-600">
-            {email}
-          </Text>
+          <Text className="font-inter text-sm mt-1 text-gray-500">{email}</Text>
+
+
+          <Badge
+            label={verificationBadge.label}
+            badgeBg={verificationBadge.badgeBg}
+            badgeText={verificationBadge.badgeText}
+            dot={verificationBadge.dot}
+          />
         </View>
 
-   
-        <View className="px-4 mt-4">
-          <Text className="font-interbold text-lg mb-4 text-gray-900">
+
+        <View className="px-4 mt-6">
+          <Text className="font-interbold text-sm text-gray-400 uppercase tracking-widest mb-3 ml-1">
             Account
           </Text>
-          <TouchableOpacity
+          <MenuItem
+            iconSource={require("@/assets/icons/profile-2user.png")}
+            iconBg="bg-blue-50"
+            iconTint="#3B82F6"
+            title="Personal Information"
+            subtitle="Edit your personal details"
             onPress={handlePersonalInformation}
-            className="bg-white rounded-xl p-4 mb-3 border border-gray-200 flex-row items-center justify-between"
-          >
-            <View className="flex-row items-center flex-1">
-              <View className="w-10 h-10 bg-blue-50 rounded-full items-center justify-center mr-3">
-                <Image
-                  source={require("@/assets/icons/profile-2user.png")}
-                  className="w-5 h-5"
-                  style={{ tintColor: "#3B82F6" }}
-                />
-              </View>
-              <View className="flex-1">
-                <Text className="font-interbold text-base text-gray-900">
-                  Personal Information
-                </Text>
-                <Text className="font-inter text-sm text-gray-600 mt-1">
-                  Edit your personal details
-                </Text>
-              </View>
-            </View>
-            <Image
-              source={require("@/assets/icons/arrow-left.png")}
-              className="w-5 h-5"
-              style={{ tintColor: "#9CA3AF", transform: [{ rotate: "180deg" }] }}
-            />
-          </TouchableOpacity>
+          />
         </View>
 
- 
-        <View className="px-4 mt-6">
-          <Text className="font-interbold text-lg mb-4 text-gray-900">
+
+        <View className="px-4 mt-4">
+          <Text className="font-interbold text-sm text-gray-400 uppercase tracking-widest mb-3 ml-1">
             Settings
           </Text>
-          <TouchableOpacity
-            onPress={handleAccountSettings}
-            className="bg-white rounded-xl p-4 mb-3 border border-gray-200 flex-row items-center justify-between"
-          >
-            <View className="flex-row items-center flex-1">
-              <View className="w-10 h-10 bg-blue-50 rounded-full items-center justify-center mr-3">
-                <Image
-                  source={require("@/assets/icons/settings.png")}
-                  className="w-5 h-5"
-                  style={{ tintColor: "#3B82F6" }}
-                />
-              </View>
-              <View className="flex-1">
-                <Text className="font-interbold text-base text-gray-900">
-                  Account Settings
-                </Text>
-                <Text className="font-inter text-sm text-gray-600 mt-1">
-                  Adjust account preferences
-                </Text>
-              </View>
-            </View>
-            <Image
-              source={require("@/assets/icons/arrow-left.png")}
-              className="w-5 h-5"
-              style={{ tintColor: "#9CA3AF", transform: [{ rotate: "180deg" }] }}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={handleNotifications}
-            className="bg-white rounded-xl p-4 mb-3 border border-gray-200 flex-row items-center justify-between"
-          >
-            <View className="flex-row items-center flex-1">
-              <View className="w-10 h-10 bg-blue-50 rounded-full items-center justify-center mr-3">
-                <Image
-                  source={require("@/assets/icons/notification.png")}
-                  className="w-5 h-5"
-                  style={{ tintColor: "#3B82F6" }}
-                />
-              </View>
-              <View className="flex-1">
-                <Text className="font-interbold text-base text-gray-900">
-                  Notifications
-                </Text>
-                <Text className="font-inter text-sm text-gray-600 mt-1">
-                  Manage notifications
-                </Text>
-              </View>
-            </View>
-            <Image
-              source={require("@/assets/icons/arrow-left.png")}
-              className="w-5 h-5"
-              style={{ tintColor: "#9CA3AF", transform: [{ rotate: "180deg" }] }}
-            />
-          </TouchableOpacity>
+          <MenuItem
+            iconSource={require("@/assets/icons/settings.png")}
+            iconBg={menuConfig.iconBg}
+            iconTint={menuConfig.iconTint}
+            title={menuConfig.title}
+            subtitle={menuConfig.subtitle}
+            onPress={handleVerificationAction}
+          />
         </View>
 
-    
-        <View className="px-4 mt-6">
-          <TouchableOpacity
+
+        <View className="px-4 mt-4">
+          <MenuItem
+            iconSource="↪"
+            iconBg="bg-red-50"
+            iconTint="text-red-600"
+            title="Logout"
+            subtitle="Sign out of your account"
             onPress={handleLogout}
-            className="bg-white rounded-xl p-4 mb-3 border border-red-200 flex-row items-center justify-between"
-          >
-            <View className="flex-row items-center flex-1">
-              <View className="w-10 h-10 bg-red-50 rounded-full items-center justify-center mr-3">
-                <Text className="text-red-600 text-xl font-bold">↪</Text>
-              </View>
-              <View className="flex-1">
-                <Text className="font-interbold text-base text-red-600">
-                  Logout
-                </Text>
-                <Text className="font-inter text-sm text-gray-600 mt-1">
-                  Sign out of your account
-                </Text>
-              </View>
-            </View>
-          </TouchableOpacity>
+            danger
+          />
         </View>
       </ScrollView>
     </View>

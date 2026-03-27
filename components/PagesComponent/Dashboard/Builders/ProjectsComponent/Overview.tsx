@@ -1,7 +1,7 @@
-import { View, Text } from 'react-native'
 import React from 'react'
-import ProgressBar from '../../../../Miscallaneous/ProgressBar'
+import { Text, View } from 'react-native'
 import ProjectTimeline from '../../../../Cards/ProjectTimeline'
+import ProgressBar from '../../../../Miscallaneous/ProgressBar'
 
 const Overview = () => {
   return (
@@ -25,7 +25,7 @@ const Overview = () => {
      <View className="p-4 m-4  rounded-xl">
         <Text className="font-interbold text-gray-400  text-xl">Fund in Escrow</Text>
         <Text className="text-xl font-interbold py-3">#17,380,690</Text>
-           <Text className="font-inter">Manage by abbey Mortgage Bank</Text>
+           <Text className="font-inter">Manage by Homebase Mortgage Bank</Text>
      </View>
     </View>
   )

@@ -1,23 +1,19 @@
-import { View, Text, Image, TouchableOpacity } from "react-native";
-import React from "react";
-import {
-  AppleImage,
-  BuildConnectImage,
-  GoggleImage,
-} from "@/constants/image";
-import { arrowleft } from "@/constants/icon";
+import GradientButton from "@/components/Buttons/GradientButton";
 import FormInput from "@/components/Forms/Formnput";
 import PasswordInput from "@/components/Forms/PasswordInput";
-import GradientButton from "@/components/Buttons/GradientButton";
-import DividerWithText from "@/components/Miscallaneous/Divider";
-import ButtonWithIcon from "@/components/Buttons/ButtonWithIcon";
 import KeyboardAvoidingLayout from "@/components/Layouts/KeyboardAvoidLayout";
 import AuthLink from "@/components/Miscallaneous/AuthLink";
-import { LoginInput, loginSchema } from "@/core/schemas/authschema";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { arrowleft } from "@/constants/icon";
+import {
+  BuildConnectImage
+} from "@/constants/image";
 import { useAuth } from "@/core/hooks/useAuth";
+import { LoginInput, loginSchema } from "@/core/schemas/authschema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
+import React from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 
 
@@ -121,26 +117,26 @@ const SignInScreen = () => {
             <GradientButton loading={loginMutation.isPending} title="Continue" onPress={handleSubmit(onSubmit)} />
           </View>
 
-          <View>
+          {/* <View>
             <DividerWithText text="or" />
-          </View>
+          </View> */}
           <View className="">
-            <View className="pb-6">
+            {/* <View className="pb-6">
               <ButtonWithIcon
                 icon={AppleImage}
                 onPress={() => { }}
                 textColor="black"
                 title="Continue With Apple"
               />
-            </View>
-            <View>
+            </View> */}
+            {/* <View>
               <ButtonWithIcon
                 onPress={() => { }}
                 icon={GoggleImage}
                 textColor="black"
                 title="Continue With Google"
               />
-            </View>
+            </View> */}
             <View className="mt-12">
               <AuthLink
                 questionText="Dont have an account? "

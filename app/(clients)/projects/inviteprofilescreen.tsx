@@ -1,351 +1,276 @@
-import GradientButton from '@/components/Buttons/GradientButton';
-import AppLayout from '@/components/Layouts/AppLayout';
-import SuccessScreen from '@/components/Notifications/SucessScreen';
-import { useBids } from '@/core/hooks/UseBids';
-import { useLocalSearchParams } from 'expo-router';
-import { Check, Star } from 'lucide-react-native';
-import React from 'react';
-import { Image, ImageBackground, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import GradientButton from "@/components/Buttons/GradientButton";
+import AppLayout from "@/components/Layouts/AppLayout";
+import SuccessScreen from "@/components/Notifications/SucessScreen";
+import { useBids } from "@/core/hooks/UseBids";
+import { useLocalSearchParams } from "expo-router";
+import {
+  Award,
+  ExternalLink,
+  MapPin,
+  ShieldCheck
+} from "lucide-react-native";
+import React from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Linking,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-interface Contractor {
-  name: string;
-  rating: number;
-  reviews: number;
-  projects: string;
-  years: number;
-  coverImage: string;
-}
+export default function ContractorProfileScreen() {
+  const { contractorId, projectId } = useLocalSearchParams<{
+    contractorId: string;
+    projectId: string;
+  }>();
 
-interface Project {
-  id: number;
-  title: string;
-  image: string;
-}
-
-interface Testimonial {
-  id: number;
-  name: string;
-  timeAgo: string;
-  avatar: string;
-  text: string;
-}
-
-interface StatItemProps {
-  value: string | number;
-  label: string;
-}
-
-interface ProjectCardProps {
-  project: Project;
-  onPress?: () => void;
-}
-
-interface TestimonialCardProps {
-  testimonial: Testimonial;
-}
-
-interface InviteProfileScreenProps {
-  contractor?: Contractor;
-}
-
-// Mock data
-const services = [
-  'Residential New Builds',
-  'Renovation',
-  'Commercial',
-];
-
-// Mock data
-const testimonials: Testimonial[] = [
-  {
-    id: 1,
-    name: 'Ethan Morgan',
-    timeAgo: '2 months ago',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop',
-    text: 'Lorem ipsum dolor sit amet consectetur. Vivert rra a in diam nulla eget sed. Nunc habitasse a cras quis amet est magnis partu rient ut. In is mauris sodales orci senectus integer.',
-  },
-  {
-    id: 2,
-    name: 'Bennett Olivia',
-    timeAgo: '6 months ago',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop',
-    text: 'Lorem ipsum dolor sit amet consectetur. Vivert rra a in diam nulla eget sed. Nunc habitasse a cras quis amet est magnis partu rient ut. In is mauris sodales orci senectus integer.',
-  },
-  {
-    id: 3,
-    name: 'Sarah Johnson',
-    timeAgo: '1 month ago',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop',
-    text: 'Lorem ipsum dolor sit amet consectetur. Vivert rra a in diam nulla eget sed. Nunc habitasse a cras quis amet est magnis partu rient ut. In is mauris sodales orci senectus integer.',
-  },
-];
-
-// Mock data
-const contractorData: Contractor = {
-  name: 'Elite Builders',
-  rating: 4.5,
-  reviews: 81,
-  projects: '22+',
-  years: 15,
-  coverImage: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&h=400&fit=crop',
-};
-
-const projects: Project[] = [
-  {
-    id: 1,
-    title: 'Modern Home',
-    image: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&h=600&fit=crop',
-  },
-  {
-    id: 2,
-    title: 'Kitchen Renovation',
-    image: 'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=800&h=600&fit=crop',
-  },
-  {
-    id: 3,
-    title: 'Office Space',
-    image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop',
-  },
-  {
-    id: 4,
-    title: 'Luxury Villa',
-    image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&h=600&fit=crop',
-  },
-];
-
-const StatItem: React.FC<StatItemProps> = ({ value, label }) => (
-  <View className="flex-1 items-center">
-    <Text className="text-4xl font-bold text-gray-900">{value}</Text>
-    <Text className="text-base text-gray-600 mt-1">{label}</Text>
-  </View>
-);
-
-export const ServiceTag = ({ 
-  label, 
-  onPress 
-}: { 
-  label: string; 
-  onPress?: () => void 
-}) => {
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      className="bg-blue-100 rounded-full px-4 py-3 mr-3 mb-3"
-      activeOpacity={0.7}
-    >
-      <Text className="text-blue-600 text-base font-intersemibold">
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
-};
-
-const ProjectCard: React.FC<ProjectCardProps> = ({ 
-  project, 
-  onPress 
-}) => {
-  return (
-    <TouchableOpacity 
-      onPress={onPress}
-      className="mr-4"
-      activeOpacity={0.8}
-    >
-      <Image
-        source={{ uri: project.image }}
-        className="w-72 h-48 rounded-3xl"
-      />
-      <Text className="text-lg font-intersemibold text-gray-900 mt-3">
-        {project.title}
-      </Text>
-    </TouchableOpacity>
-  );
-}
-
-const TestimonialCard: React.FC<TestimonialCardProps> = ({ 
-  testimonial 
-}) => {
-  return (
-    <View className="bg-white rounded-2xl p-5 mb-4 border border-gray-200">
-      <View className="flex-row items-center mb-4">
-        <Image
-          source={{ uri: testimonial.avatar }}
-          className="w-14 h-14 rounded-full mr-3"
-        />
-        <View className="flex-1">
-          <Text className="text-lg font-interbold text-gray-900">
-            {testimonial.name}
-          </Text>
-          <Text className="text-sm text-gray-500 mt-1">
-            {testimonial.timeAgo}
-          </Text>
-        </View>
-      </View>
-
-      <Text className="text-base font-inter text-gray-600 leading-6 italic">
-        {testimonial.text}
-      </Text>
-    </View>
-  );
-};
-
-const Inviteprofilescreen: React.FC<InviteProfileScreenProps> = ({ contractor = contractorData }) => {
-  const { contractorId, projectId} = useLocalSearchParams<{ contractorId: string, projectId: string }>();
   const { singleContractorQuery, inviteBidMutation, inviteBidsuccess } = useBids();
-
   const { data, isLoading } = singleContractorQuery(contractorId || "");
-    
+  const contractor = data?.data?.data;
+
   const handleInviteToBid = () => {
-  const inviteData = {  // Better naming
-    projectId: projectId,
-    contractorId: contractorId,
-    message: "ayyaa",
-    expiresInDays: 30
+    inviteBidMutation.mutate({
+      projectId,
+      contractorId,
+      message: "You have been invited to bid on this project.",
+      expiresInDays: 30,
+    });
+  };
+
+  if (inviteBidsuccess) {
+    return (
+      <SuccessScreen
+        title="Invitation Sent"
+        message="Invitation Sent Successfully"
+        buttonTitle="View more Projects"
+        navigateTo="projects/projects"
+        params={{ projectId, initialTab: "Bids" }}
+      />
+    );
   }
 
-  console.log(inviteData)
-  inviteBidMutation.mutate(inviteData);
-}
+  if (isLoading || !contractor) {
+    return (
+      <AppLayout screenName="Contractor Profile">
+        <View className="flex-1 justify-center items-center py-20">
+          <ActivityIndicator size="large" color="#2463EB" />
+          <Text className="mt-4 text-gray-600 font-inter">Loading profile...</Text>
+        </View>
+      </AppLayout>
+    );
+  }
 
-   if (inviteBidsuccess) {
-     return (
-      <SuccessScreen
-  title="Invitation Sent"
-  message="Invitation Sent Successfully"
-  buttonTitle="View Project Bids"
-  navigateTo="projects/clientprojectdetails"
-      params={{ projectId: projectId, initialTab: 'Bids' }}
-/>
-     );
-   }
+  const { personalInfo, businessInfo, statistics, certificationsAndLicenses, portfolio } =
+    contractor;
 
-
+  const initials = `${personalInfo.firstName?.[0] ?? ""}${personalInfo.lastName?.[0] ?? ""}`.toUpperCase();
+  const workingDays: string[] = businessInfo?.workingHours?.days ?? [];
 
   return (
-    <AppLayout screenName="Elite Builders">
-      <View className="mx-4 my-6">
-        <ImageBackground
-          source={{ uri: contractor.coverImage }}
-          className="w-full h-64 rounded-t-3xl overflow-hidden"
-          imageStyle={{ opacity: 0.7 }}
-        >
-          <View className="flex-1 bg-black/20" />
-        </ImageBackground>
-        
-        <View className="bg-white rounded-3xl p-6 -mt-16 mx-4">
-          <View className="flex-row items-center justify-between mb-6">
-            <Text className="text-xl font-interbold text-gray-900">
-              {contractor.name}
-            </Text>
-            <View className="flex-row items-center gap-1">
-              <Star size={20} fill="#FFD700" color="#FFD700" />
-              <Text className="text-base font-semibold text-gray-700 ml-1">
-                {contractor.rating} ({contractor.reviews}+ reviews)
+    <AppLayout screenName={ "Contractor Profile Details"}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 48 }}
+      >
+
+        {/* ── Profile Card ── */}
+        <View className="pt-4 bg-white m-4 rounded-xl">
+
+          {/* Avatar + name */}
+          <View className="flex-row items-center gap-4 px-4 pb-4">
+            <View className="w-16 h-16 rounded-full bg-blue-100 items-center justify-center overflow-hidden">
+              {personalInfo.profilePicture?.url ? (
+                <Image
+                  source={{ uri: personalInfo.profilePicture.url }}
+                  style={{ width: 64, height: 64, borderRadius: 32 }}
+                />
+              ) : (
+                <Text className="font-interbold text-blue-600 text-xl">{initials}</Text>
+              )}
+            </View>
+            <View className="flex-1">
+              <Text className="font-interbold text-xl text-gray-900">
+                {personalInfo.firstName} {personalInfo.lastName}
               </Text>
+              <Text className="font-inter text-sm text-gray-500 mt-0.5">
+                {businessInfo?.businessName}
+              </Text>
+              <View className="flex-row items-center gap-1 mt-1">
+                <MapPin size={12} color="#9CA3AF" />
+                <Text className="font-inter text-xs text-gray-400">{businessInfo?.location}</Text>
+              </View>
+            </View>
+            <View className="flex-row items-center gap-1.5 bg-green-50 px-3 py-1.5 rounded-full">
+              <View className="w-2 h-2 rounded-full bg-green-400" />
+              <Text className="text-green-600 text-xs font-intersemibold">Active</Text>
             </View>
           </View>
-          
-          <View className="flex-row border-t border-gray-200 pt-4">
-            <StatItem value={contractor.projects} label="Projects" />
-            <View className="w-px bg-gray-200" />
-            <StatItem value={contractor.years} label="Years" />
-          </View>
-        </View>
-        
-        <View className="pt-6">
-          <Text className="text-xl font-interbold">About us</Text>
-          <Text className="text-gray-400 pt-4">
-            Lorem ipsum dolor sit amet consectetur. Viverra a in diam nulla eget sed. Nunc habitasse cras quis amet est magnis partu rient ut. In mauris sodales orci senectus integer. Pharetra nunc maecenas nibh lectus quam in ultrices. In mauris sodales orci senectus integer. Pharetra nunc maecenas nibh lectus quam in ultrices.
-          </Text>
+
+          <View className="h-px bg-gray-100 mx-4" />
+
+         
         </View>
 
-        <View className="bg-gray-100 px-1 py-6">
-          {/* Header */}
-          <Text className="text-xl font-interbold text-gray-900 mb-6">
-            Services Offered
-          </Text>
+   
+        <View className="pt-4 bg-white m-4 rounded-xl">
+          <Text className="font-interbold px-4 text-xl pb-4">Contact Details</Text>
 
-          {/* Services Tags */}
-          <View className="flex-row flex-wrap">
-            {services.map((service, index) => (
-              <ServiceTag
-                key={index}
-                label={service}
-                onPress={() => console.log('Selected:', service)}
-              />
-            ))}
+          <View className="px-4 py-3 flex-row justify-between border-b border-gray-100">
+            <Text className="font-inter text-gray-500">Email</Text>
+            <Text className="font-intersemibold text-gray-900">{personalInfo.email}</Text>
           </View>
+
+          <View className="px-4 py-3 flex-row justify-between border-b border-gray-100">
+            <Text className="font-inter text-gray-500">Phone</Text>
+            <Text className="font-intersemibold text-gray-900">{personalInfo.phoneNumber}</Text>
+          </View>
+
+          <View className="px-4 py-3 flex-row justify-between border-b border-gray-100">
+            <Text className="font-inter text-gray-500">Availability</Text>
+            <Text className="font-intersemibold text-gray-900">
+              {businessInfo?.availability?.label ?? "—"}
+            </Text>
+          </View>
+
+          <View className="px-4 py-3 flex-row justify-between">
+            <Text className="font-inter text-gray-500">Working Hours</Text>
+            <Text className="font-intersemibold text-gray-900">
+              {businessInfo?.workingHours?.start && businessInfo?.workingHours?.end
+                ? `${businessInfo.workingHours.start.slice(0, 5)} – ${businessInfo.workingHours.end.slice(0, 5)}`
+                : "—"}
+            </Text>
+          </View>
+
+       
+          {workingDays.length > 0 && (
+            <View className="px-4 pb-4 pt-1">
+              <Text className="font-inter text-xs text-gray-400 uppercase tracking-wider mb-2">
+                Working Days
+              </Text>
+              <View className="flex-row flex-wrap gap-2">
+                {workingDays.map((day) => (
+                  <View key={day} className="bg-blue-50 rounded-lg px-3 py-1.5">
+                    <Text className="font-intersemibold text-xs text-blue-600 capitalize">{day}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
         </View>
-        
-        <View>
-          <View className="flex-1 py-4 mt-4">
+
+     
+        <View className="pt-4 bg-white m-4 rounded-xl">
+          <View className="flex-row items-center justify-between px-4 pb-4">
+            <Text className="font-interbold text-xl">Certifications & Licenses</Text>
+            {(certificationsAndLicenses?.certifications?.length > 0 ||
+              certificationsAndLicenses?.licenses?.length > 0) && (
+              <View className="bg-blue-100 px-3 py-1 rounded-full">
+                <Text className="text-blue-800 font-intersemibold text-xs">
+                  {(certificationsAndLicenses?.certifications?.length ?? 0) +
+                    (certificationsAndLicenses?.licenses?.length ?? 0)}{" "}
+                  file(s)
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {(certificationsAndLicenses?.certifications?.length > 0 ||
+            certificationsAndLicenses?.licenses?.length > 0) ? (
+            <View className="px-4 pb-4 gap-3">
+              {certificationsAndLicenses?.certifications?.map((cert: any, idx: number) => (
+                <TouchableOpacity
+                  key={cert.id ?? idx}
+                  onPress={() => cert.publicUrl && Linking.openURL(cert.publicUrl)}
+                  activeOpacity={0.8}
+                  className="flex-row items-center gap-3 bg-gray-50 rounded-xl p-3"
+                >
+                  <View className="bg-blue-50 rounded-xl p-3">
+                    <Award size={18} color="#2563EB" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="font-intersemibold text-sm text-gray-900" numberOfLines={1}>
+                      {cert.fileName || "Certificate"}
+                    </Text>
+                    <Text className="font-inter text-xs text-gray-400 mt-0.5">Certification</Text>
+                  </View>
+                  <View className="bg-blue-50 rounded-lg p-2">
+                    <ExternalLink size={14} color="#2563EB" />
+                  </View>
+                </TouchableOpacity>
+              ))}
+
+              {certificationsAndLicenses?.licenses?.map((lic: any, idx: number) => (
+                <TouchableOpacity
+                  key={lic.id ?? idx}
+                  onPress={() => lic.publicUrl && Linking.openURL(lic.publicUrl)}
+                  activeOpacity={0.8}
+                  className="flex-row items-center gap-3 bg-gray-50 rounded-xl p-3"
+                >
+                  <View className="bg-purple-50 rounded-xl p-3">
+                    <ShieldCheck size={18} color="#7C3AED" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="font-intersemibold text-sm text-gray-900" numberOfLines={1}>
+                      {lic.fileName || "License"}
+                    </Text>
+                    <Text className="font-inter text-xs text-gray-400 mt-0.5">License · Verified</Text>
+                  </View>
+                  <View className="bg-purple-50 rounded-lg p-2">
+                    <ExternalLink size={14} color="#7C3AED" />
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : (
+            <View className="px-4 pb-6 items-center gap-2">
+              <ShieldCheck size={32} color="#D1D5DB" />
+              <Text className="font-inter text-sm text-gray-400 text-center">
+                No certifications or licenses on file
+              </Text>
+            </View>
+          )}
+        </View>
+
+      
+        {portfolio?.total > 0 && (
+          <View className="pt-4 bg-white m-4 rounded-xl">
+            <View className="flex-row items-center justify-between px-4 pb-4">
+              <Text className="font-interbold text-xl">Portfolio</Text>
+              <View className="bg-blue-100 px-3 py-1 rounded-full">
+                <Text className="text-blue-800 font-intersemibold text-xs">
+                  {portfolio.total} {portfolio.total === 1 ? "item" : "items"}
+                </Text>
+              </View>
+            </View>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              className="px-4"
-              contentContainerStyle={{ paddingRight: 16 }}
+              contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16, gap: 12 }}
             >
-              {projects.map(project => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
+              {portfolio.items.map((item: any) => (
+                <Image
+                  key={item.id}
+                  source={{ uri: item.url }}
+                  style={{ width: 160, height: 110, borderRadius: 12 }}
+                  resizeMode="cover"
                 />
               ))}
             </ScrollView>
           </View>
+        )}
 
-          <View>
-            <View className="flex-1 px-4 py-6">
-              <View className="flex-row justify-between items-center mb-6">
-                <Text className="text-2xl font-interbold text-gray-900">
-                  Testimonials
-                </Text>
-                <TouchableOpacity>
-                  <Text className="text-base font-intersemibold text-gray-700">
-                    View All
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* Testimonials List */}
-              {testimonials.map(testimonial => (
-                <TestimonialCard key={testimonial.id} testimonial={testimonial} />
-              ))}
-            </View>
-          </View>
-
-          <View>
-            <View className="bg-gray-100 px-4 py-6">
-              <Text className="text-2xl font-bold text-gray-900 mb-6">
-                Certifications & Licenses
-              </Text>
-
-              <View className="flex-row items-center mb-4">
-                <View className="w-12 h-12 bg-blue-600 rounded-full items-center justify-center mr-4">
-                  <Check size={24} color="white" strokeWidth={3} />
-                </View>
-                <Text className="text-lg text-gray-900">
-                  Licensed General Contractor
-                </Text>
-              </View>
-
-              <View className="flex-row items-center">
-                <View className="w-12 h-12 bg-blue-600 rounded-full items-center justify-center mr-4">
-                  <Check size={24} color="white" strokeWidth={3} />
-                </View>
-                <Text className="text-lg text-gray-900">
-                  Certified Green Builder
-                </Text>
-              </View>
-
-              <View className="mt-14">
-                <GradientButton loading={inviteBidMutation.isPending} onPress={handleInviteToBid} title="Invite to bids" />
-              </View>
-            </View>
-          </View>
+      
+        <View className="p-4 mx-4 bg-white rounded-xl mt-4">
+          <GradientButton
+            title="Invite to Bid"
+            onPress={handleInviteToBid}
+            loading={inviteBidMutation.isPending}
+          />
         </View>
-      </View>
-    </AppLayout>
-  )
-}
 
-export default Inviteprofilescreen;
+      </ScrollView>
+    </AppLayout>
+  );
+}

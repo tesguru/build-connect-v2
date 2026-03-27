@@ -1,12 +1,13 @@
 import { BidsCard } from '@/components/Cards/BidsCard';
 import InfoCard from '@/components/Cards/InfoCard';
 import ProjectsComponent from '@/components/Cards/ProjectsComponent';
-import MyProperties from '@/components/PagesComponent/Dashboard/Builders/HomeComponents/Properties';
+import PropertiesComponent from '@/components/Cards/PropertiesComponent';
 import DashboardHeader from '@/components/PagesComponent/Dashboard/Shared/DashboardHeader';
 import { AddCircle, Code, Dollar } from '@/constants/icon';
 import { bidImage, CustomSurvey } from '@/constants/image';
 import { useBids } from '@/core/hooks/UseBids';
 import { Project, useProjects } from '@/core/hooks/useProjects';
+import { useProperty } from '@/core/hooks/useProperty';
 import { ProjectQueryParams } from '@/core/types/api';
 import { formatTimeAgo } from '@/core/utils/data';
 import { useAuthStore } from '@/store/Authstore';
@@ -16,10 +17,9 @@ import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } fr
 
 const Home = () => {
   const router = useRouter();
-  const { clearAuthData, user } = useAuthStore();
+  const { user } = useAuthStore();
   const firstName = user?.firstName || "Builder";
 
-  // ── Projects query ──────────────────────────────────────
   const { projectsMarketPlaceQuery } = useProjects();
   const [projectQueryParams] = useState<ProjectQueryParams>({
     page: 1,
@@ -39,7 +39,7 @@ const Home = () => {
     projectsApiResponse?.projects ||
     [];
 
-  // ── Bids query ──────────────────────────────────────────
+
   const { getAllBids } = useBids();
   const [bidsQueryParams] = useState<ProjectQueryParams>({
     page: 1,
@@ -55,11 +55,23 @@ const Home = () => {
 
   const bidsList = bidsApiResponse?.data?.data?.bids ?? [];
 
-  // ── Handlers ────────────────────────────────────────────
+
+  const { myProperty } = useProperty();
+
+  const {
+    data: apiResponse,
+    isLoading: isLoadingProperties,
+    error: propertiesError,
+  } = myProperty();
+
+  const propertyList = apiResponse?.data?.data?.properties || [];
+
+
   const handleNotification = () => router.push("/notification/notification");
-  const handleNavigation = () => router.replace("/builders/createproperty/createproperty");
+  const handleCreateProperty = () => router.replace("/(builders)/createproperty/createproperty");
   const handleAllProjects = () => router.push("/findprojects/findprojects");
-  const handleAllBids = () => router.push("/mybids/mybids");
+  const handleAllBids = () => router.push("/mybids/bids");
+  const handleAllProperties = () => router.push("/(builders)/properties/properties");
 
   return (
     <View className="flex-1">
@@ -72,11 +84,9 @@ const Home = () => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
       >
-     
-
-        {/* ── Welcome Banner ───────────────────────────────── */}
+        {/* Welcome Banner */}
         <View className="bg-dashboard mt-8 mx-2 rounded-xl pt-6 px-4 pb-4">
           <Text className="font-worksanssemibold text-white text-3xl">Welcome Back!</Text>
           <Text className="text-white font-work-sans">Let's start the day with you.</Text>
@@ -95,7 +105,7 @@ const Home = () => {
                 icon={Code}
                 title="My Bids"
                 subtitle="Manage Bid works"
-                onPress={() => router.push("/mybids/mybids")}
+                onPress={() => router.push("/mybids/bids")}
               />
             </View>
           </View>
@@ -112,15 +122,15 @@ const Home = () => {
             <View className="flex-1">
               <InfoCard
                 icon={Code}
-                title="Portfolio"
-                subtitle="Showcase your work"
-                onPress={() => {}}
+                title="Mortgage"
+                subtitle="View Mortgages"
+                onPress={() => router.push("/(builders)/viewmortgage/mortgages")}
               />
             </View>
           </View>
         </View>
 
-      
+        {/* Available Projects */}
         <View className="mt-8 rounded-xl px-2">
           <View className="flex-row justify-between items-center mb-4 mx-4">
             <Text className="font-interbold text-xl text-gray-900">Available Projects</Text>
@@ -167,6 +177,7 @@ const Home = () => {
           )}
         </View>
 
+      
         <View className="mt-8 rounded-xl px-2">
           <View className="flex-row justify-between items-center mb-4 mx-4">
             <Text className="font-interbold text-xl text-gray-900">My Bids</Text>
@@ -195,7 +206,7 @@ const Home = () => {
                 <BidsCard
                   image={bidImage}
                   projectName={bid?.project?.title}
-                  projectId={bid.id}
+                  projectId={bid.project.id}
                   amount={bid.bidAmount}
                   bidStatus={bid.status}
                   contractId={bid.contractId}
@@ -207,21 +218,72 @@ const Home = () => {
         </View>
 
      
-        <View className="pt-2">
-          <MyProperties />
-        </View>
+        <View className="mt-8 rounded-xl px-2">
+          <View className="flex-row justify-between items-center mb-4 mx-4">
+            <Text className="font-interbold text-xl text-gray-900">My Properties</Text>
+            {propertyList.length > 2 && (
+              <TouchableOpacity onPress={handleAllProperties}>
+                <Text className="font-inter text-blue-500">View all</Text>
+              </TouchableOpacity>
+            )}
+          </View>
 
-      
-        <View className="flex-row justify-end mr-3 mt-4">
-          <TouchableOpacity
-            onPress={handleNavigation}
-            className="bg-blue-600 w-40 flex-row items-center px-6 py-3 rounded-full"
-          >
-            <Text className="text-white text-2xl">+</Text>
-            <Text className="text-white font-work-sans text-base ml-2">Add Property</Text>
-          </TouchableOpacity>
+          {isLoadingProperties ? (
+            <View className="justify-center items-center py-20">
+              <ActivityIndicator size="large" color="#2463EB" />
+            </View>
+          ) : propertiesError || propertyList.length === 0 ? (
+            <View className="items-center py-8">
+              <Image source={CustomSurvey} resizeMode="contain" style={{ width: 90, height: 90 }} />
+              <Text className="font-worksanssemibold text-2xl mt-4">Oops!</Text>
+              <Text className="font-work-sans text-base text-gray-500 text-center mt-2 px-4">
+                You have not created any properties yet
+              </Text>
+            </View>
+          ) : (
+            propertyList.slice(0, 2).map((property) => (
+              <View key={property.id} className="mb-4">
+                <PropertiesComponent
+                  image={{ uri: property.media?.[0]?.publicUrl }}
+                  title={property.title}
+                  status={property.status}
+                  address={property.location}
+                  price={property.price}
+                  onView={() =>
+                    router.push({
+                      pathname: '/properties/propertiesdetails',
+                      params: { id: property.id },
+                    })
+                  }
+                  onEdit={() =>
+                    router.push({
+                      pathname: '/createproperty/updateproperty',
+                      params: { id: property.id },
+                    })
+                  }
+                />
+              </View>
+            ))
+          )}
         </View>
       </ScrollView>
+
+  
+      <TouchableOpacity
+        onPress={handleCreateProperty}
+        activeOpacity={0.9}
+        className="absolute bottom-6 right-6 bg-blue-600 rounded-full flex-row items-center px-6 py-4 shadow-lg"
+        style={{
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+          elevation: 5,
+        }}
+      >
+        <Text className="text-white text-2xl font-bold mr-2">+</Text>
+        <Text className="text-white font-inter text-base font-medium">Create Property</Text>
+      </TouchableOpacity>
     </View>
   );
 };

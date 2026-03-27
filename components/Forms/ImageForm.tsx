@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Image, Alert } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
 import { fileerror, markicon } from '@/constants/icon';
+import * as ImagePicker from 'expo-image-picker';
+import React from 'react';
 import { Control, Controller } from 'react-hook-form';
+import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
 
 interface ImageUploadComponentProps {
   control: Control<any>;
@@ -33,7 +33,7 @@ export default function ImageUploadComponent({
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
+      allowsEditing: false,
       aspect: [1, 1],
       quality: 0.8,
     });

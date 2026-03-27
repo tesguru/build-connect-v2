@@ -1,5 +1,5 @@
 import { DollarCircle, HeartIcon, LocationIcon, MarkCircle } from '@/constants/icon';
-import React from 'react';
+import React, { useState } from 'react';
 import { Image, ImageSourcePropType, Text, TouchableOpacity, View } from 'react-native';
 import ProgressBar from '../Miscallaneous/ProgressBar';
 import StatusBar from '../Miscallaneous/StatusBar';
@@ -51,7 +51,6 @@ interface ProjectsComponentProps {
   locationIcon?: ImageSourcePropType;
   clockIcon?: ImageSourcePropType;
   userIcon?: ImageSourcePropType;
-  // ✅ status from statusDetails.value
   status?: string;
 }
 
@@ -64,10 +63,13 @@ const ProjectsWithMilestone: React.FC<ProjectsComponentProps> = ({
   budget,
   role,
   progress,
+  description,
   onPress,
   heartIcon = HeartIcon,
   locationIcon = LocationIcon,
 }) => {
+  const [expanded, setExpanded] = useState(false)
+
   return (
     <TouchableOpacity className="mt-2 p-4 bg-white rounded-xl" onPress={onPress}>
       <View>
@@ -76,6 +78,36 @@ const ProjectsWithMilestone: React.FC<ProjectsComponentProps> = ({
         <View className="flex-row justify-between items-start pb-4">
           <Text className="text-xl font-worksanssemibold flex-1 pr-2">{projectName}</Text>
           <StatusBadge status={status} />
+        </View>
+
+        {/* ── Description with expand/collapse ── */}
+        <View>
+          <Text
+            className="font-inter text-gray-600 leading-5"
+            numberOfLines={expanded ? undefined : 2}
+          >
+            {description}
+          </Text>
+          {!expanded && (description?.length ?? 0) > 100 && (
+            <TouchableOpacity
+              onPress={(e) => {
+                e.stopPropagation()
+                setExpanded(true)
+              }}
+            >
+              <Text className="text-blue-600 font-inter mt-0.5">...more</Text>
+            </TouchableOpacity>
+          )}
+          {expanded && (
+            <TouchableOpacity
+              onPress={(e) => {
+                e.stopPropagation()
+                setExpanded(false)
+              }}
+            >
+              <Text className="text-blue-600 font-inter mt-0.5">Show less</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         <ProgressBar progress={progress} />

@@ -160,7 +160,7 @@ export interface PaymentInstructionsApiResponse {
 
 export type FundingStatus =
   | 'pending_verification'
-  | 'verified'
+  | 'successful'
   | 'rejected'
   | 'cancelled'
 

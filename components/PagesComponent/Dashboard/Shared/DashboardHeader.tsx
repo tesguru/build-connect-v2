@@ -1,8 +1,7 @@
-import React from "react";
-import { View, Text, Image, TouchableOpacity } from "react-native";
-import { notification } from "@/constants/icon";
 import { AvatarImage } from "@/constants/image";
 import { ChevronDown } from 'lucide-react-native';
+import React from "react";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 interface DashboardHeaderProps {
   userName?: string;
@@ -36,13 +35,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             )}
           </View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={onNotificationPress}>
+        {/* <TouchableOpacity onPress={onNotificationPress}>
           <Image
             resizeMode="contain"
             source={notification}
             className="w-6 h-6"
           />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </View>
   );

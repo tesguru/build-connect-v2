@@ -5,6 +5,7 @@ import Toast from "react-native-toast-message";
 
 import { useState } from "react";
 import { escrowService } from "../services/escrow/escrowservice";
+import { handleApiError } from "../utils/handleapierror";
 
 
 export type { Project, ProjectsResponse } from "../services/projects/projectTypes";
@@ -13,7 +14,7 @@ export const useEscrow = () => {
   const [submitBidSuccess, setSubmitBidSuccess] = useState(false);
 
   
-//QUERY
+
   const getWalletFunding = ( params: object) => {
   return useQuery({
     queryKey: ['getAllWalletFunding',  params], 
@@ -21,7 +22,7 @@ export const useEscrow = () => {
   });
 };
 
-  //MUTATIONS
+
   const createPaymentInstructionsMutation = useMutation({
     mutationFn: escrowService.paymentInstructions,
     onSuccess: (res: any) => {
@@ -39,11 +40,7 @@ export const useEscrow = () => {
       }
     },
     onError: (error: any) => {
-      Toast.show({
-        type: "error",
-        text1: "Payment Instructions Failed",
-        text2: error?.response?.data?.message || error instanceof Error ? error.message : "Failed to create project",
-      });
+        handleApiError(error, "Failed to create payment instructions")
     },
   });
 
@@ -64,11 +61,7 @@ export const useEscrow = () => {
       }
     },
     onError: (error: any) => {
-      Toast.show({
-        type: "error",
-        text1: "Wallet Funding failed",
-        text2: error?.response?.data?.message || error instanceof Error ? error.message : "Failed to create project",
-      });
+         handleApiError(error, "Failed to create wallet funding")
     },
   });
     const createEscrowAccount = useMutation({
@@ -88,11 +81,7 @@ export const useEscrow = () => {
       }
     },
     onError: (error: any) => {
-      Toast.show({
-        type: "error",
-        text1: "Escrow Account failed",
-        text2: error?.response?.data?.message || error instanceof Error ? error.message : "Failed to create project",
-      });
+        handleApiError(error, "Failed to create escrow account")
     },
   });
 
@@ -113,11 +102,7 @@ export const useEscrow = () => {
       }
     },
     onError: (error: any) => {
-      Toast.show({
-        type: "error",
-        text1: "Escrow Account failed",
-        text2: error?.response?.data?.message || error instanceof Error ? error.message : "Failed to create project",
-      });
+        handleApiError(error, "Failed to create payout account")
     },
   });
 
@@ -135,6 +120,23 @@ export const useEscrow = () => {
       });
   };
 
+
+  const getSinglePaymentInstruction = (id :any) => {
+      return useQuery({
+        queryKey: ['getSinglePaymentInstructions', id], 
+        queryFn: () => escrowService.getSinglePaymentInstructions(id),
+      });
+    };
+
+    const getSingleWalletFunding = (id :any) => {
+      return useQuery({
+        queryKey: ['getSinglePaymentInstructions', id], 
+        queryFn: () => escrowService.getSingleWalletFunding(id),
+      });
+    };
+
+
+
   const getPayoutAccount = () => {
       return useQuery({
         queryKey: ['getPayoutAccount', ],
@@ -150,6 +152,8 @@ export const useEscrow = () => {
   getEscrowAccount,
   getPaymentInstructions,
   createPayoutAccount,
-  getPayoutAccount
+  getPayoutAccount,
+  getSinglePaymentInstruction,
+  getSingleWalletFunding
   };
 };

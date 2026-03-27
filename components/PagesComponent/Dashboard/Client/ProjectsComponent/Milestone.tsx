@@ -96,7 +96,23 @@ const Milestone = ({ projectId }: { projectId: string }) => {
     };
     return map[status] || status;
   };
-
+const getStatusStyle = (status: string) => {
+    switch (status?.toLowerCase()) {
+        case 'completed':
+            return { bg: 'bg-green-100', text: 'text-green-700' };
+        case 'pending':
+            return { bg: 'bg-yellow-100', text: 'text-yellow-700' };
+        case 'in_progress':
+        case 'in progress':
+            return { bg: 'bg-blue-100', text: 'text-blue-700' };
+        case 'overdue':
+            return { bg: 'bg-red-100', text: 'text-red-700' };
+        case 'cancelled':
+            return { bg: 'bg-gray-100', text: 'text-gray-500' };
+        default:
+            return { bg: 'bg-gray-100', text: 'text-gray-600' };
+    }
+};
 
   if (isLoading) {
   return (
@@ -175,11 +191,11 @@ const Milestone = ({ projectId }: { projectId: string }) => {
                 dueDate={formatDate(milestone.completionDate)}
                 budget={`₦${milestone.amount?.toLocaleString() || '0'}`}
                 progress={getProgress(milestone.status)}
-                status={getStatusLabel(milestone.status)}
+                status={getStatusLabel(milestone.statusDetails.value)}
                 onPress={() =>
                   router.push({
                     pathname: '/milestone/milestonedetails',
-                    params: { milestoneId: milestone.id, projectId }
+                    params: { milestoneId: milestone.id, projectId, milestoneName:milestone.name}
                   })
                   }
               />

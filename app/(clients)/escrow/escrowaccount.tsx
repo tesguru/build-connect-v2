@@ -1,4 +1,3 @@
-import PaymentLogCard from '@/components/Cards/PaymentLogs';
 import AppLayout from '@/components/Layouts/AppLayout';
 import QuickAccessCard from '@/components/PagesComponent/Dashboard/Shared/QuickAccessCard';
 import { PlusIcon, SupportIcon } from '@/constants/icon';
@@ -24,14 +23,12 @@ const EscrowAccount = () => {
   const { data: apiResponse, isLoading } = getWalletFunding({ page: 1, limit: 100 });
   const { data: accountDetailsResponse, isLoading: accountDetailsLoading } = getEscrowAccount();
 
-  const fundingList = apiResponse?.data?.data?.fundings ||
-    apiResponse?.data?.fundings ||
-    [];
+
 
   const accountDetails = accountDetailsResponse?.data?.data || null;
   const wallet = accountDetails?.wallet || null;
 
-  const visibleList = showAll ? fundingList : fundingList.slice(0, 5);
+
 
   const formatBalance = (amount) => {
     if (amount == null) return '0.00';
@@ -127,47 +124,6 @@ const EscrowAccount = () => {
               <Text className="text-sm font-medium text-gray-700 flex-1">Payments Logs</Text>
             </TouchableOpacity>
           </View>
-        </View>
-
-   
-        <View className="p-4">
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="font-interbold text-xl text-gray-900">Payment Logs</Text>
-            {fundingList.length > 5 && (
-              <TouchableOpacity onPress={() => setShowAll(!showAll)}>
-                <Text className="font-inter text-blue-500 text-sm">
-                  {showAll ? "Show less" : "View more"}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {isLoading ? (
-            <View className="justify-center items-center py-10">
-              <ActivityIndicator size="large" color="#2463EB" />
-            </View>
-          ) : fundingList.length === 0 ? (
-            <View className="bg-white rounded-xl p-6 items-center border border-gray-100">
-              <Ionicons name="receipt-outline" size={40} color="#9ca3af" />
-              <Text className="font-intersemibold text-gray-500 mt-3">No payments logged yet</Text>
-              <Text className="font-inter text-gray-400 text-xs mt-1 text-center">
-                Tap "Log Payment" above to record your first payment
-              </Text>
-            </View>
-          ) : (
-            visibleList.map((funding) => (
-              <PaymentLogCard
-                key={funding.id}
-                amount={funding.amount}
-                currency={funding.currency}
-                paymentDate={funding.paymentDate}
-                reference={funding.reference}
-                note={funding.note}
-                status={funding.status}
-                createdAt={funding.createdAt}
-              />
-            ))
-          )}
         </View>
       </ScrollView>
     </AppLayout>

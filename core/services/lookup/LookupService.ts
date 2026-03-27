@@ -24,6 +24,12 @@ export const LookupService = {
   getProjectTypes: () =>
     axiosInstance.get<LookupResponse>(ENDPOINTS.LOOKUP.PROJECT_TYPES),
 
+    getPropertyTypes: () =>
+    axiosInstance.get<LookupResponse>(ENDPOINTS.LOOKUP.PROPERTY_TYPES),
+
+     getEmploymentStatus: () =>
+    axiosInstance.get<LookupResponse>(ENDPOINTS.LOOKUP.EMPLOYMENT_STATUS),
+
   getTimelines: () =>
     axiosInstance.get<LookupResponse>(ENDPOINTS.LOOKUP.TIMELINES),
 

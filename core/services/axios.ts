@@ -1,16 +1,17 @@
 // axios.ts
+import { useAuthStore } from "@/store/Authstore";
 import Axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import * as SecureStore from "expo-secure-store";
-import { AuthService } from "./auth/AuthService";
 import Toast from "react-native-toast-message";
-import { useAuthStore } from "@/store/Authstore";
+import { AuthService } from "./auth/AuthService";
 
 const axiosInstance: AxiosInstance = Axios.create({
   baseURL: "https://api-buildconnect.ivantage.africa/v1",
   timeout: 60000,
 });
 
-// Flag to prevent multiple simultaneous refresh attempts
+
+
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (value?: any) => void;

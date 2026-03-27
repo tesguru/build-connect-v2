@@ -20,6 +20,9 @@ export interface ConfirmUploadData {
 export const UploadService = {
   prepareUpload: (data: PrepareUploadData) =>
     axiosInstance.post(ENDPOINTS.UPLOAD.PREPARE_UPLOAD, data),
+
+  UploadFile: (data: PrepareUploadData) =>
+    axiosInstance.post(ENDPOINTS.UPLOAD.UPLOAD, data),
   
   confirmUpload: (fileId: string, data: ConfirmUploadData) =>
     axiosInstance.put(ENDPOINTS.UPLOAD.CONFIRM_UPLOAD(fileId), data),

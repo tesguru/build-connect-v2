@@ -1,7 +1,5 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
-import ProgressBar from '../Miscallaneous/ProgressBar';
-import StatusBar from '../Miscallaneous/StatusBar';
 
 interface MilestoneProps {
   milestoneName: string;
@@ -12,31 +10,53 @@ interface MilestoneProps {
   status?: string;
 }
 
+const getStatusStyle = (status: string) => {
+  switch (status?.toLowerCase()) {
+    case 'completed':
+      return { bg: 'bg-green-100', text: 'text-green-700' };
+    case 'pending':
+      return { bg: 'bg-yellow-100', text: 'text-yellow-700' };
+    case 'in_progress':
+    case 'in progress':
+      return { bg: 'bg-blue-100', text: 'text-blue-700' };
+    case 'overdue':
+      return { bg: 'bg-red-100', text: 'text-red-700' };
+    case 'cancelled':
+      return { bg: 'bg-gray-100', text: 'text-gray-500' };
+    default:
+      return { bg: 'bg-gray-100', text: 'text-gray-600' };
+  }
+};
+
 const Milestone: React.FC<MilestoneProps> = ({
   milestoneName,
   dueDate,
   budget,
   progress,
   onPress,
-  status = "Pending"
+  status = 'Pending',
 }) => {
+  const statusStyle = getStatusStyle(status);
+
   return (
-    <TouchableOpacity 
-      className="m-4 p-4 bg-white rounded-xl " 
+    <TouchableOpacity
+      className="m-4 p-4 bg-white rounded-xl"
       onPress={onPress}
     >
       {/* Header with title and status */}
       <View className="flex-row justify-between items-start mb-3">
-        <Text className="text-xl font-worksanssemibold text-gray-900">
+        <Text className="text-xl font-worksanssemibold text-gray-900 flex-1 mr-2">
           {milestoneName}
         </Text>
-        <StatusBar title={status} />
+        <View className={`px-3 py-1 rounded-full ${statusStyle.bg}`}>
+          <Text className={`text-xs font-medium ${statusStyle.text}`}>
+            {status}
+          </Text>
+        </View>
       </View>
 
       {/* Due date */}
-      <Text className="text-gray-500 font-inter mb-3">
-        Due: {dueDate}
-      </Text>
+      <Text className="text-gray-500 font-inter mb-3">Due: {dueDate}</Text>
 
       {/* Payment amount */}
       <View className="flex-row items-baseline mb-4">
@@ -45,8 +65,6 @@ const Milestone: React.FC<MilestoneProps> = ({
           {budget}
         </Text>
       </View>
-
-      <ProgressBar progress={progress} />
     </TouchableOpacity>
   );
 };

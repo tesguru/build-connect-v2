@@ -38,14 +38,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({
     const { user } = useAuthStore();
    user?.role === "client";
 
-  const handleHome = () => {
-     if(user?.role === "client"){
- router.push('/(clients)/home/home');
-     }
-     else{
-      router.push('/(builders)/home/home')
-     }
-  };
+ const handleHome = () => {
+  if (user?.role === "client") {
+    router.replace('/(tab)');        
+  } else {
+    router.replace('/(tab)');        
+  }
+};
 
   return (
     <View className="flex-1">

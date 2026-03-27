@@ -27,7 +27,7 @@ const PaymentInstructionsScreen = () => {
   const { data: apiResponse, isLoading, error } = getPaymentInstructions(queryParams)
 
   /* ── Normalise response: data.instructions ── */
-  const instructionsList = apiResponse?.data?.data?.data?.instructions ?? []
+  const instructionsList = apiResponse?.data?.data?.instructions ?? []
 
   /* ── Build filter tabs with live counts ── */
   const statusFilters = useMemo(() => {
@@ -93,7 +93,7 @@ const PaymentInstructionsScreen = () => {
 
   const handlePaymentPress = (instructionId: string) => {
     router.push({
-      pathname: '/payments/paymentdetails',
+      pathname: '/escrow/paymentdetails',
       params: { instructionId },
     })
   }

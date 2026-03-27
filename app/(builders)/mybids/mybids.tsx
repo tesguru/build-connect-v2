@@ -1,7 +1,5 @@
 import { BidsCard } from '@/components/Cards/BidsCard'
-import AppLayout from '@/components/Layouts/AppLayout'
 import EmptyScreenComponent from '@/components/Miscallaneous/EmptyScreenComponent'
-import { bidImage } from '@/constants/image'
 import { useBids } from '@/core/hooks/UseBids'
 import { Project, ProjectQueryParams } from '@/core/types/api'
 import { useRouter } from 'expo-router'
@@ -106,7 +104,7 @@ const MyBids = () => {
   };
 
   return (
-    <AppLayout screenName="My Bids" fullHeightContent>
+  
       <View className="flex-1">
         <View className="mt-8 flex-1">
 
@@ -171,8 +169,9 @@ const MyBids = () => {
               contentContainerStyle={{ paddingBottom: 20 }}
             >
               {filteredProjects.map((project) => (
-                <View key={project.id} className="mb-4 px-4 py-6">
-                 <BidsCard image={bidImage}  projectName={project?.project?.title} projectId={project.id} amount={project.bidAmount} bidStatus={project.status} contractId={project.contractId} bidId={project.id}  />
+                <View key={project.id} className=" px-4 py-3">
+                
+                 <BidsCard   projectName={project?.project?.title} projectId={project?.project?.id} amount={project.bidAmount} bidStatus={project.status} contractId={project.contractId} bidId={project.id}  />
                 </View>
               ))}
 
@@ -200,7 +199,7 @@ const MyBids = () => {
           )}
         </View>
       </View>
-    </AppLayout>
+  
   );
 };
 

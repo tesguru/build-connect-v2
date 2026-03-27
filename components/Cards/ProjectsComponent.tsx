@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, ImageSourcePropType } from 'react-native';
 import { ClockIcon, LocationIcon, UserIcon } from '@/constants/icon';
+import React from 'react';
+import { Image, ImageSourcePropType, Text, TouchableOpacity, View } from 'react-native';
 
 interface ProjectsComponentProps {
   postedTime: string;
@@ -67,7 +67,7 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
       </View>
 
       <View>
-        <Text className="text-2xl font-worksanssemibold text-gray-800 mb-2">
+        <Text className="text-xl font-worksanssemibold text-gray-800 mb-2">
           {projectName}
         </Text>
 

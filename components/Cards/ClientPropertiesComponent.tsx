@@ -1,8 +1,8 @@
-import { BathroomIcon, BedrooomIcon, LocationIcon, SquareMeter } from '@/constants/icon';
+import { BathroomIcon, BedrooomIcon, LocationIcon } from '@/constants/icon';
 import { SampleImage } from '@/constants/image';
 import type { MarketplaceProperty } from '@/core/types/api';
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 
 const NOT_AVAILABLE = 'Not available';
 
@@ -21,28 +21,36 @@ function getPropertyTypeLabel(propertyType: MarketplaceProperty['propertyType'])
 
 interface ClientPropertiesComponentProps {
   property: MarketplaceProperty;
+  onPress?: () => void;
 }
 
-export default function ClientPropertiesComponent({ property }: ClientPropertiesComponentProps) {
+export default function ClientPropertiesComponent({
+  property,
+  onPress,
+}: ClientPropertiesComponentProps) {
   const [isFavorite, setIsFavorite] = useState(false);
 
   const title = property?.title ?? NOT_AVAILABLE;
-  const price = formatPrice(property?.price ?? property?.amount);
+  const price = formatPrice(property?.price);
   const location = property?.location ?? NOT_AVAILABLE;
   const propertyType = getPropertyTypeLabel(property?.propertyType);
-  const bedroomsText =
-    property?.bedrooms != null ? `${property.bedrooms} beds` : NOT_AVAILABLE;
-  const bathroomsText =
-    property?.bathrooms != null ? `${property.bathrooms} baths` : NOT_AVAILABLE;
-  const areaText =
-    property?.area != null ? `${String(property.area)} sqm` : NOT_AVAILABLE;
-  const imageUri =
-    property?.image ??
-    (Array.isArray(property?.images) && property.images[0] ? property.images[0] : null);
+  const bedroomsText = property?.bedrooms != null ? `${property.bedrooms} beds` : NOT_AVAILABLE;
+  const bathroomsText = property?.bathrooms != null ? `${property.bathrooms} baths` : NOT_AVAILABLE;
+
+ 
+  const imageUri = Array.isArray(property?.media) && property.media[0]?.publicUrl
+    ? property.media[0].publicUrl
+    : null;
 
   return (
-    <View className="px-4 mb-4">
+    <TouchableOpacity
+      className="px-4 mb-4"
+      onPress={onPress}
+      activeOpacity={0.95}
+    >
       <View className="bg-white p-2 rounded-3xl overflow-hidden shadow-lg w-full">
+
+        {/* Property image */}
         {imageUri ? (
           <Image
             source={{ uri: imageUri }}
@@ -59,38 +67,33 @@ export default function ClientPropertiesComponent({ property }: ClientProperties
           />
         )}
 
+        {/* Property type badge */}
         <View className="absolute top-6 left-6 bg-gray-900 px-5 py-2.5 rounded-xl">
           <Text className="text-white font-inter text-base font-semibold tracking-wide">
             {propertyType}
           </Text>
         </View>
 
+        {/* Favourite button */}
         <TouchableOpacity
           className="absolute top-5 right-6"
           onPress={() => setIsFavorite(!isFavorite)}
           activeOpacity={0.7}
         >
-          <View
-            className={`w-12 h-12 rounded-full justify-center items-center shadow-md ${
-              isFavorite ? 'bg-red-50' : 'bg-white/95'
-            }`}
-          >
-            <Text className="text-3xl">
-              {isFavorite ? '❤️' : '🤍'}
-            </Text>
-          </View>
+          
         </TouchableOpacity>
 
         <View className="pt-4 p-2">
-          <View className="flex-row justify-between ">
+
+        
+          <View className="flex-row justify-between">
             <Text className="font-interbold text-xl flex-1" numberOfLines={1}>
               {title}
             </Text>
-            <Text className="font-interbold text-xl ml-2">
-              {price}
-            </Text>
+            <Text className="font-interbold text-xl ml-2">{price}</Text>
           </View>
 
+       
           <View className="flex-row gap-2 py-4 items-start">
             <Image
               source={LocationIcon}
@@ -102,22 +105,20 @@ export default function ClientPropertiesComponent({ property }: ClientProperties
             </Text>
           </View>
 
-          <View className="flex-row justify-between">
-            <View className="bg-gray-200 gap-2 p-3 w-20 rounded-3xl flex-row items-end ">
+          
+          <View className="flex-row gap-3">
+            <View className="bg-gray-200 gap-2 p-3 rounded-3xl flex-row items-center">
               <Image className="w-4 h-4" source={BedrooomIcon} />
               <Text className="text-xs font-inter">{bedroomsText}</Text>
             </View>
-            <View className="bg-gray-200 gap-2 p-3 w-20 rounded-3xl flex-row items-end ">
+            <View className="bg-gray-200 gap-2 p-3 rounded-3xl flex-row items-center">
               <Image className="w-4 h-4" source={BathroomIcon} />
               <Text className="text-xs font-inter">{bathroomsText}</Text>
             </View>
-            <View className="bg-gray-200 gap-2 p-3 w-22 rounded-3xl flex-row items-end ">
-              <Image className="w-4 h-4" source={SquareMeter} />
-              <Text className="text-xs font-inter">{areaText}</Text>
-            </View>
           </View>
+
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }

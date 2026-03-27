@@ -1,18 +1,19 @@
-import { View, Text } from "react-native";
+import DropdownField from "@/components/Forms/DropDown";
+import FileUploadComponent from "@/components/Forms/FileUploadComponent";
+import MultiSelectDropdownField from "@/components/Forms/MultiSelectForm";
+import TimePicker from "@/components/Forms/TimePicker";
+import { camera } from "@/constants/icon";
+import { LookupService } from "@/core/services/lookup/LookupService";
+import { daysOfWeek } from "@/core/utils/data";
+import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { Controller, useFormContext, useFormState } from "react-hook-form";
-import FileUploadComponent from "@/components/Forms/FileUploadComponent";
-import { camera } from "@/constants/icon";
-import DropdownField from "@/components/Forms/DropDown";
-import { daysOfWeek, timeSlots } from "@/core/utils/data";
-import { LookupService } from "@/core/services/lookup/LookupService";
-import { useQuery } from "@tanstack/react-query";
-import MultiSelectDropdownField from "@/components/Forms/MultiSelectForm";
+import { Text, View } from "react-native";
 
 const Portfolio = () => {
   const { control } = useFormContext();
   const { errors } = useFormState({ control });
-  
+
   const [projectPhotoError, setProjectPhotoError] = useState<string | null>(null);
 
   const { data: availabilityOptions, isLoading: isLoadingBudgetRanges } = useQuery({
@@ -32,7 +33,7 @@ const Portfolio = () => {
       <Text className="font-inter text-base pt-2 text-md">
         Add photo of your best projects here
       </Text>
-      
+
       <View>
         <FileUploadComponent
           control={control}
@@ -50,26 +51,41 @@ const Portfolio = () => {
       <View className="my-4">
         <Text className="text-xl font-interbold">Working hours</Text>
       </View>
-      
+
       <View className="flex-row gap-6 pt-4">
+        {/* Start Time */}
         <View className="flex-1">
-          <DropdownField
-            name="startTime"
+          <Controller
             control={control}
-            label="Start time"
-            placeholder="Select start time"
-            data={timeSlots}
-            error={errors.startTime?.message as string}
+            name="startTime"
+            render={({ field }) => (
+              <TimePicker
+                label="Start time"
+                placeholder="e.g 08:00"
+                value={field.value}
+                onChange={field.onChange}
+                hasError={!!errors.startTime}
+                errorMessage={errors.startTime?.message as string}
+              />
+            )}
           />
         </View>
+
+        {/* End Time */}
         <View className="flex-1">
-          <DropdownField
-            name="endTime"
+          <Controller
             control={control}
-            label="End time"
-            placeholder="Select end time"
-            data={timeSlots}
-            error={errors.endTime?.message as string}
+            name="endTime"
+            render={({ field }) => (
+              <TimePicker
+                label="End time"
+                placeholder="e.g 17:00"
+                value={field.value}
+                onChange={field.onChange}
+                hasError={!!errors.endTime}
+                errorMessage={errors.endTime?.message as string}
+              />
+            )}
           />
         </View>
       </View>
@@ -103,4 +119,4 @@ const Portfolio = () => {
   );
 };
 
-export default Portfolio;
+export default Portfolio;  

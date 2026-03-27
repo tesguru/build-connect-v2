@@ -9,6 +9,7 @@ import { Controller, useForm } from "react-hook-form";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { z } from "zod";
 
+
 const changePasswordSchema = z.object({
   currentPassword:    z.string().min(1, "Current password is required"),
   newPassword:        z.string().min(8, "Password must be at least 8 characters"),
@@ -62,7 +63,7 @@ const ChangePasswordScreen = () => {
       >
         <View className="px-4 pt-6">
 
-          {/* Current Password */}
+          
           <Controller
             control={control}
             name="currentPassword"
@@ -82,7 +83,7 @@ const ChangePasswordScreen = () => {
             </Text>
           )}
 
-          {/* New Password */}
+         
           <Controller
             control={control}
             name="newPassword"
@@ -102,7 +103,6 @@ const ChangePasswordScreen = () => {
             </Text>
           )}
 
-          {/* ✅ Fixed: name was "confirmPassword", must be "confirmNewPassword" */}
           <Controller
             control={control}
             name="confirmNewPassword"
@@ -116,7 +116,7 @@ const ChangePasswordScreen = () => {
               />
             )}
           />
-          {/* ✅ Fixed: was errors.confirmPassword (undefined), now errors.confirmNewPassword */}
+
           {errors.confirmNewPassword && (
             <Text className="text-red-500 text-sm mt-1 font-inter">
               {errors.confirmNewPassword.message}
@@ -124,7 +124,6 @@ const ChangePasswordScreen = () => {
           )}
 
           <View className="mt-8 gap-4">
-            {/* ✅ Fixed: added loading prop */}
             <GradientButton
               loading={changePasswordMutation.isPending}
               title="Update Password"

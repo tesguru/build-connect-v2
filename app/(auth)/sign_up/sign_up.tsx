@@ -1,27 +1,23 @@
-import { View, Text, Image, TouchableOpacity } from "react-native";
-import React, { useState } from "react";
-import {
-  AppleImage,
-  BuildConnectImage,
-  GoggleImage,
-} from "@/constants/image";
-import { arrowleft } from "@/constants/icon";
+import GradientButton from "@/components/Buttons/GradientButton";
+import TermsAgreement from "@/components/Forms/CheckBox";
 import FormInput from "@/components/Forms/Formnput";
 import PasswordInput from "@/components/Forms/PasswordInput";
-import GradientButton from "@/components/Buttons/GradientButton";
-import DividerWithText from "@/components/Miscallaneous/Divider";
-import ButtonWithIcon from "@/components/Buttons/ButtonWithIcon";
 import KeyboardAvoidingLayout from "@/components/Layouts/KeyboardAvoidLayout";
-import TermsAgreement from "@/components/Forms/CheckBox";
 import AuthLink from "@/components/Miscallaneous/AuthLink";
+import { arrowleft } from "@/constants/icon";
+import {
+  BuildConnectImage
+} from "@/constants/image";
+import React, { useState } from "react";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
-import { useAuth } from "@/core/hooks/useAuth";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import colors from "@/constants/colors";
 import PhoneFormInput from "@/components/Forms/PhoneNumberInput";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import colors from "@/constants/colors";
+import { useAuth } from "@/core/hooks/useAuth";
 import { SignUpInput, userSchema } from "@/core/schemas/authschema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { Controller, useForm } from "react-hook-form";
 
 const SignUpScreen = () => {
   // Get params from Expo Router
@@ -76,7 +72,7 @@ const SignUpScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingLayout>
+    <KeyboardAvoidingLayout androidExtraPadding={60}>
       <View className="px-4 flex-1">
         <TouchableOpacity className="pt-10" onPress={handleBack}>
           <Image
@@ -99,28 +95,21 @@ const SignUpScreen = () => {
             {selectedRole === "client" ? "Sign up to hire builder" : "Sign up to find work"}
           </Text>
 
-          <View className="pb-4">
+          {/* <View className="pb-4">
             <ButtonWithIcon
               icon={AppleImage}
               textColor="black"
               title="Continue With Apple"
               onPress={() => {}}
             />
-          </View>
+          </View> */}
 
-          <View>
-            <ButtonWithIcon
-              icon={GoggleImage}
-              textColor="black"
-              title="Continue With Google"
-              onPress={() => {}}
-            />
-          </View>
+          
         </View>
 
-        <View className="mt-8 mb-4">
+        {/* <View className="mt-8 mb-4">
           <DividerWithText text="or" />
-        </View>
+        </View> */}
 
         <View className="space-y-4">
           <View className="flex-row gap-4">

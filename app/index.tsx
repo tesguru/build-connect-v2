@@ -1,11 +1,10 @@
-import { useEffect } from 'react';
-import { View, Image, Text } from 'react-native';
-import { useRouter } from 'expo-router';
-import { SplashImage } from '@/constants/image';
 import colors from '@/constants/colors';
+import { SplashImage } from '@/constants/image';
 import strings from '@/constants/strings';
-import React from 'react';
 import { useAuthStore } from '@/store/Authstore';
+import { useRouter } from 'expo-router';
+import React, { useEffect } from 'react';
+import { Image, Text, View } from 'react-native';
 
 export default function Index() {
   const router = useRouter();

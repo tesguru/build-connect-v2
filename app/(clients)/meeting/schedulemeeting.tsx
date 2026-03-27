@@ -3,6 +3,7 @@ import { FormDatePicker } from "@/components/Forms/DatePicker";
 import DropdownField from "@/components/Forms/DropDown";
 import FormInput from "@/components/Forms/Formnput";
 import { FormTextArea } from "@/components/Forms/TextArea";
+import TimePicker from "@/components/Forms/TimePicker";
 import AppLayout from "@/components/Layouts/AppLayout";
 import SuccessScreen from "@/components/Notifications/SucessScreen";
 import colors from "@/constants/colors";
@@ -33,21 +34,21 @@ type MeetingPlatform = {
 
 const getPlatformMeta = (label: string): { Icon: React.ElementType; isVirtual: boolean } => {
   const lower = label.toLowerCase();
-  if (lower.includes("zoom"))     return { Icon: Video,  isVirtual: true  };
-  if (lower.includes("meet"))     return { Icon: Video,  isVirtual: true  };
-  if (lower.includes("teams"))    return { Icon: Laptop, isVirtual: true  };
-  if (lower.includes("phone"))    return { Icon: Phone,  isVirtual: true  };
-  if (lower.includes("physical")) return { Icon: Users,  isVirtual: false };
+  if (lower.includes("zoom")) return { Icon: Video, isVirtual: true };
+  if (lower.includes("meet")) return { Icon: Video, isVirtual: true };
+  if (lower.includes("teams")) return { Icon: Laptop, isVirtual: true };
+  if (lower.includes("phone")) return { Icon: Phone, isVirtual: true };
+  if (lower.includes("physical")) return { Icon: Users, isVirtual: false };
   return { Icon: Video, isVirtual: true };
 };
 
 const getMeetingLinkMeta = (label: string): { label: string; placeholder: string } => {
   const lower = label.toLowerCase();
-  if (lower.includes("zoom"))  return { label: "Zoom Meeting Link",  placeholder: "https://zoom.us/j/..."           };
-  if (lower.includes("meet"))  return { label: "Google Meet Link",   placeholder: "https://meet.google.com/..."     };
+  if (lower.includes("zoom")) return { label: "Zoom Meeting Link", placeholder: "https://zoom.us/j/..." };
+  if (lower.includes("meet")) return { label: "Google Meet Link", placeholder: "https://meet.google.com/..." };
   if (lower.includes("teams")) return { label: "Teams Meeting Link", placeholder: "https://teams.microsoft.com/..." };
-  if (lower.includes("phone")) return { label: "Phone Number",       placeholder: "+234 800 000 0000"               };
-  return                              { label: "Meeting Link",        placeholder: "Enter link"                      };
+  if (lower.includes("phone")) return { label: "Phone Number", placeholder: "+234 800 000 0000" };
+  return { label: "Meeting Link", placeholder: "Enter link" };
 };
 
 const formatDate = (dateString: string): string => {
@@ -72,16 +73,14 @@ const PlatformButton = React.memo(({
     activeOpacity={0.7}
     onPress={onPress}
     // ✅ flex-1 so each button takes equal width in its row
-    className={`flex-1 flex-col items-center justify-center gap-1.5 px-2 py-3.5 rounded-xl border-2 ${
-      selected ? "border-blue-600 bg-blue-50" : "border-gray-200 bg-white"
-    }`}
+    className={`flex-1 flex-col items-center justify-center gap-1.5 px-2 py-3.5 rounded-xl border-2 ${selected ? "border-blue-600 bg-blue-50" : "border-gray-200 bg-white"
+      }`}
   >
     <Icon size={20} color={selected ? "#2563eb" : "#9ca3af"} />
     <Text
       numberOfLines={1}
-      className={`font-inter text-[11px] text-center font-medium ${
-        selected ? "text-blue-600" : "text-gray-500"
-      }`}
+      className={`font-inter text-[11px] text-center font-medium ${selected ? "text-blue-600" : "text-gray-500"
+        }`}
     >
       {label}
     </Text>
@@ -144,39 +143,39 @@ const ScheduleMeetingScreen = () => {
   const linkMeta = useMemo(() => getMeetingLinkMeta(selectedPlatformLabel), [selectedPlatformLabel]);
 
   const handlePlatformSelect = useCallback((platformId: string) => {
-    setValue("platform",    platformId, { shouldValidate: true, shouldDirty: true });
+    setValue("platform", platformId, { shouldValidate: true, shouldDirty: true });
     setValue("meetingLink", "");
-    setValue("location",    "");
+    setValue("location", "");
   }, [setValue]);
 
 
-  const onSubmit =  (data: ScheduleMeetingInput) => {
-  scheduleMeetingMutation.mutate({
-    projectId,
-    milestoneId: data.milestoneId,
-    title:       data.title,
-    attendees:   data.attendees,
-    date:        formatDate(data.date),
-    time:        data.time,
-    platform:    data.platform,
-    agenda:      data.agenda ?? "",
-    ...(isVirtual  && data.meetingLink && { meetingLink: data.meetingLink }),
-    ...(isPhysical && data.location    && { location:    data.location    }),
-  });
-};
+  const onSubmit = (data: ScheduleMeetingInput) => {
+    scheduleMeetingMutation.mutate({
+      projectId,
+      milestoneId: data.milestoneId,
+      title: data.title,
+      attendees: data.attendees,
+      date: formatDate(data.date),
+      time: data.time,
+      platform: data.platform,
+      agenda: data.agenda ?? "",
+      ...(isVirtual && data.meetingLink && { meetingLink: data.meetingLink }),
+      ...(isPhysical && data.location && { location: data.location }),
+    });
+  };
 
 
   if (scheduleMeetingSuccess) {
-  return (  
-    <SuccessScreen
-      title="Meeting Scheduled!"
-      message="Your meeting has been successfully scheduled."
-      buttonTitle="View Meeting"
-      navigateTo="projects/clientprojectdetails"
-      params={{ projectId: projectId, initialTab: 'Meeting' }}
-    />
-  );
-}
+    return (
+      <SuccessScreen
+        title="Meeting Scheduled!"
+        message="Your meeting has been successfully scheduled."
+        buttonTitle="View Meeting"
+        navigateTo="projects/clientprojectdetails"
+        params={{ projectId: projectId, initialTab: 'Meeting' }}
+      />
+    );
+  }
 
 
   return (
@@ -239,9 +238,9 @@ const ScheduleMeetingScreen = () => {
             {errors.attendees && <Text className="font-inter pt-1 text-red-500 text-sm">{errors.attendees.message}</Text>}
           </View>
 
-          {/* Date & Time */}
+      
           <View className="flex-row gap-4">
-            <View className="flex-1 pt-4">
+            <View className="flex-1 pt-2">
               <Controller
                 control={control}
                 name="date"
@@ -261,21 +260,21 @@ const ScheduleMeetingScreen = () => {
                 )}
               />
             </View>
-            <View className="flex-1 pb-4">
+            <View className="flex-1 pt-6">
               <Controller
                 control={control}
                 name="time"
                 render={({ field }) => (
-                  <FormInput
+                  <TimePicker
                     label="Time"
                     placeholder="e.g 10:00"
                     value={field.value}
+                    onChange={field.onChange}
                     hasError={!!errors.time}
-                    onChangeText={field.onChange}
+                    errorMessage={errors.time?.message}
                   />
                 )}
               />
-              {errors.time && <Text className="font-inter pt-1 text-red-500 text-sm">{errors.time.message}</Text>}
             </View>
           </View>
 
@@ -306,7 +305,7 @@ const ScheduleMeetingScreen = () => {
             {errors.platform && <Text className="font-inter pt-2 text-red-500 text-sm">{errors.platform.message}</Text>}
           </View>
 
-          {/* Meeting Link (virtual) */}
+
           {isVirtual && !!selectedPlatformId && (
             <View>
               <Controller

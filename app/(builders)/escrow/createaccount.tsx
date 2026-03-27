@@ -79,7 +79,7 @@ const CreateAccount = () => {
               name="bankName"
               render={({ field }) => (
                 <FormInput
-                  placeholder="e.g Abbey Mortgage Bank"
+                  placeholder="e.g Homebase Mortgage Bank"
                   label="Bank Name"
                   value={field.value}
                   hasError={!!errors.bankName}

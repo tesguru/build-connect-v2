@@ -1,8 +1,7 @@
 import GradientButton from "@/components/Buttons/GradientButton";
 import DropdownField from "@/components/Forms/DropDown";
-import { FileUploadResult } from "@/components/Forms/FileUploadComponent";
+import FileUploadComponent from "@/components/Forms/FileUploadComponent";
 import FormInput from "@/components/Forms/Formnput";
-import ImageUploadComponent from "@/components/Forms/ImageForm";
 import { FormTextArea } from "@/components/Forms/TextArea";
 import AppLayout from "@/components/Layouts/AppLayout";
 import SuccessScreen from "@/components/Notifications/SucessScreen";
@@ -40,31 +39,10 @@ const PRIORITY_OPTIONS = [
   { label: "High", value: "high", id: "high" },
 ];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-/** Expo image picker returns type:"image" — resolve the real MIME from the URI extension */
-const getMimeType = (uri: string, fallback?: string): string => {
-  const ext = uri.split(".").pop()?.toLowerCase();
-  const map: Record<string, string> = {
-    jpg: "image/jpeg",
-    jpeg: "image/jpeg",
-    png: "image/png",
-    gif: "image/gif",
-    webp: "image/webp",
-    pdf: "application/pdf",
-    doc: "application/msword",
-    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  };
-  // if fallback is already a valid MIME (contains "/"), keep it
-  if (fallback && fallback.includes("/")) return fallback;
-  return (ext && map[ext]) ?? "image/jpeg";
-};
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const SubmitTicket = () => {
   const [isUploading, setIsUploading] = React.useState(false);
-
 
   const {
     control,
@@ -86,44 +64,21 @@ const SubmitTicket = () => {
     name: "attachments",
   });
 
-  const { submitTicketMutation, submitTicketSuccess} = useSupport();
+  const { submitTicketMutation, submitTicketSuccess } = useSupport();
 
   const onSubmit = async (data: SubmitTicketInput) => {
     try {
       setIsUploading(true);
 
-      // Upload each attachment that has a file selected and collect the IDs
+      // ✅ Sequential uploads — FileUploadComponent gives FileUploadResult directly
       const attachmentFileIds: string[] = [];
 
       for (const item of data.attachments) {
         if (!item.file) continue;
 
-        let fileData: FileUploadResult;
-
-        if ("size" in item.file && "name" in item.file) {
-          // Already a FileUploadResult — still sanitize the type just in case
-          fileData = {
-            ...(item.file as FileUploadResult),
-            type: getMimeType(item.file.uri, item.file.type),
-          };
-        } else {
-          const response = await fetch(item.file.uri);
-          const blob = await response.blob();
-          const fileName = item.file.uri.split("/").pop() || "attachment.jpg";
-
-          fileData = {
-            uri: item.file.uri,
-            name: fileName,
-            // expo returns "image" or "video" — resolve to real MIME from extension
-            type: getMimeType(item.file.uri, item.file.type),
-            width: item.file.width,
-            height: item.file.height,
-            size: blob.size,
-          };
-        }
-
-        const uploadResult = await uploadFile(fileData, "portfolio", "portfolio");
-        attachmentFileIds.push(uploadResult.fileId);
+        // No conversion needed — FileUploadComponent already returns FileUploadResult
+        const uploadResult = await uploadFile(item.file, "work_showcase", "Support Attachment");
+        attachmentFileIds.push(uploadResult.id); // ✅ uploadFile returns UploadedFile directly
       }
 
       setIsUploading(false);
@@ -147,20 +102,16 @@ const SubmitTicket = () => {
     }
   };
 
-
-
   if (submitTicketSuccess) {
     return (
       <SuccessScreen
         title="Ticket Submitted Successfully"
         message="Your support ticket has been submitted. Our team will get back to you shortly."
         buttonTitle="Back to Dashboard"
-        navigateTo={"home/home"}
+        navigateTo={"/(tab)"}
       />
     );
   }
-
-
 
   return (
     <AppLayout screenName="Submit Ticket">
@@ -248,7 +199,7 @@ const SubmitTicket = () => {
           />
         </View>
 
-        {/* Attachments — same pattern as milestones in AddProject */}
+        {/* Attachments */}
         <View className="mt-4 mx-2">
           <View className="flex-row justify-between items-center mb-4">
             <Text className="font-worksanssemibold text-xl">Attachments</Text>
@@ -268,33 +219,25 @@ const SubmitTicket = () => {
                 </TouchableOpacity>
               </View>
 
-              {/* Each slot bound to its own field: attachments.${index}.file 
-                  — ImageUploadComponent writes the picked file directly into
-                    this form field exactly as projectMedia works in AddProject */}
-              <Controller
+           
+              <FileUploadComponent
                 control={control}
                 name={`attachments.${index}.file`}
-                render={() => (
-                  <ImageUploadComponent
-                    title="Click to upload or drag and drop"
-                    image={reportImage}
-                    label="Attachment"
-                    note="PNG, JPG, PDF (max. 5MB)"
-                    control={control}
-                    name={`attachments.${index}.file`}
-                    error={
-                      errors.attachments?.[index]?.file?.message as
-                        | string
-                        | undefined
-                    }
-                  />
-                )}
+                label="Attachment"
+                title="Upload Attachment"
+                note="PNG, JPG, PDF (max. 5MB)"
+                icon={reportImage}
+                maxSizeMB={5}
+                error={
+                  errors.attachments?.[index]?.file?.message as
+                    | string
+                    | undefined
+                }
               />
             </View>
           ))}
         </View>
 
-        {/* Add attachment — same style as Add milestone in AddProject */}
         <TouchableOpacity
           onPress={() => append({ file: null })}
           className="flex-row gap-2 justify-end"
@@ -303,10 +246,9 @@ const SubmitTicket = () => {
           <Text className="text-blue-600 font-inter">Add attachment</Text>
         </TouchableOpacity>
 
-        {/* Submit */}
         <View className="pt-6">
           <GradientButton
-            loading={isUploading}
+            loading={isUploading || submitTicketMutation.isPending}
             title="Submit Ticket"
             onPress={handleSubmit(onSubmit)}
           />

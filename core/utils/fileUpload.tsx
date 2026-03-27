@@ -1,138 +1,81 @@
 import { FileUploadResult } from "@/components/Forms/FileUploadComponent";
-import { UploadService } from "../services/upload/UploadService";
+import axiosInstance from "../services/axios";
 
 
+export interface UploadedFile {
+  id: string;
+  type: string;
+  originalName: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  description: string | null;
+  status: string;
+  publicUrl: string;
+  projectId: string | null;
+  createdAt: string;
+}
 
-export const getMimeType = (
-  uri: string,
-  fileName: string,
-  fallbackType?: string
-): string => {
-  if (fallbackType && fallbackType.includes("/")) {
-    return fallbackType;
-  }
+export interface UploadResponse {
+  code: string;
+  data: UploadedFile;
+  message: string;
+  success: boolean;
+  reqId: string;
+  statusCode: number;
+}
 
-  
-  const extension =
-    fileName.split(".").pop()?.toLowerCase() ||
-    uri.split(".").pop()?.toLowerCase() ||
-    "";
-
-  // Map extensions to mime types
-  const mimeTypes: { [key: string]: string } = {
-    jpg: "image/jpeg",
-    jpeg: "image/jpeg",
-    png: "image/png",
-    gif: "image/gif",
-    webp: "image/webp",
-    pdf: "application/pdf",
-    doc: "application/msword",
-    docx:
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  };
-
-  return mimeTypes[extension] || "image/jpeg"; 
-};
-
-
+/**
+ * Upload any file to the API in a single FormData POST.
+ *
+ * @param file       - FileUploadResult from the picker component
+ * @param fileType   - e.g. "profile_picture" | "document" | "report"
+ * @param description - optional description string
+ */
 export const uploadFile = async (
   file: FileUploadResult,
   fileType: string,
   description?: string
-) => {
+): Promise<UploadedFile> => {
+  const formData = new FormData();
+
+  // Attach the binary file
+  formData.append("file", {
+    uri: file.uri,
+    name: file.name,
+    type: file.type,
+  } as any);
+
+  // Attach metadata fields expected by the API
+  formData.append("type", fileType);
+  if (description) formData.append("description", description);
+  if (file.size) formData.append("fileSize", String(file.size));
+
   try {
- 
-    const mimeType = getMimeType(file.uri, file.name, file.type);
-
-    const prepareData = {
-      fileName: file.name,
-      fileSize: file.size,
-      mimeType: mimeType,
-      type: fileType,
-      width: file.width || undefined,
-      height: file.height || undefined,
-      description: description || fileType,
-    };
-
-    const prepareResponse = await UploadService.prepareUpload(prepareData);
-    const prepareResult = prepareResponse.data;
-
-    if (!prepareResult.success || !prepareResult.data) {
-      const errorMessage = prepareResult.message || "Failed to prepare upload";
-      throw new Error(errorMessage);
-    }
-
-    const { uploadUrl, uploadParams, publicUrl, fileId } = prepareResult.data;
-
-    if (!uploadUrl) {
-      throw new Error("Upload URL not received from server");
-    }
-
- 
-    const formData = new FormData();
-
-   
-    formData.append("file", {
-      uri: file.uri,
-      type: mimeType,
-      name: file.name,
-    } as any);
-
- 
-    if (uploadParams) {
-      Object.keys(uploadParams).forEach((key) => {
-        formData.append(key, String(uploadParams[key]));
-      });
-    }
-
-  
-    const uploadResponse = await fetch(uploadUrl, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!uploadResponse.ok) {
-      const errorText = await uploadResponse.text();
-      throw new Error(
-        `Failed to upload file: ${uploadResponse.statusText} - ${errorText}`
-      );
-    }
-    const cloudinaryPublicId = uploadParams?.public_id;
-    const cloudinarySecureUrl = publicUrl;
-
-    if (!cloudinaryPublicId || !cloudinarySecureUrl || !fileId) {
-      throw new Error("Missing required information for confirmation");
-    }
-
-    const confirmData = {
-      cloudinaryPublicId: cloudinaryPublicId,
-      cloudinarySecureUrl: cloudinarySecureUrl,
-      actualFileSize: file.size,
-    };
-
-    const confirmResponse = await UploadService.confirmUpload(
-      fileId,
-      confirmData
+    const response = await axiosInstance.post<UploadResponse>(
+      "/files/upload",          
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        timeout: 60000,
+      }
     );
 
-    return {
-      success: true,
-      data: confirmResponse.data,
-      fileId,
-    };
-  } catch (error: any) {
-    console.error(`Error uploading ${fileType}:`, error);
-
-    let errorMessage = "Failed to upload file. Please try again.";
-
-    if (error?.response?.data) {
-   
-      const apiError = error.response.data;
-      errorMessage =
-        apiError.message || apiError.data?.message || errorMessage;
-    } else if (error?.message) {
-      errorMessage = error.message;
+    if (!response.data.success) {
+      throw new Error(response.data.message ?? "Upload failed");
     }
-    throw new Error(errorMessage);
+
+    return response.data.data;
+  } catch (error: any) {
+   
+    const message: string =
+      error?.response?.data?.message ??
+      error?.response?.data?.data?.message ??
+      error?.message ??
+      "Failed to upload file. Please try again.";
+
+    throw new Error(message);
   }
 };

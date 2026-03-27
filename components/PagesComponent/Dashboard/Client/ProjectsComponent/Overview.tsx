@@ -1,4 +1,3 @@
-import PrimaryButton from '@/components/Buttons/Button';
 import { useProjects } from '@/core/hooks/useProjects';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -39,7 +38,6 @@ const Overview = (projectId:{projectId : string}) => {
             </View>
         );
     }
-    
     return (
         <View>
             <View className="pt-4 bg-white m-4 rounded-xl">
@@ -47,7 +45,9 @@ const Overview = (projectId:{projectId : string}) => {
                 <Text className="font-inter px-4 pt-4">
                     {projectData?.description || "No description available"}
                 </Text>
+                <View className="px-3">
                 <ProgressBar progress={projectData?.progress?.progressPercentage || 0}/>
+                </View>
                 <View className="px-4 py-4 flex-row justify-between">
                     <Text className="font-interbold text-lg">Budget</Text>
                     <Text className="font-interbold text-lg">
@@ -67,28 +67,7 @@ const Overview = (projectId:{projectId : string}) => {
                     </Text>
                 </View>
             </View>
-
-            <ProjectTimeline milestones={projectData?.milestones || []}/>
-            
-            {projectData?.status !== 'draft' && (
-                <>
-                    <View className="p-4 m-4 bg-white rounded-xl">
-                        <Text className="font-interbold text-gray-400 text-xl">Fund in Escrow</Text>
-                        <Text className="text-xl font-interbold py-3">#17,380,690</Text>
-                        <Text className="font-inter">Manage by abbey Mortgage Bank</Text>
-                    </View>
-
-                    <View className="mx-3">
-                        <PrimaryButton 
-                            onPress={handleCloseproject} 
-                            className="bg-gray-300" 
-                            textColor='black'  
-                            title='Close Project' 
-                            backgroundColor='white'
-                        />
-                    </View>
-                </>
-            )}
+            <ProjectTimeline milestones={projectData?.milestones || []}/>  
         </View>
     )
 }

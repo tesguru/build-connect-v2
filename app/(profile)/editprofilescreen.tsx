@@ -13,7 +13,7 @@ import { AvatarImage } from "@/constants/image";
 import { useAuth } from "@/core/hooks/useAuth";
 import { useAuthStore } from "@/store/Authstore";
 
-/* ─── Validation schema ─────────────────────────────────── */
+
 const editProfileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
@@ -45,7 +45,7 @@ const EditProfileScreen = () => {
     },
   });
 
-  /* ── Image picker ── */
+ 
   const handleChangePhoto = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
@@ -75,7 +75,7 @@ const EditProfileScreen = () => {
     }
   };
 
-  /* ── Submit ── */
+
   const onSubmit = (data: EditProfileInput) => {
     if (user) {
       updateUser({ ...user, ...data });
@@ -105,7 +105,7 @@ const EditProfileScreen = () => {
               source={profileImage ? { uri: profileImage } : AvatarImage}
               className="w-24 h-24 rounded-full"
             />
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={handleChangePhoto}
               className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-2 border-2 border-white"
             >
@@ -114,7 +114,7 @@ const EditProfileScreen = () => {
                 className="w-4 h-4"
                 style={{ tintColor: "white" }}
               />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
           <TouchableOpacity onPress={handleChangePhoto} className="mt-3">
             <Text className="text-blue-600 font-interbold text-base">Change Photo</Text>

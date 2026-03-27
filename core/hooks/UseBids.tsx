@@ -82,10 +82,41 @@ export const useBids = () => {
       queryFn: () => BidService.clientBids(id, params),
     });
   };
+
+   const myInvitations = (params: any) => {
+    return useQuery({
+      queryKey: ['myInvitations', params],
+      queryFn: () => BidService.myInvitations(params),
+    });
+  };
+
+  
+
+    const clientInvitations = (params: any) => {
+    return useQuery({
+      queryKey: ['clientInvitations', params],
+      queryFn: () => BidService.clientInvitations(params),
+    });
+  };
+
   const singleContractorQuery = (id: any) => {
     return useQuery({
       queryKey: ['singleContractor', id],
       queryFn: () => BidService.singleContractor(id),
+    });
+  };
+
+ const getContractByBidQuery = (id: any) => {
+    return useQuery({
+      queryKey: ['contractByBidQuery', id],
+      queryFn: () => BidService.getContractByBidId(id),
+    });
+  };
+
+   const bidRevisionSummary = (id: any) => {
+    return useQuery({
+      queryKey: ['BidRevisionSummary', id],
+      queryFn: () => BidService.bidRevisionSummary(id),
     });
   };
 
@@ -121,6 +152,30 @@ export const useBids = () => {
         error?.response?.data?.message ||
         error?.message ||
         "Failed to create Bids.";
+      Toast.show({
+        type: "error",
+        text1: "Submit Failed",
+        text2: errorMessage
+      });
+    },
+  });
+
+  const respondToBidInvitationMutation = useMutation({
+    mutationFn: BidService.respondToBidInvitations,
+    onSuccess: (res: any) => {
+      const respondToBidData = res?.data;
+      if (
+        (respondToBidData.statusCode === 200 || respondToBidData.statusCode === 201) &&
+        respondToBidData.success === true
+      ) {
+        setrespondBidSucess(true);
+      }
+    },
+    onError: (error: any) => {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to Update Invitation Bids.";
       Toast.show({
         type: "error",
         text1: "Submit Failed",
@@ -287,7 +342,11 @@ export const useBids = () => {
     downloadContractMutation,
     signContractMutation,
     getAllBids,
-    singleContractQuery
-
+    singleContractQuery,
+    myInvitations,
+    clientInvitations,
+    getContractByBidQuery,
+    bidRevisionSummary,
+    respondToBidInvitationMutation
   };
 };

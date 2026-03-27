@@ -1,7 +1,6 @@
 import AbeyyMortgageBankBanner from "../assets/images/AbbeyImageBanner.png";
-import HomeBaseMortgageBankBanner from "../assets/images/homebase.png";
-export{
+import HomeBaseMortgageBankBanner from "../assets/images/HomebaseMortgageBank.png";
+export {
     AbeyyMortgageBankBanner,
     HomeBaseMortgageBankBanner
-
-}
+};

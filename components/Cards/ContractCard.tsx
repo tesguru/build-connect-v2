@@ -1,7 +1,6 @@
 import { useRouter } from "expo-router";
-import { Star } from "lucide-react-native";
 import React from "react";
-import { TouchableOpacity, View, Text, Image } from "react-native";
+import { Image, Text, TouchableOpacity } from "react-native";
 
 interface Contractor {
   image: string;
@@ -39,19 +38,6 @@ export const ContractorCard: React.FC<ContractorCardProps> = ({ contractor, cont
       <Text className="text-xl font-interbold text-gray-900 mb-3 text-center">
         {contractor.name}
       </Text>
-      
-      <View className="flex flex-row items-center gap-2 mb-5">
-        <Text className="text-xl">
-          <Star
-            size={22}
-            fill='#FFD700'
-            color='#FFD700'
-          />
-        </Text>
-        <Text className="text-base font-intersemibold text-gray-700">
-          {contractor.rating} ({contractor.reviews}+)
-        </Text>
-      </View>
       
       <TouchableOpacity onPress={Invitetobids} className="w-full px-6 rounded-lg">
         <Text className="font-intersemibold text-gray-700 text-center">

@@ -1,18 +1,16 @@
-
 import FundingLogCard from '@/components/Cards/FundingLogCard'
 import AppLayout from '@/components/Layouts/AppLayout'
 import EmptyScreenComponent from '@/components/Miscallaneous/EmptyScreenComponent'
 import { useEscrow } from '@/core/hooks/useEscrow'
-
 import { FundingLogQueryParams, FundingStatus } from '@/core/types/api'
 import { useRouter } from 'expo-router'
 import React, { useMemo, useState } from 'react'
 import {
-    ActivityIndicator,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native'
 
 const FundingLogsScreen = () => {
@@ -27,34 +25,32 @@ const FundingLogsScreen = () => {
 
   const { data: apiResponse, isLoading, error } = getWalletFunding(queryParams)
 
-
   const fundingsList = apiResponse?.data?.data?.fundings ?? []
-  const pagination   = apiResponse?.data?.pagination
+  const pagination = apiResponse?.data?.pagination
 
-
+  // Update status filters to match API expectations
   const statusFilters = useMemo(() => {
-    const counts: Record<FundingStatus, number> = {
+    const counts: Record<string, number> = {
       pending_verification: 0,
-      verified: 0,
+      successful: 0,
       rejected: 0,
-      cancelled: 0,
     }
 
     for (const item of fundingsList) {
-      const val = item.status as FundingStatus
-      if (val && counts[val] !== undefined) counts[val]++
+      const val = item.status as string
+      if (val === 'pending_verification') counts.pending_verification++
+      else if (val === 'successful') counts.successful++
+      else if (val === 'rejected') counts.rejected++
     }
 
     return [
-      { id: 'all',                  label: 'All',         count: fundingsList.length        },
-      { id: 'pending_verification', label: 'Pending',     count: counts.pending_verification },
-      { id: 'verified',             label: 'Verified',    count: counts.verified             },
-      { id: 'rejected',             label: 'Rejected',    count: counts.rejected             },
-      { id: 'cancelled',            label: 'Cancelled',   count: counts.cancelled            },
+      { id: 'all', label: 'All', count: fundingsList.length },
+      { id: 'pending_verification', label: 'Pending', count: counts.pending_verification },
+      { id: 'successful', label: 'Successful', count: counts.successful },
+      { id: 'rejected', label: 'Rejected', count: counts.rejected },
     ]
   }, [fundingsList])
 
-  /* ── Filter handler ── */
   const handleStatusFilter = (status: string) => {
     setSelectedFilter(status)
     const newParams: FundingLogQueryParams = { ...queryParams, page: 1 }
@@ -66,38 +62,33 @@ const FundingLogsScreen = () => {
     setQueryParams(newParams)
   }
 
-
   const filteredFundings =
     selectedFilter === 'all'
       ? fundingsList
       : fundingsList.filter((item) => item.status === selectedFilter)
 
-
   const formatStatusLabel = (status: string) => {
     const map: Record<string, string> = {
       all: 'All',
       pending_verification: 'Pending Verification',
-      verified: 'Verified',
+      successful: 'Successful',
       rejected: 'Rejected',
-      cancelled: 'Cancelled',
     }
     return map[status] ?? status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')
   }
 
   const handleFundingPress = (fundingId: string) => {
     router.push({
-      pathname: '/payments/fundingdetails',
+      pathname: '/escrow/logpaymentdetails',
       params: { fundingId },
     })
   }
-
 
   return (
     <AppLayout screenName="Payment Logs" fullHeightContent>
       <View className="flex-1">
         <View className="mt-8 flex-1">
-
-     
+          {/* Filter Chips */}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -130,14 +121,12 @@ const FundingLogsScreen = () => {
             ))}
           </ScrollView>
 
-        
+          {/* Loading State */}
           {isLoading ? (
             <View className="flex-1 justify-center items-center py-20">
               <ActivityIndicator size="large" color="#2463EB" />
               <Text className="mt-4 text-gray-600">Loading payment logs...</Text>
             </View>
-
-        
           ) : error ? (
             <View className="flex-1 justify-center items-center p-4">
               <Text className="text-red-500 text-center mb-4">
@@ -145,13 +134,11 @@ const FundingLogsScreen = () => {
               </Text>
               <TouchableOpacity
                 className="bg-blue-600 px-6 py-3 rounded-lg"
-                onPress={() => setQueryParams({ ...queryParams })}
+                onPress={() => setQueryParams({ ...queryParams, page: 1 })}
               >
                 <Text className="text-white font-medium">Retry</Text>
               </TouchableOpacity>
             </View>
-
-      
           ) : filteredFundings.length === 0 ? (
             <View className="flex-1 justify-center items-center py-20 px-4">
               <EmptyScreenComponent
@@ -169,8 +156,6 @@ const FundingLogsScreen = () => {
                 onButtonPress={undefined}
               />
             </View>
-
-    
           ) : (
             <ScrollView
               showsVerticalScrollIndicator={false}
@@ -197,7 +182,7 @@ const FundingLogsScreen = () => {
                 </View>
               ))}
 
-       
+              {/* Pagination */}
               {pagination && (
                 <View className="py-6 items-center">
                   <Text className="text-gray-500 text-sm mb-2">

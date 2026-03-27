@@ -1,12 +1,12 @@
+import { Check, ChevronDown } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-  View,
-  Text,
   FlatList,
   ListRenderItemInfo,
+  Text,
   TouchableOpacity,
+  View,
 } from "react-native";
-import { Check, ChevronDown } from "lucide-react-native";
 
 interface MilestoneItem {
   id: string;
@@ -127,7 +127,7 @@ const Row: React.FC<RowProps> = ({ item, index, nextItem }) => {
               <View className="flex-row justify-between items-center">
                 <Text className="text-sm text-gray-500">Milestone {item.orderIndex}</Text>
                 <Text className="text-sm font-semibold text-gray-900">
-                  ${item.amount.toLocaleString()}
+                  ₦{item.amount.toLocaleString()}
                 </Text>
               </View>
             </View>

@@ -16,9 +16,10 @@ const isValidTab = (tab?: string): tab is TabName =>
 
 const ClientProjectDetails = () => {
   const route = useRoute()
-  const { projectId, initialTab } = route.params as {
+  const { projectId, initialTab, status } = route.params as {
     projectId: string
     initialTab?: string
+    status:string
   }
 
   const [activeTab, setActiveTab] = useState<TabName>(
@@ -27,7 +28,7 @@ const ClientProjectDetails = () => {
 
   const tabs: { name: TabName; component: React.ReactNode }[] = [
     { name: 'Overview',   component: <Overview projectId={projectId} /> },
-    { name: 'Bids',       component: <Bids projectId={projectId} /> },
+    { name: 'Bids',       component: <Bids  projectId={projectId} status={status} /> },
     { name: 'Milestones', component: <Milestone projectId={projectId} /> },
     { name: 'Meeting',    component: <UpcomingMeetingsScreen projectId={projectId} /> },
   ]

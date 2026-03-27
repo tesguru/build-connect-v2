@@ -38,7 +38,7 @@ const ClientProjectsScreen = () => {
       cancelled: 0,
     };
     for (const p of projectsList) {
-      // ✅ Fixed: status lives in statusDetails.value not project.status
+     
       const val = p.statusDetails?.value;
       if (val && counts[val] !== undefined) {
         counts[val]++;
@@ -76,7 +76,7 @@ const ClientProjectsScreen = () => {
     if (selectedFilter === 'all') {
       return projectsList;
     }
-    // ✅ Fixed: filter by statusDetails.value not project.status
+   
     return projectsList.filter(
       (project) => project.statusDetails?.value === selectedFilter
     );
@@ -101,10 +101,11 @@ const ClientProjectsScreen = () => {
     router.push('/projects/addproject'); 
   };
 
-  const handleProjectPress = (projectId: string) => {
+  const handleProjectPress = (projectId: string, status: string) => {
+   
     router.push({
       pathname: '/projects/clientprojectdetails',
-      params: { projectId: projectId }
+      params: { projectId: projectId, status: status }
     })
   };
 
@@ -186,7 +187,7 @@ const ClientProjectsScreen = () => {
                     duration={project.timeline?.label || "N/A"}
                     role="client"
                     bids={String(project.bidCount || 0)}
-                    onPress={() => handleProjectPress(project.id)}
+                    onPress={() => handleProjectPress(project.id, project.statusDetails?.value)}
                   />
                 </View>
               ))}

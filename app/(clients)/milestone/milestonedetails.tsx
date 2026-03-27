@@ -3,7 +3,6 @@ import DropdownField from '@/components/Forms/DropDown';
 import { FormTextArea } from '@/components/Forms/TextArea';
 
 import AppLayout from '@/components/Layouts/AppLayout';
-import ProgressBar from '@/components/Miscallaneous/ProgressBar';
 import { useEscrow } from '@/core/hooks/useEscrow';
 import { useProjects } from '@/core/hooks/useProjects';
 import { LookupService } from '@/core/services/lookup/LookupService';
@@ -58,15 +57,16 @@ const MileStoneDetails = () => {
     const router = useRouter();
     const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-    const { milestoneId, projectId } = useLocalSearchParams<{
+    const { milestoneId, projectId, milestoneName } = useLocalSearchParams<{
         milestoneId: string;
         projectId: string;
+        mileStoneName: string;
     }>();
 
-    console.log(projectId)
+   
 
     const { singleMilestoneDetailsQuery, updateMileStoneMutation } = useProjects();
-    const { data, isLoading, error } = singleMilestoneDetailsQuery(projectId, milestoneId);
+    const { data, isLoading, error, refetch } = singleMilestoneDetailsQuery(projectId, milestoneId);
     const { createPaymentInstructionsMutation } = useEscrow();
 
     const { control, handleSubmit, formState: { errors } } = useForm<UpdateFormValues>();
@@ -100,6 +100,7 @@ const MileStoneDetails = () => {
             milestoneId,
             statusId: formData.statusId,
         });
+        refetch();
     };
 
     const handleConfirmPaymentInstruction = (formData: PaymentFormValues) => {
@@ -118,20 +119,25 @@ const MileStoneDetails = () => {
 
     if (isLoading) {
         return (
+               <AppLayout screenName={milestoneName}>
+
             <View className="flex-1 justify-center items-center py-20">
                 <ActivityIndicator size="large" color="#2463EB" />
-                <Text className="mt-4 text-gray-600">Loading project details...</Text>
+                <Text className="mt-4 text-gray-600">Loading milestone details...</Text>
             </View>
+            </AppLayout>
         );
     }
 
     if (error) {
         return (
+             <AppLayout screenName={milestoneName}>
             <View className="flex-1 justify-center items-center p-4">
                 <Text className="text-red-500 text-center mb-4">
-                    Error loading project details. Please try again.
+                    Error loading milestone details. Please try again.
                 </Text>
             </View>
+            </AppLayout>
         );
     }
 
@@ -163,8 +169,7 @@ const MileStoneDetails = () => {
                             </Text>
                         </View>
                     </View>
-
-                    <ProgressBar progress={mileStoneData?.progress?.progressPercentage || 0} />
+                
                 </View>
 
                 <View className="pt-4 bg-white m-4 rounded-xl">
@@ -174,23 +179,29 @@ const MileStoneDetails = () => {
                     </Text>
                 </View>
 
-                {/* Update Milestone Status */}
-                <View className="pt-3 p-4 mx-4 bg-white rounded-xl gap-y-3">
-                    <DropdownField
-                        name="statusId"
-                        control={control}
-                        label="Update Milestone"
-                        placeholder={isLoadingPlatforms ? "Loading..." : "Select milestone status"}
-                        data={mileStoneStatusesData || []}
-                        error={errors.statusId?.message as string}
-                    />
-
-                    <GradientButton
-                        loading={updateMileStoneMutation.isPending}
-                        title="Update Milestone"
-                        onPress={handleSubmit(onSubmit)}
-                    />
-                </View>
+               {!isMilestoneCompleted && (
+  <View className="pt-3 p-4 mx-4 bg-white rounded-xl ">
+    <View className="py-4">
+    <DropdownField
+      name="statusId"
+      control={control}
+      label="Update Milestone"
+      placeholder={isLoadingPlatforms ? "Loading..." : "Select milestone status"}
+      data={mileStoneStatusesData || []}
+      error={errors.statusId?.message as string}
+    />
+    </View>
+<View className="pt-1">
+     <GradientButton
+      loading={updateMileStoneMutation.isPending}
+      title="Update Milestone"
+      onPress={handleSubmit(onSubmit)}
+    />
+</View>
+   
+  </View>
+)}
+               
 
                 {/* Payment Instruction button — only when status is completed */}
                 {isMilestoneCompleted && (
@@ -204,7 +215,7 @@ const MileStoneDetails = () => {
                 )}
             </View>
 
-            {/* Payment Instruction Confirmation Modal */}
+       
             <Modal
                 visible={showPaymentModal}
                 transparent

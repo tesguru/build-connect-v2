@@ -1,7 +1,7 @@
 
 import { Star } from 'lucide-react-native';
 import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 export const ContractorListItem = ({ contractor, onPress }) => {
   return (
     <TouchableOpacity 
@@ -23,7 +23,6 @@ export const ContractorListItem = ({ contractor, onPress }) => {
             {contractor.name}
           </Text>
           
-     
           <View className="flex flex-row items-center">
             <Text className="text-sm mr-1 pt-5"> <Star
                 size={22}

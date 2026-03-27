@@ -51,7 +51,7 @@ const CreateAccount = () => {
   };
 
   return (
-    <AppLayout screenName={isUpdateMode ? "Update Account" : "Create Account"}>
+    <AppLayout screenName={isUpdateMode ? "Update account information " : "Supply account information"}>
       <ScrollView
         style={{ backgroundColor: colors.background_light, flex: 1 }}
         contentContainerStyle={{ padding: 16 }}
@@ -69,8 +69,8 @@ const CreateAccount = () => {
         )}
 
         <View className="mb-6">
-          <Text className="font-interbold text-base mb-4">
-            {isUpdateMode ? 'Update Account Details' : 'Mortgage Details'}
+          <Text className="font-inter text-base mb-4">
+            {isUpdateMode ? 'Update Account Details' : 'Have you created an account with Homebase Mortgage Bank? Supply the account information below for record purposes.'}
           </Text>
 
           {/* Bank Name */}
@@ -80,7 +80,7 @@ const CreateAccount = () => {
               name="bankName"
               render={({ field }) => (
                 <FormInput
-                  placeholder="e.g Abbey Mortgage Bank"
+                  placeholder="e.g Homebase Mortgage Bank"
                   label="Bank Name"
                   value={field.value}
                   hasError={!!errors.bankName}

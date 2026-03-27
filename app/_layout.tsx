@@ -1,14 +1,14 @@
-import "../global.css";
-import { Stack, useRouter, useSegments } from 'expo-router';
-import { SafeAreaView } from "react-native-safe-area-context";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { StatusBar } from "expo-status-bar";
-import { Platform, View, ActivityIndicator } from "react-native";
-import Toast from 'react-native-toast-message';
-import createToastConfig from "@/components/Notifications/Toast";
 import FontLayout from "@/components/Layouts/FontLayout";
-import React, { useEffect, useState } from "react";
+import createToastConfig from "@/components/Notifications/Toast";
 import { useAuthStore } from '@/store/Authstore';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Stack, useRouter, useSegments } from 'expo-router';
+import { StatusBar } from "expo-status-bar";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Platform, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from 'react-native-toast-message';
+import "../global.css";
 
 const queryClient = new QueryClient();
 

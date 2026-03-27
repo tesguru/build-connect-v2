@@ -1,8 +1,7 @@
-import React from "react";
-import { View, Text, TouchableOpacity, Image } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { arrowleft } from "@/constants/icon";
-import colors from "@/constants/colors";
+import { useNavigation } from "@react-navigation/native";
+import React from "react";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 interface AuthHeaderProps {
   title: string;
@@ -49,7 +48,7 @@ const AuthHeader: React.FC<AuthHeaderProps> = ({
           <Image
             source={arrowleft}
             resizeMode="contain"
-            style={{ width: 35, height: 35 }}
+            style={{ width: 25, height: 25 }}
           />
         </TouchableOpacity>
       )}

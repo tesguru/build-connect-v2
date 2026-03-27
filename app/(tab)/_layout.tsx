@@ -81,10 +81,10 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="settings"
+        name="support"
         options={{
           tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon={Question} />,
-          tabBarLabel: isClient ? "Support" : "Settings",
+          tabBarLabel: "Support" 
         }}
       />
     </Tabs>

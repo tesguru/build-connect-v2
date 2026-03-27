@@ -31,4 +31,6 @@ createPayoutAccount: (data :any) => axiosInstance.post(`${ENDPOINTS.ESCROW.ESCRO
 getPayoutAccount: () => axiosInstance.get(`${ENDPOINTS.ESCROW.ESCROW}builder/payout-account`),
 createEscrowAccount: (data :any) => axiosInstance.post(`${ENDPOINTS.ESCROW.ESCROW}account`,  data ),
 getEscrowAccount: () => axiosInstance.get(`${ENDPOINTS.ESCROW.ESCROW}account`),
+getSinglePaymentInstructions: (instructionId :any) => axiosInstance.get(`${ENDPOINTS.ESCROW.ESCROW}payment-instructions/${instructionId}`),
+getSingleWalletFunding: (fundingId :any) => axiosInstance.get(`${ENDPOINTS.ESCROW.ESCROW}wallet-fundings/${fundingId}`),
 };

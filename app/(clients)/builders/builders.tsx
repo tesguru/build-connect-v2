@@ -1,10 +1,10 @@
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native'
-import React from 'react'
-import { useLocalSearchParams } from 'expo-router';
-import AppLayout from '@/components/Layouts/AppLayout'
+import { ContractorCard } from '@/components/Cards/ContractCard';
+import AppLayout from '@/components/Layouts/AppLayout';
 import { useBids } from "@/core/hooks/UseBids";
 import { Ionicons } from '@expo/vector-icons';
-import { ContractorCard } from '@/components/Cards/ContractCard';
+import { useLocalSearchParams } from 'expo-router';
+import React from 'react';
+import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
 
 const BuildersScreen = () => {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
@@ -116,7 +116,7 @@ const BuildersScreen = () => {
   }
 
   return (
-    <AppLayout screenName='All Builders'>
+    <AppLayout screenName='All Builders' fullHeightContent>
       <View className="flex-1 bg-gray-50">
         <FlatList
           data={contractors}
