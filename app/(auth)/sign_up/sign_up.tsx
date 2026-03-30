@@ -72,7 +72,7 @@ const SignUpScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingLayout androidExtraPadding={60}>
+    <KeyboardAvoidingLayout androidExtraPadding={75}>
       <View className="px-4 flex-1">
         <TouchableOpacity className="pt-10" onPress={handleBack}>
           <Image

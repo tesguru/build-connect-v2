@@ -2,7 +2,6 @@ import GradientButton from "@/components/Buttons/GradientButton";
 import DropdownField from "@/components/Forms/DropDown";
 import FormInput from "@/components/Forms/Formnput";
 import AppLayout from "@/components/Layouts/AppLayout";
-import { arrowleft } from "@/constants/icon";
 import { LookupService } from "@/core/services/lookup/LookupService";
 
 import { useMortgageStore } from "@/store/MortgageStore";
@@ -10,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { z } from "zod";
 
 const employmentInfoSchema = z.object({
@@ -86,14 +85,7 @@ export default function EmploymentInfoScreen() {
       <FormProvider {...methods}>
         <View className="p-4 flex-1">
 
-          {/* Header */}
-          <View className="flex-row justify-between items-center mb-4">
-            <TouchableOpacity onPress={handleBack}>
-              <Image source={arrowleft} style={{ width: 25, height: 25 }} resizeMode="contain" />
-            </TouchableOpacity>
-            <View style={{ flex: 1 }} />
-            <View style={{ width: 25 }} />
-          </View>
+          
 
           <ScrollView
             showsVerticalScrollIndicator={false}

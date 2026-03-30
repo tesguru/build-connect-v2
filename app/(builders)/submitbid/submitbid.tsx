@@ -170,15 +170,11 @@ const SubmitBidScreen = () => {
     );
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+
   return (
     <AppLayout screenName="Submit Bid">
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Text className="font-inter px-3 pt-4">You are submitting a bid</Text>
-
         <View className="px-3">
-
-          {/* Bid Amount */}
           <View className="pt-4">
             <Controller
               control={control}

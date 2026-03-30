@@ -2,15 +2,15 @@ import GradientButton from "@/components/Buttons/GradientButton";
 import FileUploadComponent from "@/components/Forms/FileUploadComponent";
 import AppLayout from "@/components/Layouts/AppLayout";
 import SuccessScreen from "@/components/Notifications/SucessScreen";
-import { arrowleft, reportImage } from "@/constants/icon";
+import { reportImage } from "@/constants/icon";
 import { useProperty } from "@/core/hooks/useProperty";
 import { uploadFile } from "@/core/utils/fileUpload";
 import { useMortgageStore } from "@/store/MortgageStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
 import { z } from "zod";
 
@@ -155,35 +155,30 @@ export default function DocumentsScreen() {
 
   const isLoading = isUploading || createMortgageMutation.isPending;
 
-  // ── Success ────────────────────────────────────────────────────────────────
+
+ useEffect(() => {
   if (mortgageSuccess) {
     clearFormData();
-    return (
-      <SuccessScreen
-        title="Application Submitted!"
-        message="Your mortgage application has been submitted successfully. We'll be in touch shortly."
-        navigateTo="/(tab)"
-      />
-    );
   }
+}, [mortgageSuccess]);
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+
+if (mortgageSuccess) {
+  return (
+    <SuccessScreen
+      title="Application Submitted!"
+      message="Your mortgage application has been submitted successfully. We'll be in touch shortly."
+      navigateTo="/(tab)"
+    />
+  );
+}
+
+  
   return (
     <AppLayout screenName="Document Info">
       <FormProvider {...methods}>
         <View className="p-4 flex-1">
-          {/* Header */}
-          <View className="flex-row justify-between items-center mb-4">
-            <TouchableOpacity onPress={handleBack} disabled={isLoading}>
-              <Image
-                source={arrowleft}
-                style={{ width: 25, height: 25, opacity: isLoading ? 0.5 : 1 }}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-            <View style={{ flex: 1 }} />
-            <View style={{ width: 25 }} />
-          </View>
+        
 
           <ScrollView
             showsVerticalScrollIndicator={false}

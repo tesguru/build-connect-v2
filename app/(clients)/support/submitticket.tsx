@@ -118,11 +118,11 @@ const SubmitTicket = () => {
       <View
         style={{
           backgroundColor: colors.background_light,
-          padding: 16,
+          padding: 14,
           flex: 1,
         }}
       >
-        <Text className="font-interbold pt-4">Ticket Details</Text>
+     
 
         {/* Subject */}
         <View className="pt-3">

@@ -48,7 +48,7 @@ const BuildersScreen = () => {
 
   const renderFlatListItem = ({ item }: { item: any }) => {
     return (
-      <View className="flex-1">
+      <View className="flex-1 pt-6">
         <ContractorCard
           contractor={{
             image: item.image,
@@ -125,7 +125,7 @@ const BuildersScreen = () => {
           numColumns={2}
           contentContainerStyle={{
             paddingHorizontal: 8,
-            paddingTop: 8,
+            paddingTop: 10,
             paddingBottom: 16
           }}
           showsVerticalScrollIndicator={false}
@@ -135,4 +135,4 @@ const BuildersScreen = () => {
   );
 }
 
-export default BuildersScreen;
+export default BuildersScreen; 

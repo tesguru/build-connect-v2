@@ -1,7 +1,7 @@
-import React from "react";
-import { View } from "react-native";
 import KeyboardAvoidingLayout from "@/components/Layouts/KeyboardAvoidLayout";
 import SuccessScreen from "@/components/Notifications/SucessScreen";
+import React from "react";
+import { View } from "react-native";
 
 
 

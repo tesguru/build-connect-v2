@@ -2,13 +2,13 @@ import GradientButton from "@/components/Buttons/GradientButton";
 import { FormDatePicker } from "@/components/Forms/DatePicker";
 import FormInput from "@/components/Forms/Formnput";
 import AppLayout from "@/components/Layouts/AppLayout";
-import { arrowleft } from "@/constants/icon";
+import KeyboardAvoidingLayout from "@/components/Layouts/KeyboardAvoidLayout";
 import { useMortgageStore } from "@/store/MortgageStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Text, View } from "react-native";
 import { z } from "zod";
 
 const personalInfoSchema = z.object({
@@ -61,23 +61,13 @@ export default function PersonalInfoScreen() {
 
   return (
     <AppLayout screenName="Personal Info">
-      <FormProvider {...methods}>
+      <KeyboardAvoidingLayout androidExtraPadding={30}>
+         <FormProvider {...methods}>
         <View className="p-4 flex-1">
 
-          {/* Header */}
-          <View className="flex-row justify-between items-center mb-4">
-            <TouchableOpacity onPress={handleBack}>
-              <Image source={arrowleft} style={{ width: 25, height: 25 }} resizeMode="contain" />
-            </TouchableOpacity>
-            <View style={{ flex: 1 }} />
-            <View style={{ width: 25 }} />
-          </View>
+  
 
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            className="flex-1"
-            contentContainerStyle={{ paddingBottom: 20 }}
-          >
+        
             <Text className="font-interbold text-2xl text-gray-900">Personal Information</Text>
             <Text className="font-inter text-gray-500 text-sm mt-1 mb-6">
               Tell us a bit about yourself
@@ -275,13 +265,15 @@ export default function PersonalInfoScreen() {
                 <Text className="text-red-500 text-xs mt-1 font-inter">{errors.postalCode.message}</Text>
               )}
             </View>
-          </ScrollView>
+       
 
           <View className="pb-4 pt-6">
             <GradientButton title="Continue" onPress={handleContinue} />
           </View>
         </View>
       </FormProvider>
+     
+     </KeyboardAvoidingLayout>
     </AppLayout>
   );
 }

@@ -1,5 +1,5 @@
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
 
 
@@ -8,9 +8,12 @@ import { BidService } from "../services/bids/BidService";
 
 
 export const useBids = () => {
+    const queryClient = useQueryClient();
   const [submitBidSuccess, setSubmitBidSuccess] = useState(false);
   const [inviteBidsuccess, setinviteBidsuccess] = useState(false);
   const [respondBidSucess, setrespondBidSucess] = useState(false);
+    const [sendSuccess, setSendSuccess]   = useState(false)
+  const [signSuccess, setSignSuccess]   = useState(false)
   const [contractSuccess, setContractSuccess] = useState(false);
   const [contractData, setContractData] = useState(false);
   const [revisionSuccess, setBidRevisionSucess] = useState(false);
@@ -22,6 +25,7 @@ export const useBids = () => {
         (submitBidData.statusCode === 200 || submitBidData.statusCode === 201) &&
         submitBidData.success === true
       ) {
+                queryClient.invalidateQueries({ queryKey: ['getAllBids'] });
         setSubmitBidSuccess(true);
       }
     },
@@ -145,6 +149,9 @@ export const useBids = () => {
         respondToBidData.success === true
       ) {
         setrespondBidSucess(true);
+          queryClient.invalidateQueries({ queryKey: ['getAllBids'] });
+          queryClient.invalidateQueries({ queryKey: ['getSingleProject'] });
+          queryClient.invalidateQueries({ queryKey: ['getAllProjects'] });
       }
     },
     onError: (error: any) => {
@@ -233,7 +240,30 @@ export const useBids = () => {
       });
     },
   });
+  const builderBidRevisionMutation = useMutation({
+    mutationFn: BidService.builderBidRevisionRequest,
+    onSuccess: (res: any) => {
+      const bidRevisionData = res?.data;
+      if (
+        (bidRevisionData.statusCode === 200 || bidRevisionData.statusCode === 201) &&
+        bidRevisionData.success === true
+      ) {
+        setBidRevisionSucess(true);
 
+      }
+    },
+    onError: (error: any) => {
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to send Revision request.";
+      Toast.show({
+        type: "error",
+        text1: "Submit Failed",
+        text2: errorMessage
+      });
+    },
+  });
   const sendContractMutation = useMutation({
     mutationFn: BidService.sendContract,
     onSuccess: (res: any) => {
@@ -242,12 +272,7 @@ export const useBids = () => {
         (sendContractData.statusCode === 200 || sendContractData.statusCode === 201) &&
         sendContractData.success === true
       ) {
-        Toast.show({
-          type: "success",
-          text1: "Sent",
-          text2: "Contract Sent successfully.",
-        });
-
+       setSendSuccess(true);
       }
     },
     onError: (error: any) => {
@@ -271,11 +296,10 @@ export const useBids = () => {
         (sendContractData.statusCode === 200 || sendContractData.statusCode === 201) &&
         sendContractData.success === true
       ) {
-        Toast.show({
-          type: "success",
-          text1: "Sent",
-          text2: "Contract Sign successfully.",
-        });
+        queryClient.invalidateQueries({ queryKey: ['contractByBidQuery'] });
+        queryClient.invalidateQueries({ queryKey: ['singleContract'] });
+        queryClient.invalidateQueries({ queryKey: ['getSingleProject'] });
+setSignSuccess(true);
 
       }
     },
@@ -347,6 +371,9 @@ export const useBids = () => {
     clientInvitations,
     getContractByBidQuery,
     bidRevisionSummary,
-    respondToBidInvitationMutation
+    respondToBidInvitationMutation,
+    builderBidRevisionMutation,
+    sendSuccess,
+    signSuccess
   };
 };

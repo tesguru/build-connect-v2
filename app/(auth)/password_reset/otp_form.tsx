@@ -1,15 +1,15 @@
-import React from "react";
-import { View, Text, TouchableOpacity, Image } from "react-native";
-import { useForm, Controller } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import GradientButton from "@/components/Buttons/GradientButton";
 import OTPInput from "@/components/Forms/OtpInput";
+import KeyboardAvoidingLayout from "@/components/Layouts/KeyboardAvoidLayout";
+import AuthLink from "@/components/Miscallaneous/AuthLink";
 import { arrowleft } from "@/constants/icon";
 import { useAuth } from "@/core/hooks/useAuth";
-import GradientButton from "@/components/Buttons/GradientButton";
-import AuthLink from "@/components/Miscallaneous/AuthLink";
-import KeyboardAvoidingLayout from "@/components/Layouts/KeyboardAvoidLayout";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Image, Text, TouchableOpacity, View } from "react-native";
+import { z } from "zod";
 
 const otpSchema = z.object({
   otp: z.string().min(6, "OTP must be 6 digits").max(6, "OTP must be 6 digits"),
@@ -36,9 +36,8 @@ export default function OTPFormScreen() {
       { email: email || "", otp: data.otp },
       {
         onSuccess: () => {
-          // Navigate to ResetPassword with email and otp
           router.replace({
-            pathname: "/password_reset/forgot_password",
+            pathname: "/password_reset/reset_password",
             params: { email: email || "", otp: data.otp }
           });
         },

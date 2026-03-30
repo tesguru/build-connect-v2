@@ -25,36 +25,39 @@ const AuthHeader: React.FC<AuthHeaderProps> = ({
   };
 
   return (
-    <View className="flex-row items-center justify-center relative pt-10 pb-6">
-      <Text className="font-interbold text-2xl text-center flex-1 px-4" pointerEvents="box-none">
-        {title}
-      </Text>
-      {showBackButton && (
+    <View className="flex-row items-center  py-4  ">
+      {/* Back Button - Left side */}
+      {showBackButton ? (
         <TouchableOpacity
           onPress={handleBack}
-          activeOpacity={0.6}
-          hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
-          className="absolute left-0 items-center justify-center"
-          style={{
-            paddingLeft: 16,
-            paddingTop: 35,
-            paddingRight: 24,
-            paddingBottom: 24,
-            minWidth: 77,
-            minHeight: 61,
-            zIndex: 10,
-          }}
+          activeOpacity={0.7}
+          hitSlop={{ top: 12, bottom: 12, left: 11, right: 10 }}
+          className="w-10 h-10 pr-2 items-center justify-center"
         >
           <Image
             source={arrowleft}
             resizeMode="contain"
-            style={{ width: 25, height: 25 }}
+            style={{ width: 24, height: 24 }}
           />
         </TouchableOpacity>
+      ) : (
+     
+        <View className="w-10" />
       )}
+
+   
+      <Text 
+        className="flex-1 font-interbold text-xl text-center text-gray-900"
+        numberOfLines={1}
+        adjustsFontSizeToFit
+      >
+        {title}
+      </Text>
+
+  
+      <View className="w-10" />
     </View>
   );
 };
 
 export default AuthHeader;
-

@@ -49,6 +49,7 @@ export const ClientBidCard: React.FC<ClientBidCardProps> = memo(({ bid, project 
         bidId: bid.id,
         companyName,
         projectTitle: project?.title,
+           projectId: project?.id,
       },
     });
   }, [router, bid.id, companyName, project]);

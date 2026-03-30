@@ -25,7 +25,7 @@ const SignInScreen = () => {
   };
 
   const forgotPassword = () => {
-    router.push("/");
+    router.push("/(auth)/password_reset/forgot_password");
   };
 
   const {

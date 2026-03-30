@@ -2,7 +2,6 @@ import colors from '@/constants/colors';
 import { arrowleft } from '@/constants/icon';
 import { useAuthStore } from '@/store/Authstore';
 import { useRouter } from 'expo-router';
-import { Home } from 'lucide-react-native';
 import React, { ReactNode } from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
@@ -65,11 +64,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({
        
           <Text className="font-worksansBold text-xl">{screenName}</Text>
 
-          {showHome && (
+          {/* {showHome && (
             <TouchableOpacity onPress={handleHome} className="absolute right-2 pt-2">
               <Home size={24} color={colors.primary || '#2463EB'} />
             </TouchableOpacity>
-          )}
+          )} */}
         </View>
       </View>
 

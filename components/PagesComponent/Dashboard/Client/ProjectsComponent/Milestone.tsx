@@ -185,7 +185,7 @@ const getStatusStyle = (status: string) => {
           contentContainerStyle={{ paddingBottom: 20 }}
         >
           {filteredMilestones.map((milestone) => (
-            <View key={milestone.id} className="mb-4 px-4">
+            <View key={milestone.id} className="mb-2 px-4">
               <MilestoneCard
                 milestoneName={milestone.name}
                 dueDate={formatDate(milestone.completionDate)}

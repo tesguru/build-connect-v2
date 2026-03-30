@@ -15,5 +15,5 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
     "nativewind-env.d.ts"
-, "constants/image.jj"  ]
+, "constants/image.jj", "app/(builders)/reviewsummary", "app/(clients)/reviewsummary"  ]
 }

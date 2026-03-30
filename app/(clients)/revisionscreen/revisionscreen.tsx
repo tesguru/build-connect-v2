@@ -1,19 +1,19 @@
-import { View } from 'react-native'
-import React from 'react'
-import AppLayout from '@/components/Layouts/AppLayout';
 import { FormTextArea } from '@/components/Forms/TextArea';
-import { Controller, useForm } from 'react-hook-form';
+import AppLayout from '@/components/Layouts/AppLayout';
 import { zodResolver } from '@hookform/resolvers/zod';
+import React from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { View } from 'react-native';
 
 import GradientButton from '@/components/Buttons/GradientButton';
-import { useBids } from '@/core/hooks/UseBids';
-import { useLocalSearchParams, router } from 'expo-router';
 import SuccessScreen from '@/components/Notifications/SucessScreen';
+import { useBids } from '@/core/hooks/UseBids';
 import { RevisionInput, revisionSchema } from '@/core/schemas/dashboardschema';
+import { useLocalSearchParams } from 'expo-router';
 
 const Revisionscreen = () => {
   const { bidRevisionMutation, revisionSuccess } = useBids();
-  const { bidId, companyName, projectTitle } =  useLocalSearchParams<{ bidId: string; companyName: string, projectTitle: string }>();
+  const { bidId, companyName, projectTitle, projectId  } =  useLocalSearchParams<{ bidId: string; companyName: string, projectTitle:string, projectId: string }>();
 
   const {
     control,
@@ -35,21 +35,21 @@ const Revisionscreen = () => {
     }
         bidRevisionMutation.mutate(formData);
   };
+
 if (revisionSuccess) {
      return (
-      <SuccessScreen
+<SuccessScreen
   title="Request Revision Sent"
   message="Your revision request has been sent to the builder. They have been notified and will review your request shortly"
   buttonTitle="Return to Proposal Details"
-  navigateTo="/proposalscreen" 
-  params={{bidId,companyName, projectTitle} }
-/>
+  navigateTo="/(clients)/proposalscreen/proposalscreen" 
+  params={{bidId, companyName, projectTitle, projectId } }
+ />
      );
    }
 
-
   return (
-    <AppLayout screenName="Revision">
+    <AppLayout screenName="Revision Request">
       <View className="pt-4 mx-4">
         <Controller
           control={control}

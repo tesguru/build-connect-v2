@@ -144,8 +144,6 @@ const Bids = ({ projectId, status }: { projectId: string; status: string }) => {
 
   return (
     <ScrollView className="flex-1 pt-4" showsVerticalScrollIndicator={false}>
-
-      {/* ── Contractors section (posted status only) ── */}
       {showContractorSection && (
         <>
           <View className="flex-row justify-between items-center px-5 mb-3">
@@ -200,7 +198,6 @@ const Bids = ({ projectId, status }: { projectId: string; status: string }) => {
         </>
       )}
 
-      {/* ── Submitted Bids ── */}
       <View className="mt-2 mx-4 mb-6">
         <View className="flex-row justify-between items-center mb-4">
           <Text className="font-interbold text-xl text-gray-900">
@@ -235,7 +232,7 @@ const Bids = ({ projectId, status }: { projectId: string; status: string }) => {
         )}
       </View>
 
-      {/* ── Invited Bids ── */}
+    
       <View className="mt-2 mx-4 mb-10">
         <View className="flex-row justify-between items-center mb-4">
           <Text className="font-interbold text-xl text-gray-900">

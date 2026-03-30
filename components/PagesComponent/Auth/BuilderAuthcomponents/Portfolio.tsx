@@ -48,11 +48,11 @@ const Portfolio = () => {
         />
       </View>
 
-      <View className="my-4">
+      <View className="pt-4">
         <Text className="text-xl font-interbold">Working hours</Text>
       </View>
 
-      <View className="flex-row gap-6 pt-4">
+      <View className=" gap-2 pt-4">
         {/* Start Time */}
         <View className="flex-1">
           <Controller

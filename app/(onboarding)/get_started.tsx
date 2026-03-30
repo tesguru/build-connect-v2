@@ -210,10 +210,10 @@ const LegalModal = ({
 
           {sections.map((section, index) => (
             <View key={index} className="mb-5">
-              <Text className="text-sm font-semibold text-gray-800 mb-1">
+              <Text className="text-sm  font-interbold text-gray-800 mb-1">
                 {section.title}
               </Text>
-              <Text className="text-sm text-gray-600 leading-6">
+              <Text className="text-sm font-inter leading-6">
                 {section.body}
               </Text>
             </View>
@@ -233,7 +233,7 @@ const LegalModal = ({
   </Modal>
 );
 
-// ─── Main Screen ──────────────────────────────────────────────────────────────
+
 const GetStarted = () => {
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<string>("client");

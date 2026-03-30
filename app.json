@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "build_connect_v2",
+    "name": "Build Connect",
     "slug": "build_connect_v2",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/BUILDCONNECT.png",
+    "icon": "./assets/images/play_store_512.png",
     "scheme": "buildconnectv2",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

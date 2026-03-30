@@ -50,7 +50,6 @@ export const submitBidSchema = z.object({
   portfolioReferences: z.any().refine((val) => !!val, {
   message: "Additional information is required",
 }),
-
 });
 
 export const addPropertySchema = z.object({
@@ -207,7 +206,39 @@ export const scheduleMeetingSchema = z.object({
   agenda:      z.string().optional(),
 });
 
+
+// ── Revision Schema ────────────────────────────────────────────────────────────
+export const builderrevisionSchema = z.object({
+  message: z.string().min(1, "Revision message is required"),
+  bidAmount: z
+    .number({ invalid_type_error: "Bid amount is required" })
+    .min(1, "Bid amount must be greater than 0"),
+  proposedTimeline: z.string().trim().min(1, "Proposed timeline is required"),
+  proposal: z
+    .string()
+    .trim()
+    .min(10, "Proposal must be at least 10 characters")
+    .max(5000, "Proposal cannot exceed 5000 characters"),
+  milestones: z
+    .array(
+      z.object({
+        milestoneName: z.string().trim().min(1, "Milestone name is required"),
+        description: z.string().optional().default(""),
+        completionDate: z.string().min(1, "Completion date is required"),
+        paymentAmount: z
+          .number({ invalid_type_error: "Payment amount is required" })
+          .min(1, "Payment amount must be greater than 0"),
+        paymentPercentage: z.number().min(0).max(100).default(100),
+        orderIndex: z.number().default(1), // ← default 1, not 0
+      })
+    )
+    .min(1, "At least one milestone is required"),
+  portfolioReferences: z.any().nullable().optional(), // ← not required
+});
+
+export type BuilderRevisionInput = z.infer<typeof builderrevisionSchema>;
 export type ScheduleMeetingInput = z.infer<typeof scheduleMeetingSchema>;
+
 
 
 export type RevisionInput = z.infer<typeof revisionSchema>;

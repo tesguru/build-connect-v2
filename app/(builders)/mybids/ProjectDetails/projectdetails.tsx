@@ -6,7 +6,6 @@ import React, { useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import BuilderContractdetailsScreen from './contractdetails'
 import Milestone from './milestone'
-import ReviewSumaryScreen from './ReviewSummary'
 
 type TabName = 'Overview' | 'Bids' | 'Milestones' | 'Contract' | 'Review Summary'
 
@@ -23,7 +22,6 @@ const ProjectDetails = () => {
     bidId:string;
     initialTab?: string
   }
-
   const [activeTab, setActiveTab] = useState<TabName>(
     isValidTab(initialTab) ? initialTab : 'Overview'
   )
@@ -32,7 +30,6 @@ const ProjectDetails = () => {
     { name: 'Overview',   component: <Overview projectId={projectId} /> },
     { name: 'Milestones', component: <Milestone projectId={projectId} /> },
     { name: 'Contract',    component: <BuilderContractdetailsScreen bidId={bidId} contractId={contractId} /> },
-        { name: 'Review Summary',    component: <ReviewSumaryScreen bidId={bidId} contractId={contractId} /> },
   ]
 
   return (

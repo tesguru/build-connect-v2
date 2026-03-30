@@ -33,7 +33,7 @@ type Invitation = {
 
 type Props = {
   invitation: Invitation
-  onAccept?: (id: string) => void
+  onAccept?: (id: string, projectId: string) => void
   onDecline?: (id: string) => void
   onViewProject?: (projectId: string) => void
   isResponding?: boolean
@@ -142,7 +142,7 @@ export default function InvitationCard({
               <>
                 {/* Accept */}
                 <TouchableOpacity
-                  onPress={() => onAccept?.(id)}
+                  onPress={() => onAccept?.(id, project.id)}
                   disabled={isResponding}
                   className={`flex-row items-center gap-2 px-5 py-2 rounded-full ${
                     isResponding ? 'bg-blue-400' : 'bg-blue-700'

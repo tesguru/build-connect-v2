@@ -1,6 +1,9 @@
 import { useRouter } from "expo-router";
 import React from "react";
-import { Image, Text, TouchableOpacity } from "react-native";
+import { Dimensions, Image, Text, TouchableOpacity } from "react-native";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const CARD_WIDTH = (SCREEN_WIDTH - 48) / 2; // 2 columns, accounting for margins
 
 interface Contractor {
   image: string;
@@ -11,34 +14,39 @@ interface Contractor {
 
 interface ContractorCardProps {
   contractor: Contractor;
-  contractorid: string; 
+  contractorid: string;
   projectId: string;
 }
 
 export const ContractorCard: React.FC<ContractorCardProps> = ({ contractor, contractorid, projectId }) => {
   const router = useRouter();
-  
+
   const Invitetobids = () => {
     router.replace({
       pathname: "/projects/inviteprofilescreen",
-      params: { 
+      params: {
         contractorId: contractorid,
-        projectId: projectId 
-      }
+        projectId: projectId,
+      },
     });
   };
 
   return (
-    <TouchableOpacity onPress={Invitetobids} className="rounded-3xl py-4 flex flex-col items-center w-[185px] m-4 border border-gray-300 mx-2">
-      <Image 
+    <TouchableOpacity
+      onPress={Invitetobids}
+      style={{ width: CARD_WIDTH }}
+      className="rounded-3xl py-4 flex flex-col items-center border border-gray-300 mx-2"
+    >
+      <Image
         source={{ uri: contractor.image }}
-        className="w-32 h-32 rounded-full mb-4"
+        style={{ width: CARD_WIDTH * 0.5, height: CARD_WIDTH * 0.5, borderRadius: (CARD_WIDTH * 0.5) / 2 }}
+        className="mb-4"
       />
-      
-      <Text className="text-xl font-interbold text-gray-900 mb-3 text-center">
+
+      <Text className="text-xl font-interbold text-gray-900 mb-3 text-center" numberOfLines={2}>
         {contractor.name}
       </Text>
-      
+
       <TouchableOpacity onPress={Invitetobids} className="w-full px-6 rounded-lg">
         <Text className="font-intersemibold text-gray-700 text-center">
           Invite to Bid

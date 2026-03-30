@@ -40,7 +40,7 @@ const Milestone: React.FC<MilestoneProps> = ({
 
   return (
     <TouchableOpacity
-      className="m-4 p-4 bg-white rounded-xl"
+      className="mx-1 my-1 p-4 bg-white rounded-xl"
       onPress={onPress}
     >
       {/* Header with title and status */}

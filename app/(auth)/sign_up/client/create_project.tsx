@@ -188,7 +188,7 @@ export default function CreateProjectScreen() {
 
       const documentTasks = data.documentFiles.map((item, i) => {
         if (item.file) {
-          return uploadFile(item.file, "project_document", "Project Document").then((res) => {
+          return uploadFile(item.file, "work_showcase", "Project Document").then((res) => {
             documentFileIds[i] = res.id;
             setValue(`documentFiles.${i}.fileId`, res.id);
           });
@@ -277,13 +277,13 @@ export default function CreateProjectScreen() {
   return (
     <KeyboardAvoidingLayout>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View className="px-4 flex-1">
+        <View className="px-1 flex-1">
           <PageHeader title="Tell us About Your Project" onBackPress={handleBack} />
 
-          <Text className="font-interbold text-lg px-4 pt-4">Project Details</Text>
+
 
           {/* Project Name */}
-          <View className="px-4 pt-4">
+          <View className="px-4 ">
             <Controller
               control={control}
               name="projectName"

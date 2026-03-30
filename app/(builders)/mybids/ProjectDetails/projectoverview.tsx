@@ -16,7 +16,7 @@ const Overview = (projectId:{projectId : string}) => {
     const apiData = apiResponse?.data || apiResponse; 
     const projectData = apiData || {};
     
-    console.log("Overview", projectData)
+   
     
   
     

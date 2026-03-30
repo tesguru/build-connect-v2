@@ -1,5 +1,5 @@
-import React, { useRef, useState, useEffect } from "react";
-import { View, TextInput, TextInputKeyPressEventData, NativeSyntheticEvent } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { NativeSyntheticEvent, TextInput, TextInputKeyPressEventData, View } from "react-native";
 
 interface OTPInputProps {
   length?: number;
@@ -16,7 +16,7 @@ const OTPInput: React.FC<OTPInputProps> = ({
   onChange = () => {},
   color = "black",
   inactiveColor = "#d1d5db",
-  size = 55,
+  size = 49,
 }) => {
   const [otp, setOtp] = useState<string[]>(Array(length).fill(""));
   const inputs = useRef<Array<TextInput | null>>([]);
@@ -49,9 +49,9 @@ const OTPInput: React.FC<OTPInputProps> = ({
   };
 
   return (
-    <View style={{ flexDirection: "row", justifyContent: "center", gap: 10 }}>
+    <View className="" style={{ flexDirection: "row", justifyContent: "center", gap: 10 }}>
       {Array.from({ length }).map((_, index) => (
-        <TextInput
+        <TextInput className="m"
           key={index}
           ref={(el) => (inputs.current[index] = el)}
           value={otp[index]}

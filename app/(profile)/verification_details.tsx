@@ -11,7 +11,6 @@ import {
   Clock,
   ExternalLink,
   FileText,
-  Globe,
   ImageIcon,
   MapPin,
   ShieldCheck,
@@ -292,11 +291,20 @@ const Timeline = ({
 const BuilderVerificationView = ({
   contractorProfile,
   verificationStatus,
+  userData, // Add userData prop to get user info
 }: {
   contractorProfile: any;
   verificationStatus: string;
+  userData: any; // Added this
 }) => {
   const sc = getVerificationStatusConfig(verificationStatus);
+
+  // Get user info from main userData instead of contractorProfile
+  const fullName = userData?.firstName && userData?.lastName 
+    ? `${userData.firstName} ${userData.lastName}`
+    : '—';
+  const email = userData?.email || '—';
+  const mobileNumber = userData?.mobileNumber || '—';
 
   const documents = [
     contractorProfile?.profilePicture && {
@@ -342,7 +350,7 @@ const BuilderVerificationView = ({
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingBottom: 48 }}
     >
-      {/* ── Status Overview Card ── */}
+      {/* Status Overview Card */}
       <View className="pt-4 bg-white m-4 rounded-xl">
         <View className="flex-row items-center justify-between px-4 mb-3">
           <View className="flex-row items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-full">
@@ -395,7 +403,7 @@ const BuilderVerificationView = ({
         </View>
       </View>
 
-  
+      {/* Business Information */}
       <View className="bg-white m-4 rounded-xl">
         <Text className="font-interbold px-4 pt-4 text-xl pb-2">
           Business Information
@@ -409,35 +417,11 @@ const BuilderVerificationView = ({
         <InfoRow
           label="Location"
           value={contractorProfile?.location}
+          last
         />
-        {contractorProfile?.businessDescription && (
-          <>
-            <View className="px-4 py-4">
-              <Text className="font-inter text-gray-500 mb-1">Description</Text>
-              <Text className="font-inter text-gray-800 leading-5">
-                {contractorProfile.businessDescription}
-              </Text>
-            </View>
-            <Divider />
-          </>
-        )}
-        {contractorProfile?.website && (
-          <TouchableOpacity
-            onPress={() => Linking.openURL(contractorProfile.website)}
-            className="px-4 py-4 flex-row justify-between items-center"
-          >
-            <Text className="font-inter text-gray-500">Website</Text>
-            <View className="flex-row items-center gap-1.5">
-              <Globe size={14} color="#2563EB" />
-              <Text className="font-interbold text-base text-blue-600">
-                {contractorProfile.website}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        )}
       </View>
 
-   
+      {/* Account Information - Using userData instead */}
       <View className="bg-white m-4 rounded-xl">
         <Text className="font-interbold px-4 pt-4 text-xl pb-2">
           Account Information
@@ -445,81 +429,22 @@ const BuilderVerificationView = ({
         <Divider />
         <InfoRow
           label="Full Name"
-          value={
-            contractorProfile?.user
-              ? `${contractorProfile.user.firstName} ${contractorProfile.user.lastName}`
-              : '—'
-          }
+          value={fullName}
         />
         <InfoRow
           label="Email"
-          value={contractorProfile?.user?.email}
+          value={email}
         />
         <InfoRow
           label="Phone"
-          value={contractorProfile?.user?.mobileNumber}
+          value={mobileNumber}
           last
         />
       </View>
 
-   
-      <View className="bg-white m-4 rounded-xl">
-        <Text className="font-interbold px-4 pt-4 text-xl pb-2">
-          Profile Details
-        </Text>
-        <Divider />
+  
 
-        <InfoRow
-          label="Experience"
-          value={contractorProfile?.experienceRange?.label}
-        />
-        <InfoRow
-          label="Availability"
-          value={contractorProfile?.availabilityOption?.label}
-        />
-        <InfoRow
-          label="Working Hours"
-          value={
-            contractorProfile?.workingHoursStart && contractorProfile?.workingHoursEnd
-              ? `${contractorProfile.workingHoursStart} - ${contractorProfile.workingHoursEnd}`
-              : '—'
-          }
-        />
-
-     
-        <View className="px-4 py-4">
-          <Text className="font-inter text-gray-500 mb-2">Available Days</Text>
-          <View className="flex-row flex-wrap gap-2">
-            {contractorProfile?.availableDays?.length > 0 ? (
-              contractorProfile.availableDays.map((day: string) => (
-                <View key={day} className="bg-blue-50 px-3 py-1 rounded-full">
-                  <Text className="font-interbold text-blue-600 text-xs capitalize">
-                    {day}
-                  </Text>
-                </View>
-              ))
-            ) : (
-              <Text className="font-inter text-gray-400">—</Text>
-            )}
-          </View>
-        </View>
-
-      
-        {contractorProfile?.workShowcaseIds?.length > 0 && (
-          <>
-            <Divider />
-            <View className="px-4 py-4">
-              <Text className="font-inter text-gray-500 mb-1">Work Showcase</Text>
-              <Text className="font-interbold text-base text-gray-900">
-                {contractorProfile.workShowcaseIds.length} item
-                {contractorProfile.workShowcaseIds.length > 1 ? 's' : ''} submitted
-              </Text>
-            </View>
-          </>
-        )}
-      </View>
-
-   
+      {/* Documents Section - Show if any documents exist */}
       {documents.length > 0 && (
         <View className="bg-white m-4 rounded-xl">
           <Text className="font-interbold px-4 pt-4 text-xl pb-4">
@@ -543,7 +468,7 @@ const BuilderVerificationView = ({
         </View>
       )}
 
-  
+      {/* Timeline */}
       <Timeline
         submittedAt={contractorProfile?.createdAt}
         verificationStatus={verificationStatus}
@@ -709,6 +634,7 @@ const VerificationDetailsScreen = () => {
         <BuilderVerificationView
           contractorProfile={userData?.contractorProfile}
           verificationStatus={verificationStatus}
+          userData={userData} // Pass the full userData
         />
       ) : (
         <ClientVerificationView

@@ -25,26 +25,32 @@ export const BidsCard = ({
 }: BidsCardProps) => {
   const router = useRouter();
 
+  // Helper function to format number with commas
+  const formatAmount = (amount: string | number): string => {
+    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+    if (isNaN(num)) return '0';
+    return num.toLocaleString('en-NG');
+  };
+
   const gotoProjectDetails = () => {
-  if (contractId) {
+    if (contractId) {
+      router.push({
+        pathname: '/(builders)/mybids/ProjectDetails/projectdetails',
+        params: { contractId, bidId, projectId },
+      });
+      return;
+    }
+
     router.push({
-      pathname: '/(builders)/mybids/ProjectDetails/projectdetails',
+      pathname: '/projectdetails/projectdetails',
       params: { contractId, bidId, projectId },
     });
-    return; 
-  }
-
-  router.push({
-    pathname: '/projectdetails/projectdetails',
-    params: { contractId, bidId, projectId },
-  });
-};
+  };
 
   const viewBidDetails = () => {
-
-     router.push({
+    router.push({
       pathname: '/mybids/viewbidsdetails',
-      params: {bidId },
+      params: { bidId },
     });
   };
 
@@ -90,10 +96,7 @@ export const BidsCard = ({
         elevation: 3,
       }}
     >
-   
       <View className="flex-row p-3 gap-3">
-
-    
         <View
           style={{
             width: 88,
@@ -120,10 +123,7 @@ export const BidsCard = ({
           </Text>
         </View>
 
-      
         <View className="flex-1 justify-between py-1">
-
-         
           <View className="flex-row justify-between items-start">
             <Text
               className="font-interbold text-gray-900 text-base flex-1 pr-2"
@@ -146,32 +146,26 @@ export const BidsCard = ({
             </View>
           </View>
 
-      
           <View className="mt-2">
             <Text className="font-inter text-xs text-gray-400">Bid Amount</Text>
             <Text className="font-interbold text-blue-600 text-base mt-0.5">
-              ₦{typeof amount === 'number' ? amount.toLocaleString() : amount}
+              ₦{formatAmount(amount)}
             </Text>
           </View>
-
         </View>
       </View>
 
-  
       <View className="mx-3 h-px bg-slate-100" />
 
-    
       <View className="flex-row gap-2 px-3 py-3">
-      
-          <TouchableOpacity
-            className="flex-1 flex-row items-center justify-center gap-1 bg-blue-600 rounded-xl py-2.5"
-            onPress={gotoProjectDetails}
-            activeOpacity={0.85}
-          >
-            <Ionicons name="document-text-outline" size={13} color="#fff" />
-            <Text className="text-white font-intersemibold text-xs">View Project</Text>
-          </TouchableOpacity>
-     
+        <TouchableOpacity
+          className="flex-1 flex-row items-center justify-center gap-1 bg-blue-600 rounded-xl py-2.5"
+          onPress={gotoProjectDetails}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="document-text-outline" size={13} color="#fff" />
+          <Text className="text-white font-intersemibold text-xs">View Project</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
           className="flex-1 flex-row items-center justify-center gap-1 rounded-xl py-2.5 border border-slate-200 bg-slate-50"

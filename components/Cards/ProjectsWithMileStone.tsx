@@ -25,7 +25,7 @@ const StatusBadge = ({ status }: { status?: string }) => {
   return (
     <View
       style={{ backgroundColor: cfg.bg }}
-      className="px-3 py-1 rounded-full self-start"
+      className="px-3 py-1 text-inter rounded-full self-start"
     >
       <Text style={{ color: cfg.text }} className="text-xs font-inter font-medium">
         {cfg.label}
@@ -88,7 +88,7 @@ const ProjectsWithMilestone: React.FC<ProjectsComponentProps> = ({
           >
             {description}
           </Text>
-          {!expanded && (description?.length ?? 0) > 100 && (
+          {!expanded && (description?.length ?? 0) > 40 && (
             <TouchableOpacity
               onPress={(e) => {
                 e.stopPropagation()

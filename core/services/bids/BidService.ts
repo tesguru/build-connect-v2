@@ -15,6 +15,7 @@ export const BidService = {
   signContract: (contractorId: any) => axiosInstance.post(`${ENDPOINTS.CONTRACT.CONTRACT}${contractorId}/sign`),
   bidRespond: (data: any) =>  axiosInstance.patch(`${ENDPOINTS.BID.BIDS}${data.bidId}/status`, data),
   bidRevisionRequest: (data: any) =>  axiosInstance.post(`${ENDPOINTS.BID.BIDS}${data.bidId}/revisions/request`, data),
+  builderBidRevisionRequest: (data: any) =>  axiosInstance.post(`${ENDPOINTS.BID.BIDS}${data.bidId}/revisions/submit`, data),
   inviteToBids: (data: any) => axiosInstance.post(`${ENDPOINTS.BID.BIDS}invite`, data),
   myInvitations: (data: any) => axiosInstance.get(`${ENDPOINTS.BID.BIDS}my-invitations`, data),
   getInvitations: (data: any) => axiosInstance.get(`${ENDPOINTS.BID.BIDS}my-invitations`, data),

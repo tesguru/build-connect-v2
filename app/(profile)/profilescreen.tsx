@@ -14,9 +14,7 @@ import {
   View,
 } from "react-native";
 
-// ─── Verification Status Config (display only — admin controlled) ─────────────
-// This has nothing to do with navigation or actions
-// It just shows what admin has decided
+
 const VERIFICATION_STATUS_CONFIG: Record<
   string,
   { label: string; badgeBg: string; badgeText: string; dot: string }

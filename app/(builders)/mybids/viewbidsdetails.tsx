@@ -1,9 +1,9 @@
 import AppLayout from '@/components/Layouts/AppLayout';
 import { useBids } from '@/core/hooks/UseBids';
 import { formatCurrency } from '@/core/utils';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 const SectionCard = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -70,8 +70,13 @@ const ViewBidDetails = () => {
 
   const { singleBidQuery } = useBids();
   const { data, isLoading, error } = singleBidQuery(bidId);
+  const router = useRouter();
+ const handleRevision = () =>
+    router.push({
+      pathname: '/(builders)/reviewsummary/reviewsummary',
+      params: { bidId },
+    });
 
-  // ── Guard: loading ──
   if (isLoading) {
     return (
       <AppLayout screenName="Bid Details">
@@ -83,7 +88,6 @@ const ViewBidDetails = () => {
     );
   }
 
-  // ── Guard: error ──
   if (error) {
     return (
       <AppLayout screenName="Bid Details">
@@ -96,7 +100,6 @@ const ViewBidDetails = () => {
     );
   }
 
-  // ── Safe to destructure — data is guaranteed here ──
   const bidsData   = data?.data?.data ?? {};
   const milestones = bidsData.milestones ?? [];
 
@@ -212,6 +215,18 @@ const ViewBidDetails = () => {
             </Text>
           )}
         </SectionCard>
+
+         <TouchableOpacity
+                            onPress={handleRevision}
+                            className="items-center py-3"
+                          >
+                            <Text className="font-inter text-gray-400 text-sm">
+                              Not satisfied?{' '}
+                              <Text className="text-green-600 font-interbold">
+                                Request a revision
+                              </Text>
+                            </Text>
+                          </TouchableOpacity>
       </ScrollView>
     </AppLayout>
   );

@@ -24,6 +24,7 @@ export interface CreateProjectPayload {
 
 export const meetingService = {
   getMeeting: (params :any) => axiosInstance.get(`${ENDPOINTS.MEETINGS.MEETINGS}`,  { params }),
+  singleMeeting: (meetingId :any) => axiosInstance.get(`${ENDPOINTS.MEETINGS.MEETINGS}${meetingId}`,),
   getMeetingDetails: (data: CreateProjectPayload) => 
     axiosInstance.post(ENDPOINTS.MEETINGS.MEETINGS, data),
   createMeeting: (data: any) =>  axiosInstance.post(`${ENDPOINTS.MEETINGS.MEETINGS}schedule`, data),

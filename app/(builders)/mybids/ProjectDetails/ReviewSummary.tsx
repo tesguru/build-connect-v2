@@ -1,69 +1,68 @@
 import { useBids } from '@/core/hooks/UseBids';
-import React, { useRef, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
+import React, { useRef } from 'react';
 import {
-    FlatList,
-    KeyboardAvoidingView,
-    Platform,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
-const CURRENT_USER = 'Abolanle Onabanjo';
-const OTHER_USER = 'Ethan Carter';
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+const formatSentAt = (isoString: string): string => {
+  const date = new Date(isoString);
+  const hours = date.getHours();
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'pm' : 'am';
+  const hour12 = hours % 12 || 12;
+  return `Today, ${hour12}:${minutes}${ampm}`;
+};
 
-const initialMessages = [
-  {
-    id: '1',
-    sender: OTHER_USER,
-    text: "Hello! I'm Abolanle, how can I help you today?",
-    time: 'Today, 08:25am',
-  },
-  {
-    id: '2',
-    sender: CURRENT_USER,
-    text: 'Hi Ethan, great to connect with you. How can we get started.',
-    time: 'Today, 08:35am',
-  },
-  {
-    id: '3',
-    sender: OTHER_USER,
-    text: "I've reviewed your project details. Let's schedule a call to discuss the next steps.",
-    time: 'Today, 08:40am',
-  },
-  {
-    id: '4',
-    sender: CURRENT_USER,
-    text: 'Sounds good! How about tomorrow afternoon, I hope that is cool with you?',
-    time: 'Today, 09:29am',
-  },
-  {
-    id: '5',
-    sender: OTHER_USER,
-    text: "Tomorrow afternoon works perfectly for me. Let's say 2:00 PM?",
-    time: 'Today, 09:35am',
-  },
-];
+const mapApiMessages = (apiMessages: any[], builderName: string, clientName: string) =>
+  apiMessages.map((msg) => ({
+    id: msg.id,
+    sender: msg.role === 'builder' ? builderName : clientName,
+    senderRole: msg.role,
+    text: msg.message,
+    time: formatSentAt(msg.sentAt),
+    isStatic: msg.isStatic,
+  }));
 
 // ─── Avatar ────────────────────────────────────────────────────────────────────
-const Avatar = ({ name, isCurrentUser = false }) => {
+const Avatar = ({ name, role = 'builder' }) => {
   const initials = name
     .split(' ')
-    .map(w => w[0])
+    .map((w) => w[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
 
+  const isBuilder = role === 'builder';
+  
   return (
     <View
-      className={`w-9 h-9 rounded-full items-center justify-center ${
-        isCurrentUser ? 'bg-indigo-600' : 'bg-purple-100'
-      }`}
+      style={{
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: isBuilder ? '#eff6ff' : '#2563eb',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: isBuilder ? '#bfdbfe' : '#1e40af',
+      }}
     >
       <Text
-        className={`text-sm font-bold ${
-          isCurrentUser ? 'text-white' : 'text-purple-700'
-        }`}
+        style={{
+          fontSize: 14,
+          fontFamily: 'Inter_600SemiBold',
+          color: isBuilder ? '#2563eb' : '#ffffff',
+        }}
       >
         {initials}
       </Text>
@@ -72,44 +71,70 @@ const Avatar = ({ name, isCurrentUser = false }) => {
 };
 
 // ─── Message Bubble ────────────────────────────────────────────────────────────
-const MessageBubble = ({ message }) => {
-  const isMe = message.sender === CURRENT_USER;
+const MessageBubble = ({ message, isBuilder }) => {
+  const isMe = message.senderRole === 'builder';
 
   return (
     <View
-      className={`flex-row mb-5 items-end ${
-        isMe ? 'justify-end' : 'justify-start'
-      }`}
+      style={{
+        flexDirection: 'row',
+        marginBottom: 20,
+        alignItems: 'flex-end',
+        justifyContent: isMe ? 'flex-end' : 'flex-start',
+      }}
     >
       {!isMe && (
-        <View className="mr-2 mb-0.5">
-          <Avatar name={message.sender} />
+        <View style={{ marginRight: 12, marginBottom: 2 }}>
+          <Avatar name={message.sender} role="client" />
         </View>
       )}
 
-      <View className={`max-w-[72%] ${isMe ? 'items-end' : 'items-start'}`}>
-        <Text className="text-xs font-semibold text-slate-400 mb-1 tracking-tight">
+      <View style={{ maxWidth: '72%', alignItems: isMe ? 'flex-end' : 'flex-start' }}>
+        <Text
+          style={{
+            fontSize: 11,
+            fontFamily: 'Inter_500Medium',
+            color: '#94a3b8',
+            marginBottom: 4,
+          }}
+        >
           {message.sender}
         </Text>
 
         <View
-          className={`rounded-2xl px-4 pt-3 pb-2.5 ${
-            isMe
-              ? 'bg-indigo-600 rounded-tr-sm'
-              : 'bg-white rounded-tl-sm shadow-sm'
-          }`}
+          style={{
+            borderRadius: 20,
+            paddingHorizontal: 16,
+            paddingTop: 12,
+            paddingBottom: 10,
+            backgroundColor: isMe ? '#2563eb' : '#ffffff',
+            borderTopRightRadius: isMe ? 4 : 20,
+            borderTopLeftRadius: isMe ? 20 : 4,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.05,
+            shadowRadius: 2,
+            elevation: 1,
+          }}
         >
           <Text
-            className={`text-[15px] leading-[22px] ${
-              isMe ? 'text-white' : 'text-slate-800'
-            }`}
+            style={{
+              fontSize: 15,
+              lineHeight: 22,
+              fontFamily: 'Inter_400Regular',
+              color: isMe ? '#ffffff' : '#1e293b',
+            }}
           >
             {message.text}
           </Text>
           <Text
-            className={`text-[11px] font-medium mt-1.5 text-right ${
-              isMe ? 'text-indigo-200 italic' : 'text-slate-400'
-            }`}
+            style={{
+              fontSize: 10,
+              fontFamily: 'Inter_400Regular',
+              marginTop: 6,
+              textAlign: 'right',
+              color: isMe ? '#bfdbfe' : '#cbd5e1',
+            }}
           >
             {message.time}
           </Text>
@@ -117,8 +142,8 @@ const MessageBubble = ({ message }) => {
       </View>
 
       {isMe && (
-        <View className="ml-2 mb-0.5">
-          <Avatar name={message.sender} isCurrentUser />
+        <View style={{ marginLeft: 12, marginBottom: 2 }}>
+          <Avatar name={message.sender} role="builder" />
         </View>
       )}
     </View>
@@ -126,128 +151,236 @@ const MessageBubble = ({ message }) => {
 };
 
 // ─── Main Screen ───────────────────────────────────────────────────────────────
-export default function ReviewSummaryScreen({ bidId }: { bidId: string }) {
-  const [messages, setMessages] = useState(initialMessages);
-  const [inputText, setInputText] = useState('');
+export default function ReviewSummaryScreen({ bidId, bidData }: { bidId: string; bidData?: any }) {
   const flatListRef = useRef(null);
+  const navigation = useNavigation();
 
-  const sendMessage = () => {
-    if (!inputText.trim()) return;
+  const { bidRevisionSummary } = useBids();
+  const { data: apiResponse, isLoading, error } = bidRevisionSummary(bidId);
 
-    const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    const ampm = hours >= 12 ? 'pm' : 'am';
-    const hour12 = hours % 12 || 12;
-    const timeStr = `Today, ${hour12}:${minutes}${ampm}`;
+  // Get builder and client names from bid data
+  const builderName = bidData?.contractor 
+    ? `${bidData.contractor.firstName} ${bidData.contractor.lastName}`
+    : 'Builder';
+  const clientName = bidData?.project?.client 
+    ? `${bidData.project.client.firstName} ${bidData.project.client.lastName}`
+    : 'Client';
 
-    setMessages(prev => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        sender: CURRENT_USER,
-        text: inputText.trim(),
-        time: timeStr,
-      },
-    ]);
-    setInputText('');
+  // Derive messages from API response
+  const messages = apiResponse?.data?.messages
+    ? mapApiMessages(apiResponse.data.messages, builderName, clientName)
+    : [];
+   const router = useRouter();
+   const handleSendReviewSummary = () => {
+  router.push({
+    pathname: "/(clients)/revisionscreen/revisionscreen",
+    params: { bidId: bidId }
+  });
+};
 
-    setTimeout(() => {
-      flatListRef.current?.scrollToEnd({ animated: true });
-    }, 100);
-  };
+  // ── Loading state ──
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 80 }}>
+        <ActivityIndicator size="large" color="#2563eb" />
+        <Text 
+          style={{ 
+            fontFamily: 'Inter_400Regular', 
+            color: '#94a3b8', 
+            fontSize: 13, 
+            marginTop: 12 
+          }}
+        >
+          Loading conversation…
+        </Text>
+      </View>
+    );
+  }
 
-  const canSend = inputText.trim().length > 0;
-
-  const handleSendReviewSummary = () => {
-    // Navigate to the Review Request screen, passing along the messages as context
-    navigation?.navigate('SendReviewRequest', { messages });
-  };
-
-   const { bidRevisionSummary } = useBids();
-  
-    const {
-      data: apiResponse,
-      isLoading,
-      error,
-    } = bidRevisionSummary(bidId);
-
-    console.log(apiResponse);
+  // ── Error state ──
+  if (error) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 80, paddingHorizontal: 24 }}>
+        <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
+        <Text 
+          style={{ 
+            fontFamily: 'Inter_500Medium', 
+            color: '#ef4444', 
+            fontSize: 14, 
+            textAlign: 'center',
+            marginTop: 16
+          }}
+        >
+          Failed to load messages. Please try again.
+        </Text>
+      </View>
+    );
+  }
 
   return (
-    <View className="mt-2">
-
-     
-
-    
-      <View className="flex-row items-center justify-between px-4 py-2.5 bg-indigo-50 border-b border-indigo-100">
-        <View className="flex-row items-center gap-2">
-          <Avatar name={OTHER_USER} />
+    <View style={{ flex: 1, backgroundColor: '#f8fafc' }}>
+      {/* ── Header ── */}
+      <View 
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: 20,
+          paddingVertical: 16,
+          backgroundColor: '#ffffff',
+          borderBottomWidth: 1,
+          borderBottomColor: '#e2e8f0',
+        }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <Avatar name={builderName} role="builder" />
           <View>
-            <Text className="text-xs text-slate-400 font-medium">Builder</Text>
-            <Text className="text-[13px] font-semibold text-slate-700">{OTHER_USER}</Text>
+            <Text 
+              style={{ 
+                fontFamily: 'Inter_400Regular', 
+                fontSize: 11, 
+                color: '#64748b' 
+              }}
+            >
+              Builder
+            </Text>
+            <Text 
+              style={{ 
+                fontFamily: 'Inter_600SemiBold', 
+                fontSize: 14, 
+                color: '#0f172a' 
+              }}
+            >
+              {builderName}
+            </Text>
           </View>
         </View>
 
-        {/* Divider line with arrow */}
-        <View className="flex-row items-center gap-1">
-          <View className="w-6 h-px bg-indigo-300" />
-          <Text className="text-indigo-400 text-xs">↔</Text>
-          <View className="w-6 h-px bg-indigo-300" />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View style={{ width: 30, height: 1, backgroundColor: '#cbd5e1' }} />
+          <Ionicons name="swap-horizontal" size={16} color="#94a3b8" />
+          <View style={{ width: 30, height: 1, backgroundColor: '#cbd5e1' }} />
         </View>
 
-        <View className="flex-row items-center gap-2">
-          <View className="items-end">
-            <Text className="text-xs text-slate-400 font-medium">Client</Text>
-            <Text className="text-[13px] font-semibold text-slate-700">{CURRENT_USER}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <View style={{ alignItems: 'flex-end' }}>
+            <Text 
+              style={{ 
+                fontFamily: 'Inter_400Regular', 
+                fontSize: 11, 
+                color: '#64748b' 
+              }}
+            >
+              Client
+            </Text>
+            <Text 
+              style={{ 
+                fontFamily: 'Inter_600SemiBold', 
+                fontSize: 14, 
+                color: '#0f172a' 
+              }}
+            >
+              {clientName}
+            </Text>
           </View>
-          <Avatar name={CURRENT_USER} isCurrentUser />
+          <Avatar name={clientName} role="client" />
         </View>
       </View>
 
-   
+      {/* ── Message list + CTA ── */}
       <KeyboardAvoidingView
-        className="flex-1"
+        style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <FlatList
           ref={flatListRef}
           data={messages}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => <MessageBubble message={item} />}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <MessageBubble 
+              message={item} 
+              isBuilder={item.senderRole === 'builder'} 
+            />
+          )}
           contentContainerStyle={{
-            paddingHorizontal: 16,
-            paddingTop: 20,
-            paddingBottom: 12,
+            paddingHorizontal: 20,
+            paddingTop: 24,
+            paddingBottom: 16,
           }}
           showsVerticalScrollIndicator={false}
           onContentSizeChange={() =>
             flatListRef.current?.scrollToEnd({ animated: false })
           }
+          ListEmptyComponent={
+            <View style={{ alignItems: 'center', marginTop: 60 }}>
+              <Ionicons name="chatbubble-outline" size={48} color="#cbd5e1" />
+              <Text 
+                style={{ 
+                  fontFamily: 'Inter_400Regular', 
+                  color: '#94a3b8', 
+                  fontSize: 14, 
+                  marginTop: 12 
+                }}
+              >
+                No messages yet.
+              </Text>
+            </View>
+          }
         />
 
-
-        <View className="px-4 pt-3 pb-2  border-t border-slate-100">
+        <View style={{ 
+          paddingHorizontal: 20, 
+          paddingTop: 16, 
+          paddingBottom: 24,
+          borderTopWidth: 1,
+          borderTopColor: '#e2e8f0',
+          backgroundColor: '#ffffff',
+        }}>
           <TouchableOpacity
-            className="flex-row items-center justify-center bg-indigo-600 rounded-2xl py-3.5 px-6 shadow-md"
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#2563eb',
+              borderRadius: 14,
+              paddingVertical: 14,
+              paddingHorizontal: 20,
+              gap: 8,
+              shadowColor: '#2563eb',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+              elevation: 2,
+            }}
             onPress={handleSendReviewSummary}
             activeOpacity={0.85}
           >
-       
-            <Text className="text-white text-base mr-2">📋</Text>
-            <Text className="text-white text-[15px] font-bold tracking-wide">
+            <Ionicons name="document-text-outline" size={18} color="#fff" />
+            <Text 
+              style={{ 
+                color: '#ffffff', 
+                fontSize: 15, 
+                fontFamily: 'Inter_600SemiBold',
+                letterSpacing: 0.3,
+              }}
+            >
               Send Review Summary
             </Text>
-         
-            <Text className="text-white text-base ml-2 opacity-80">→</Text>
+            <Ionicons name="arrow-forward-outline" size={16} color="#fff" />
           </TouchableOpacity>
-          <Text className="text-center text-slate-400 text-[11px] mt-1.5">
+          <Text 
+            style={{ 
+              textAlign: 'center', 
+              color: '#94a3b8', 
+              fontSize: 11, 
+              fontFamily: 'Inter_400Regular',
+              marginTop: 12,
+            }}
+          >
             This will send a review request to both parties
           </Text>
         </View>
-
-      
       </KeyboardAvoidingView>
     </View>
   );

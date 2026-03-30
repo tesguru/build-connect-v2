@@ -1,7 +1,6 @@
 import GradientButton from "@/components/Buttons/GradientButton";
 import AppLayout from "@/components/Layouts/AppLayout";
 import EmptyScreenComponent from "@/components/Miscallaneous/EmptyScreenComponent";
-import { ConstructionBuilding } from "@/constants/image";
 import { useProjects } from "@/core/hooks/useProjects";
 import { useRoute } from "@react-navigation/native";
 import { useRouter } from "expo-router";
@@ -11,23 +10,36 @@ import {
   Calendar,
   CheckCircle,
   Clock,
-  DollarSign,
   FileText,
+  Flag,
   MapPin,
-  Users,
+  Users
 } from "lucide-react-native";
-import React from "react";
-import { ActivityIndicator, Image, ScrollView, Text, View } from "react-native";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Dimensions,
+  Image,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const ProjectDetailsScreen = ({ navigation }: any) => {
   const route = useRoute();
   const { projectId } = route.params as { projectId: string };
   const { singleProjectMarketPlaceQuery } = useProjects();
   const { data, isLoading, error } = singleProjectMarketPlaceQuery(projectId);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const apiResponse = data?.data;
   const projectData = apiResponse?.data || apiResponse;
   const router = useRouter();
+
   const handleSubmitBid = () => {
     router.push({
       pathname: "/submitbid/submitbid",
@@ -42,6 +54,28 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
   const formatStatus = (status: string) => {
     if (!status) return "Unknown";
     return status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ");
+  };
+
+  const getMilestoneStatusStyle = (status: string) => {
+    switch (status) {
+      case "completed":
+        return { bg: "bg-green-100", text: "text-green-800" };
+      case "in_progress":
+        return { bg: "bg-blue-100", text: "text-blue-800" };
+      case "pending":
+        return { bg: "bg-yellow-100", text: "text-yellow-800" };
+      default:
+        return { bg: "bg-gray-100", text: "text-gray-800" };
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    if (!amount && amount !== 0) return "N/A";
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      minimumFractionDigits: 0,
+    }).format(amount);
   };
 
   if (isLoading) {
@@ -97,25 +131,62 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
   const owner = projectData.owner || {};
   const applicationDeadline =
     projectData.applicationDeadline || "Not specified";
+  const images = projectData.images || [];
+  const milestones = projectData.milestones || [];
+
+  const totalMilestoneAmount = milestones.reduce(
+    (sum: number, m: any) => sum + (m.amount || 0),
+    0
+  );
+  const completedMilestones = milestones.filter(
+    (m: any) => m.status === "completed"
+  ).length;
 
   return (
     <AppLayout screenName="Project Details">
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View className="flex-row justify-center m-4 ">
-          <Image
-            className="rounded-xl"
-            style={{ width: "100%", height: 200 }}
-            resizeMode="cover"
-            source={ConstructionBuilding}
-          />
-        </View>
+
+        {/* Hero Image Gallery */}
+        {images.length > 0 && (
+          <View>
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+            >
+              {images.map((img: any, index: number) => (
+                <TouchableOpacity
+                  key={img.fileId}
+                  activeOpacity={0.92}
+                  onPress={() => setSelectedImage(img.publicUrl)}
+                >
+                  <Image
+                    source={{ uri: img.publicUrl }}
+                    style={{ width: SCREEN_WIDTH, height: 240 }}
+                    resizeMode="cover"
+                  />
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            {images.length > 1 && (
+              <View className="flex-row justify-center mt-2 gap-1 pb-1">
+                {images.map((_: any, i: number) => (
+                  <View key={i} className="w-2 h-2 rounded-full bg-blue-400" />
+                ))}
+              </View>
+            )}
+          </View>
+        )}
 
         <View className="px-6">
           <Text className="font-worksanssemibold text-2xl pt-4">{title}</Text>
 
           {owner && Object.keys(owner).length > 0 && (
             <Text className="font-inter pt-2 text-gray-600">
-              Posted by: {(owner as any)?.name || "Anonymous"}
+              Posted by:{" "}
+              {(owner as any)?.name ||
+                `${(owner as any)?.firstName || ""} ${(owner as any)?.lastName || ""}`.trim() ||
+                "Anonymous"}
             </Text>
           )}
 
@@ -154,32 +225,32 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
 
           {/* Budget and Timeline Cards */}
           <View className="flex-row gap-4 pt-6">
-            <View className="flex-1 bg-white p-4 rounded-xl  border border-gray-100">
+            <View className="flex-1 bg-white p-4 rounded-xl border border-gray-100">
               <View className="flex-row items-center justify-center mb-2">
-                <DollarSign size={20} color="#3B82F6" />
+                <Clock size={20} color="#3B82F6" />
                 <Text className="text-center text-md font-inter text-gray-600 ml-2">
                   Budget
                 </Text>
               </View>
-              <Text className="text-center text-xl font-worksanssemibold text-blue-600">
+              <Text className="text-center text-sm font-worksanssemibold text-blue-600">
                 {(budgetRange as any)?.label || "Not specified"}
               </Text>
             </View>
 
-            <View className="flex-1 bg-white p-4 rounded-xl  border border-gray-100">
+            <View className="flex-1 bg-white p-4 rounded-xl border border-gray-100">
               <View className="flex-row items-center justify-center mb-2">
                 <Clock size={20} color="#3B82F6" />
                 <Text className="text-center text-md font-inter text-gray-600 ml-2">
                   Timeline
                 </Text>
               </View>
-              <Text className="text-center text-xl font-worksanssemibold text-gray-800">
+              <Text className="text-center text-sm font-worksanssemibold text-gray-800">
                 {(timeline as any)?.label || "Not specified"}
               </Text>
             </View>
           </View>
 
-          {/* About This Project */}
+          {/* Description */}
           <View className="pt-6">
             <Text className="font-worksanssemibold text-xl mb-3">
               Description
@@ -284,7 +355,7 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
                     {applicationDeadline !== "Not specified"
                       ? new Date(applicationDeadline).toLocaleDateString(
                           "en-US",
-                          { month: "short", day: "numeric", year: "numeric" },
+                          { month: "short", day: "numeric", year: "numeric" }
                         )
                       : "Not specified"}
                   </Text>
@@ -298,6 +369,123 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
             </View>
           </View>
 
+          {/* ── MILESTONES ── */}
+          <View className="pt-6">
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="font-worksanssemibold text-xl">Milestones</Text>
+              {milestones.length > 0 && (
+                <View className="bg-blue-100 px-3 py-1 rounded-full">
+                  <Text className="text-blue-800 font-worksanssemibold text-xs">
+                    {milestones.length}{" "}
+                    {milestones.length === 1 ? "milestone" : "milestones"}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {milestones.length > 0 ? (
+              <>
+                {/* Summary strip */}
+                <View className="flex-row gap-3 mb-3">
+                  <View className="flex-1 bg-blue-50 p-3 rounded-xl border border-blue-100 items-center">
+                    <Text className="text-xs font-inter text-blue-600 mb-1">
+                      Total Value
+                    </Text>
+                    <Text className="font-worksanssemibold text-blue-800 text-sm">
+                      {formatCurrency(totalMilestoneAmount)}
+                    </Text>
+                  </View>
+                  <View className="flex-1 bg-green-50 p-3 rounded-xl border border-green-100 items-center">
+                    <Text className="text-xs font-inter text-green-600 mb-1">
+                      Completed
+                    </Text>
+                    <Text className="font-worksanssemibold text-green-800 text-sm">
+                      {completedMilestones} / {milestones.length}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Milestone cards */}
+                <View className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                  {milestones.map((milestone: any, index: number) => {
+                    const mStyle = getMilestoneStatusStyle(milestone.status);
+                    return (
+                      <View
+                        key={milestone.id}
+                        className={`p-4 ${
+                          index < milestones.length - 1
+                            ? "border-b border-gray-100"
+                            : ""
+                        }`}
+                      >
+                        {/* Top row: order + name + status badge */}
+                        <View className="flex-row items-center justify-between mb-2">
+                          <View className="flex-row items-center flex-1 mr-2">
+                            <View className="w-7 h-7 rounded-full bg-blue-600 items-center justify-center mr-3">
+                              <Text className="text-white text-xs font-worksanssemibold">
+                                {milestone.orderIndex || index + 1}
+                              </Text>
+                            </View>
+                            <Text
+                              className="font-worksanssemibold text-gray-900 flex-1"
+                              numberOfLines={1}
+                            >
+                              {milestone.name}
+                            </Text>
+                          </View>
+                          <View className={`px-2 py-1 rounded-full ${mStyle.bg}`}>
+                            <Text className={`text-xs font-worksanssemibold ${mStyle.text}`}>
+                              {formatStatus(milestone.status)}
+                            </Text>
+                          </View>
+                        </View>
+
+                        {/* Description */}
+                        {milestone.description && (
+                          <Text className="font-inter text-gray-600 text-sm leading-5 mb-3 ml-10">
+                            {milestone.description}
+                          </Text>
+                        )}
+
+                        {/* Bottom row: amount + due date */}
+                        <View className="flex-row items-center ml-10 gap-4">
+                          <Text className="font-worksanssemibold text-blue-600 text-sm">
+                            {formatCurrency(milestone.amount)}
+                          </Text>
+                          {milestone.completionDate && (
+                            <View className="flex-row items-center">
+                              <Flag size={14} color="#9CA3AF" />
+                              <Text className="font-inter text-gray-500 text-xs ml-1">
+                                Due:{" "}
+                                {new Date(
+                                  milestone.completionDate
+                                ).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                })}
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
+              </>
+            ) : (
+              <View className="bg-gray-50 p-6 rounded-xl border border-gray-100 items-center">
+                <Flag size={40} color="#9CA3AF" />
+                <Text className="font-worksanssemibold text-gray-500 mt-3">
+                  No Milestones Yet
+                </Text>
+                <Text className="font-inter text-gray-400 text-sm mt-1 text-center">
+                  The client hasn't added any milestones to this project
+                </Text>
+              </View>
+            )}
+          </View>
+
           {/* Required Skills */}
           {requiredSkills.length > 0 && (
             <View className="pt-6">
@@ -305,7 +493,7 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
                 Required Skills
               </Text>
               <View className="flex-row flex-wrap gap-2">
-                {requiredSkills.map((skill, index) => (
+                {requiredSkills.map((skill: string, index: number) => (
                   <View
                     key={index}
                     className="flex-row items-center bg-blue-50 px-4 py-2 rounded-lg border border-blue-100"
@@ -338,7 +526,7 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
 
             {attachedDocuments.length > 0 ? (
               <View className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-                {attachedDocuments.map((doc, index) => (
+                {attachedDocuments.map((doc: any, index: number) => (
                   <View
                     key={doc.fileId}
                     className={`flex-row items-center p-4 ${
@@ -347,9 +535,22 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
                         : ""
                     }`}
                   >
-                    <View className="w-12 h-12 bg-blue-50 rounded-xl items-center justify-center mr-3">
-                      <FileText size={24} color="#3B82F6" />
-                    </View>
+                    {doc.fileType?.startsWith("image/") && doc.publicUrl ? (
+                      <TouchableOpacity
+                        onPress={() => setSelectedImage(doc.publicUrl)}
+                        activeOpacity={0.85}
+                      >
+                        <Image
+                          source={{ uri: doc.publicUrl }}
+                          className="w-12 h-12 rounded-xl mr-3"
+                          resizeMode="cover"
+                        />
+                      </TouchableOpacity>
+                    ) : (
+                      <View className="w-12 h-12 bg-blue-50 rounded-xl items-center justify-center mr-3">
+                        <FileText size={24} color="#3B82F6" />
+                      </View>
+                    )}
                     <View className="flex-1">
                       <Text
                         className="font-worksanssemibold text-gray-900 mb-1"
@@ -359,7 +560,7 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
                       </Text>
                       <View className="flex-row items-center">
                         <Text className="text-xs text-gray-500 font-inter">
-                          {doc.fileType?.split("/")[1]?.toUpperCase() || "PDF"}
+                          {doc.fileType?.split("/")[1]?.toUpperCase() || "FILE"}
                         </Text>
                         <Text className="text-xs text-gray-400 mx-2">•</Text>
                         <Text className="text-xs text-gray-500 font-inter">
@@ -369,7 +570,7 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
                         <Text className="text-xs text-gray-500 font-inter">
                           {new Date(doc.uploadedAt).toLocaleDateString(
                             "en-US",
-                            { month: "short", day: "numeric" },
+                            { month: "short", day: "numeric" }
                           )}
                         </Text>
                       </View>
@@ -416,11 +617,34 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
                 </Text>
               </View>
             )}
-
-            
           </View>
         </View>
       </ScrollView>
+
+      {/* Fullscreen image lightbox */}
+      <Modal
+        visible={!!selectedImage}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSelectedImage(null)}
+      >
+        <TouchableOpacity
+          className="flex-1 bg-black/90 justify-center items-center"
+          activeOpacity={1}
+          onPress={() => setSelectedImage(null)}
+        >
+          {selectedImage && (
+            <Image
+              source={{ uri: selectedImage }}
+              style={{ width: SCREEN_WIDTH, height: SCREEN_WIDTH }}
+              resizeMode="contain"
+            />
+          )}
+          <Text className="text-white/50 font-inter text-sm mt-4">
+            Tap anywhere to close
+          </Text>
+        </TouchableOpacity>
+      </Modal>
     </AppLayout>
   );
 };

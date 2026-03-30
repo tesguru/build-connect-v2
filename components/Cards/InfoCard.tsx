@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, ImageSourcePropType } from 'react-native';
+import { Image, ImageSourcePropType, Text, TouchableOpacity, View } from 'react-native';
 
 interface InfoCardProps {
   icon: ImageSourcePropType;
@@ -27,13 +27,13 @@ const InfoCard: React.FC<InfoCardProps> = ({
       </View>
       <View>
         <Text
-          className="font-worksanssemibold text-xl pt-2"
+          className="font-worksanssemibold text-md pt-2"
           style={{ color: titleColor }}
         >
           {title}
         </Text>
         <Text
-          className="text-sm font-work-sans pt-2"
+          className="text-xs font-work-sans pt-2"
           style={{ color: subtitleColor }}
         >
           {subtitle}

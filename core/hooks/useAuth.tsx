@@ -157,6 +157,7 @@ const router = useRouter();
           text1: "Email Sent",
           text2: "Please check your email for the reset password link",
         });
+
       }
     },
     onError: (error: any) => {

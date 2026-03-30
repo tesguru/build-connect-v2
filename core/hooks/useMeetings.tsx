@@ -68,12 +68,21 @@ const meetingsLookupQuery = ( params: object) => {
   });
 };
   
+
+  const singleMeeting = (id :any) => {
+      return useQuery({
+        queryKey: ['singleMeeting', id], 
+        queryFn: () => meetingService.singleMeeting(id),
+      });
+    };
+
   
   return {
    getAllMeetings,
    getMeetingsDetails,
    scheduleMeetingMutation,
    scheduleMeetingSuccess,
-   meetingsLookupQuery
+   meetingsLookupQuery,
+   singleMeeting
   };
 };

@@ -77,13 +77,18 @@ const InvitedInvitations = () => {
   const pagination = apiResponse?.data?.pagination
 
   // ── Accept ──────────────────────────────────────────────────────────────────
-  const handleAccept = (id: string) => {
+  const handleAccept = (id: string, projectId: string) => {
     setRespondingId(id)
     respondToBidInvitationMutation.mutate(
       { id, status: 'accepted' },
       {
         onSuccess: () => {
           setRespondingId(null)
+                 router.push({
+      pathname: '/projectdetails/projectdetails',
+      params: { projectId },
+    })
+
         },
         onError: () => {
           setRespondingId(null)
@@ -92,7 +97,7 @@ const InvitedInvitations = () => {
     )
   }
 
-  // ── Decline ─────────────────────────────────────────────────────────────────
+
   const handleDecline = (id: string) => {
     setRespondingId(id)
     respondToBidInvitationMutation.mutate(
@@ -108,7 +113,7 @@ const InvitedInvitations = () => {
     )
   }
 
-  // ── View Project ─────────────────────────────────────────────────────────────
+
   const handleViewProject = (projectId: string) => {
     router.push({
       pathname: '/projectdetails/projectdetails',

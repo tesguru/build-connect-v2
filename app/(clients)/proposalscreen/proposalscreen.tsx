@@ -4,6 +4,7 @@ import AppLayout from '@/components/Layouts/AppLayout';
 import AcceptProposalModal from '@/components/Miscallaneous/AcceptProposalModal';
 import DeclineProposalModal from '@/components/Miscallaneous/DeclineProposalModal';
 import { useBids } from '@/core/hooks/UseBids';
+import { useProjects } from '@/core/hooks/useProjects';
 import { formatCurrency } from '@/core/utils';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -132,29 +133,34 @@ const RejectedBanner = () => (
   </View>
 );
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Screen
-// ─────────────────────────────────────────────────────────────────────────────
+
 const Proposalscreen = () => {
   const router = useRouter();
 
-  const { bidId, companyName, projectTitle, projectStatus } =
+  const { bidId, companyName, projectTitle, projectId } =
     useLocalSearchParams<{
       bidId: string;
       companyName: string;
       projectTitle: string;
-      projectStatus: string;
+      projectId: string;
     }>();
 
   const { singleBidQuery, respondToBidMutation, createContractMutation } =
     useBids();
+
+  // ── Fetch live project status from API ──────────────────────────────────────
+  const { getSingleProjectQuery } = useProjects();
+  const { data: projectApiData } = getSingleProjectQuery(projectId);
+  const projectStatus: string =
+    projectApiData?.data?.data?.status ??
+    projectApiData?.data?.status ??
+    '';
 
   const { data, isLoading, error, refetch } = singleBidQuery(bidId);
 
   const bidsData   = data?.data?.data || {};
   const milestones = bidsData.milestones || [];
 
-  // ── Derived state ──────────────────────────────────────────────────────────
   const bidStatus     = (bidsData.status?.toLowerCase() ?? '') as BidStatus;
   const isBidAccepted = bidStatus === 'accepted';
   const isBidRejected = bidStatus === 'declined' || bidStatus === 'rejected';
@@ -169,26 +175,21 @@ const Proposalscreen = () => {
     0
   );
 
-  // ── Local state ────────────────────────────────────────────────────────────
   const [acceptModalVisible,  setAcceptModalVisible]  = useState(false);
   const [declineModalVisible, setDeclineModalVisible] = useState(false);
   const [isConfirming,        setIsConfirming]        = useState(false);
   const [isDeclining,         setIsDeclining]         = useState(false);
   const [isLoadingContract,   setIsLoadingContract]   = useState(false);
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
   const handleRevision = () =>
     router.push({
-      pathname: '/revisionscreen/revisionscreen',
-      params: { bidId, companyName, projectTitle },
+      pathname: '/(clients)/reviewsummary/reviewsummary',
+      params: { bidId, companyName, projectTitle, projectId  },
     });
 
   const handleViewContract = async () => {
     try {
       setIsLoadingContract(true);
-      const contractRes     = await createContractMutation.mutateAsync({ bidId });
-      const contractResData = contractRes?.data?.data || contractRes?.data;
-
       router.push({
         pathname: '/projects/contractscreen',
         params: {
@@ -196,8 +197,8 @@ const Proposalscreen = () => {
           bidId,
           proposedTimeline: bidsData.proposedTimeline,
           bidsData:         JSON.stringify(bidsData),
-          contractData:     JSON.stringify(contractResData),
           projectTitle,
+          projectId
         },
       });
     } catch (error: any) {
@@ -236,9 +237,6 @@ const Proposalscreen = () => {
         });
         return;
       }
-
-      await createContractMutation.mutateAsync({ bidId });
-
       Toast.show({
         type:  'success',
         text1: 'Bid Accepted Successfully',
@@ -296,7 +294,6 @@ const Proposalscreen = () => {
     }
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <>
       <AppLayout screenName="Project Proposal">
@@ -308,7 +305,6 @@ const Proposalscreen = () => {
             paddingBottom: 40,
           }}
         >
-          {/* ── Loading ─────────────────────────────────────────────────── */}
           {isLoading ? (
             <View className="flex-1 justify-center items-center py-20">
               <ActivityIndicator size="large" color="#2463EB" />
@@ -317,7 +313,6 @@ const Proposalscreen = () => {
               </Text>
             </View>
 
-          /* ── Error ──────────────────────────────────────────────────── */
           ) : error ? (
             <View className="flex-1 items-center justify-center py-20 px-4">
               <Text className="text-red-500 text-center font-inter mb-4">
@@ -331,10 +326,8 @@ const Proposalscreen = () => {
               />
             </View>
 
-          /* ── Content ────────────────────────────────────────────────── */
           ) : (
             <>
-              {/* Header Card */}
               <View className="bg-white rounded-2xl p-5 mb-4">
                 <View className="flex-row justify-between items-start mb-3">
                   <Text className="text-xl font-interbold text-gray-900 flex-1 mr-3">
@@ -370,7 +363,6 @@ const Proposalscreen = () => {
                 )}
               </View>
 
-              {/* Project Breakdown */}
               <SectionCard title="Project Breakdown">
                 {milestones.length > 0 ? (
                   <>
@@ -398,7 +390,6 @@ const Proposalscreen = () => {
                 )}
               </SectionCard>
 
-              {/* Project Timeline */}
               <SectionCard title="Project Timeline">
                 {milestones.length > 0 ? (
                   milestones.map((item: any, index: number) => (
@@ -417,23 +408,17 @@ const Proposalscreen = () => {
                 )}
               </SectionCard>
 
-              {/* ── Actions ─────────────────────────────────────────────── */}
-
-              {/* Accepted — contract button only */}
               {isBidAccepted && (
                 <View className="mt-2">
                   <GradientButton
                     onPress={handleViewContract}
                     title="Check Contract Details"
-                    loading={isLoadingContract}
                   />
                 </View>
               )}
 
-              {/* Rejected — banner only, zero buttons */}
               {isBidRejected && <RejectedBanner />}
 
-              {/* Pending — full action set */}
               {showActions && (
                 <View className="gap-3 mt-2">
                   <GradientButton
@@ -463,6 +448,8 @@ const Proposalscreen = () => {
               )}
             </>
           )}
+
+           
         </ScrollView>
       </AppLayout>
 
