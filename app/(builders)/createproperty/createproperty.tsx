@@ -33,7 +33,9 @@ const createPropertySchema = z.object({
   description: z.string().min(1, "Description is required"),
   keyFeatures: z.string().min(1, "Key features are required"),
   mediaFiles: z
-    .array(z.object({ file: z.any().nullable(), fileId: z.string().optional() }))
+    .array(
+      z.object({ file: z.any().nullable(), fileId: z.string().optional() }),
+    )
     .default([]),
   status: z.enum(["draft", "published"]).default("draft"),
 });
@@ -54,13 +56,14 @@ const CreateProperty = () => {
   const { createPropertyMutation, addPropertySucess } = useProperty();
 
   // ── Lookups ────────────────────────────────────────────────────────────────
-  const { data: propertyTypesResponse, isLoading: isLoadingPropertyTypes } = useQuery({
-    queryKey: ["propertyTypes"],
-    queryFn: async () => {
-      const response = await LookupService.getPropertyTypes();
-      return response.data.data.items;
-    },
-  });
+  const { data: propertyTypesResponse, isLoading: isLoadingPropertyTypes } =
+    useQuery({
+      queryKey: ["propertyTypes"],
+      queryFn: async () => {
+        const response = await LookupService.getPropertyTypes();
+        return response.data.data.items;
+      },
+    });
 
   const propertyTypesData =
     propertyTypesResponse?.map((item) => ({
@@ -91,8 +94,11 @@ const CreateProperty = () => {
     },
   });
 
-  const { fields: mediaFields, append: appendMedia, remove: removeMedia } =
-    useFieldArray({ control, name: "mediaFiles" });
+  const {
+    fields: mediaFields,
+    append: appendMedia,
+    remove: removeMedia,
+  } = useFieldArray({ control, name: "mediaFiles" });
 
   // ── Submit ─────────────────────────────────────────────────────────────────
   const onSubmit = async (data: CreatePropertyInput) => {
@@ -100,14 +106,18 @@ const CreateProperty = () => {
       setIsUploading(true);
 
       // ✅ Build parallel upload tasks
-      const mediaFileIds: (string | null)[] = new Array(data.mediaFiles.length).fill(null);
+      const mediaFileIds: (string | null)[] = new Array(
+        data.mediaFiles.length,
+      ).fill(null);
 
       const mediaTasks = data.mediaFiles.map((item, i) => {
         if (item.file) {
-          return uploadFile(item.file, "property_media", "Property Media").then((res) => {
-            mediaFileIds[i] = res.id;
-            setValue(`mediaFiles.${i}.fileId`, res.id);
-          });
+          return uploadFile(item.file, "property_media", "Property Media").then(
+            (res) => {
+              mediaFileIds[i] = res.id;
+              setValue(`mediaFiles.${i}.fileId`, res.id);
+            },
+          );
         }
         if (item.fileId) {
           mediaFileIds[i] = item.fileId;
@@ -158,7 +168,10 @@ const CreateProperty = () => {
           Toast.show({
             type: "error",
             text1: "Submission Failed",
-            text2: error?.response?.data?.message ?? error?.message ?? "Something went wrong.",
+            text2:
+              error?.response?.data?.message ??
+              error?.message ??
+              "Something went wrong.",
           });
         },
       });
@@ -191,7 +204,6 @@ const CreateProperty = () => {
     <AppLayout screenName="Add Property Listing">
       <ScrollView showsVerticalScrollIndicator={false}>
         <View className="px-3">
-
           {/* Title */}
           <View className="pt-3">
             <Controller
@@ -208,7 +220,9 @@ const CreateProperty = () => {
               )}
             />
             {errors.title && (
-              <Text className="font-inter pt-1 text-red-500 text-sm">{errors.title.message}</Text>
+              <Text className="font-inter pt-1 text-red-500 text-sm">
+                {errors.title.message}
+              </Text>
             )}
           </View>
 
@@ -224,14 +238,18 @@ const CreateProperty = () => {
                     placeholder="Enter Price"
                     value={field.value === 0 ? "" : String(field.value)}
                     hasError={!!errors.price}
-                    onChangeText={(text) => field.onChange(parseFloat(text) || 0)}
+                    onChangeText={(text) =>
+                      field.onChange(parseFloat(text) || 0)
+                    }
                     keyboardType="numeric"
                     formatNumber
                   />
                 )}
               />
               {errors.price && (
-                <Text className="font-inter pt-1 text-red-500 text-sm">{errors.price.message}</Text>
+                <Text className="font-inter pt-1 text-red-500 text-sm">
+                  {errors.price.message}
+                </Text>
               )}
             </View>
             <View className="flex-1 pt-3">
@@ -239,7 +257,9 @@ const CreateProperty = () => {
                 name="propertyTypeId"
                 control={control}
                 label="Property Type"
-                placeholder={isLoadingPropertyTypes ? "Loading..." : "Select type"}
+                placeholder={
+                  isLoadingPropertyTypes ? "Loading..." : "Select type"
+                }
                 data={propertyTypesData}
                 error={errors.propertyTypeId?.message as string}
               />
@@ -262,7 +282,9 @@ const CreateProperty = () => {
               )}
             />
             {errors.location && (
-              <Text className="font-inter pt-1 text-red-500 text-sm">{errors.location.message}</Text>
+              <Text className="font-inter pt-1 text-red-500 text-sm">
+                {errors.location.message}
+              </Text>
             )}
           </View>
 
@@ -340,15 +362,19 @@ const CreateProperty = () => {
             />
           </View>
 
-          {/* ── Media Files ────────────────────────────────────────────────── */}
           <View className="mt-6 mx-2">
             <View className="flex-row justify-between items-center mb-4">
               <Text className="font-worksanssemibold text-xl">Media Files</Text>
-              <Text className="font-inter text-gray-400 text-sm">Images, Videos (Optional)</Text>
+              <Text className="font-inter text-gray-400 text-sm">
+                Images, Videos (Optional)
+              </Text>
             </View>
 
             {mediaFields.map((field, index) => (
-              <View key={field.id} className="border border-gray-300 rounded-xl p-4 mb-4">
+              <View
+                key={field.id}
+                className="border border-gray-300 rounded-xl p-4 mb-4"
+              >
                 <View className="flex-row justify-between items-center mb-4">
                   <Text className="font-inter text-lg">Image {index + 1}</Text>
                   <TouchableOpacity onPress={() => removeMedia(index)}>
@@ -370,7 +396,11 @@ const CreateProperty = () => {
                       name={`mediaFiles.${index}.file`}
                       value={field.value}
                       onChange={field.onChange}
-                      error={errors.mediaFiles?.[index]?.file?.message as string | undefined}
+                      error={
+                        errors.mediaFiles?.[index]?.file?.message as
+                          | string
+                          | undefined
+                      }
                       maxSizeMB={10}
                     />
                   )}
@@ -396,7 +426,6 @@ const CreateProperty = () => {
               disabled={isLoading}
             />
           </View>
-
         </View>
       </ScrollView>
     </AppLayout>

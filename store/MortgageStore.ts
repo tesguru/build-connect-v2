@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 export interface MortgageFormData {
   // Property
@@ -15,7 +15,6 @@ export interface MortgageFormData {
   state: string;
   postalCode: string;
 
-  // Step 2 — Employment & Income
   employmentStatusId: string;
   occupation: string;
   employerName: string;
@@ -35,7 +34,10 @@ export interface MortgageFormData {
 interface MortgageStoreState {
   formData: Partial<MortgageFormData>;
   setFormData: (data: Partial<MortgageFormData>) => void;
-  updateFormField: <K extends keyof MortgageFormData>(field: K, value: MortgageFormData[K]) => void;
+  updateFormField: <K extends keyof MortgageFormData>(
+    field: K,
+    value: MortgageFormData[K],
+  ) => void;
   clearFormData: () => void;
 }
 

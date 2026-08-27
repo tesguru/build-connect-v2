@@ -1,8 +1,8 @@
+import { useRouter } from "expo-router";
 import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Switch, Text, View } from "react-native";
 
 import GradientButton from "@/components/Buttons/GradientButton";
-import { FormDatePicker } from "@/components/Forms/DatePicker";
 import DropdownField from "@/components/Forms/DropDown";
 import FileUploadComponent from "@/components/Forms/FileUploadComponent";
 import FormInput from "@/components/Forms/Formnput";
@@ -11,254 +11,178 @@ import AppLayout from "@/components/Layouts/AppLayout";
 import SuccessScreen from "@/components/Notifications/SucessScreen";
 import { reportImage } from "@/constants/icon";
 import { useProjects } from "@/core/hooks/useProjects";
-import { addProjectSchema } from "@/core/schemas/dashboardschema";
-import { LookupService } from "@/core/services/lookup/LookupService";
 import { uploadFile } from "@/core/utils/fileUpload";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
-import { FileText, Image, Plus, X } from "lucide-react-native";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import Toast from "react-native-toast-message";
 import { z } from "zod";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Schema
+// SCHEMA - FROM FIRST FILE (create_project.tsx)
 // ─────────────────────────────────────────────────────────────────────────────
-const extendedProjectSchema = addProjectSchema
-  .omit({ projectMedia: true })
-  .extend({
-    milestones: z
-      .array(
-        z.object({
-          milestoneName: z.string().trim().min(1, "Milestone name is required"),
-          milestoneDescription: z.string().trim().min(1, "Milestone description is required"),
-          completionDate: z.string().min(1, "Completion date is required"),
-          paymentAmount: z.number().positive("Payment amount must be greater than 0"),
-        })
-      )
-      .min(1, "At least one milestone is required"),
-    mediaFiles: z
-      .array(z.object({ file: z.any().nullable(), fileId: z.string().optional() }))
-      .default([]),
-    documentFiles: z
-      .array(z.object({ file: z.any().nullable(), fileId: z.string().optional() }))
-      .default([]),
-  });
+const CURRENCY_OPTIONS = [
+  { label: "NGN - Nigerian Naira", value: "NGN" },
+  { label: "USD - US Dollar", value: "USD" },
+  { label: "GBP - British Pound", value: "GBP" },
+  { label: "EUR - Euro", value: "EUR" },
+  { label: "GHS - Ghanaian Cedi", value: "GHS" },
+  { label: "KES - Kenyan Shilling", value: "KES" },
+  { label: "ZAR - South African Rand", value: "ZAR" },
+];
 
-type ExtendedProjectInput = z.infer<typeof extendedProjectSchema>;
+const createProjectSchema = z.object({
+  projectName: z.string().trim().min(1, "Project name is required"),
+  location: z.string().trim().min(1, "Location is required"),
+  description: z.string().trim().min(1, "Description is required"),
+  currency: z.string().min(1, "Currency is required"),
+  budgetMin: z.string().min(1, "Budget min is required"),
+  budgetMax: z.string().min(1, "Budget max is required"),
+  durationMin: z.string().min(1, "Duration min is required"),
+  durationMax: z.string().min(1, "Duration max is required"),
+  hasApprovedDrawings: z.boolean().default(false),
+  drawingFile: z.any().nullable().optional(),
+});
+
+type CreateProjectFormValues = z.infer<typeof createProjectSchema>;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Component
 // ─────────────────────────────────────────────────────────────────────────────
 const AddProject = () => {
-  const [openDatePicker, setOpenDatePicker] = React.useState<"start" | "end" | null>(null);
-  const [isUploading, setIsUploading] = React.useState(false);
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const { submitBidMutation, submitBidSuccess } = useProjects();
 
-  // ── Lookups ────────────────────────────────────────────────────────────────
-  const { data: projectTypesResponse, isLoading: isLoadingProjectTypes } = useQuery({
-    queryKey: ["projectTypes"],
-    queryFn: async () => {
-      const res = await LookupService.getProjectTypes();
-      return res.data.data.items;
-    },
-  });
-
-  const { data: getBudgetRangesResponse, isLoading: isLoadingBudgetRanges } = useQuery({
-    queryKey: ["budgetRange"],
-    queryFn: async () => {
-      const res = await LookupService.getBudgetRanges();
-      return res.data.data.items;
-    },
-  });
-
-  const { data: getTimelineResponse, isLoading: isLoadingTimeline } = useQuery({
-    queryKey: ["getTimeline"],
-    queryFn: async () => {
-      const res = await LookupService.getTimelines();
-      return res.data.data.items;
-    },
-  });
-
-  const projectTypesData =
-    projectTypesResponse?.map((item) => ({ label: item.label, value: item.value, id: item.id })) ?? [];
-  const budgetData =
-    getBudgetRangesResponse?.map((item) => ({ label: item.label, value: item.value, id: item.id })) ?? [];
-  const timelineData =
-    getTimelineResponse?.map((item) => ({ label: item.label, value: item.value, id: item.id })) ?? [];
-
-  // ── Form ───────────────────────────────────────────────────────────────────
+  // ── Form - USING FIRST FILE'S SCHEMA ─────────────────────────────────────
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors },
     setValue,
-  } = useForm<ExtendedProjectInput>({
-    resolver: zodResolver(extendedProjectSchema),
+  } = useForm<CreateProjectFormValues>({
+    resolver: zodResolver(createProjectSchema),
     defaultValues: {
       projectName: "",
-      projectType: "",
-      budgetRangeId: "",
-      timelineId: "",
       location: "",
-      budget: "",
-      startDate: "",
-      endDate: "",
       description: "",
-      milestones: [
-        { milestoneName: "", milestoneDescription: "", completionDate: "", paymentAmount: 0 },
-      ],
-      mediaFiles: [],
-      documentFiles: [],
+      currency: "NGN",
+      budgetMin: "",
+      budgetMax: "",
+      durationMin: "",
+      durationMax: "",
+      hasApprovedDrawings: false,
+      drawingFile: null,
     },
   });
 
-  const { fields: milestoneFields, append: appendMilestone, remove: removeMilestone } =
-    useFieldArray({ control, name: "milestones" });
+  const hasApprovedDrawings = watch("hasApprovedDrawings");
 
-  const { fields: mediaFields, append: appendMedia, remove: removeMedia } =
-    useFieldArray({ control, name: "mediaFiles" });
-
-  const { fields: documentFields, append: appendDocument, remove: removeDocument } =
-    useFieldArray({ control, name: "documentFiles" });
-
-  // ── Helpers ────────────────────────────────────────────────────────────────
-  const formatDate = (dateString: string) => {
-    const d = new Date(dateString);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
+  // ── Helpers from first file ──────────────────────────────────────────────
+  const showError = (message: string) => {
+    Toast.show({ type: "error", text1: "Validation Error", text2: message });
   };
 
-  const showError = (text2: string) =>
-    Toast.show({ type: "error", text1: "Error", text2 });
-
-  // ── Submit ─────────────────────────────────────────────────────────────────
-  const onSubmit = async (data: ExtendedProjectInput) => {
+  // ── Submit - EXACTLY FROM FIRST FILE ─────────────────────────────────────
+  const onSubmit = async (data: CreateProjectFormValues) => {
+    setIsSubmitting(true);
     try {
-      setIsUploading(true);
+      const budgetMin = parseFloat(String(data.budgetMin).replace(/,/g, ""));
+      const budgetMax = parseFloat(String(data.budgetMax).replace(/,/g, ""));
+      const durationMin = parseInt(
+        String(data.durationMin).replace(/,/g, ""),
+        10,
+      );
+      const durationMax = parseInt(
+        String(data.durationMax).replace(/,/g, ""),
+        10,
+      );
 
-      // ── Validation ───────────────────────────────────────────────────────
-      const selectedProjectType = projectTypesResponse?.find((i) => i.value === data.projectType);
-      const selectedBudgetRange = getBudgetRangesResponse?.find((i) => i.value === data.budgetRangeId);
-      const selectedTimeline = getTimelineResponse?.find((i) => i.value === data.timelineId);
-      const budgetNum = parseFloat(String(data.budget ?? "").replace(/,/g, ""));
-
-      if (!selectedProjectType) {
-        showError("Please select a valid project type");
-        setIsUploading(false);
+      if (!Number.isFinite(budgetMin) || budgetMin <= 0) {
+        showError("Please enter a valid minimum budget");
+        setIsSubmitting(false);
         return;
       }
-      if (!selectedBudgetRange) {
-        showError("Please select a budget range");
-        setIsUploading(false);
+      if (!Number.isFinite(budgetMax) || budgetMax <= 0) {
+        showError("Please enter a valid maximum budget");
+        setIsSubmitting(false);
         return;
       }
-      if (!selectedTimeline) {
-        showError("Please select a timeline");
-        setIsUploading(false);
+      if (budgetMax <= budgetMin) {
+        showError("Budget max must be greater than budget min");
+        setIsSubmitting(false);
         return;
       }
-      if (!Number.isFinite(budgetNum) || budgetNum <= 0) {
-        showError("Please enter a valid budget amount");
-        setIsUploading(false);
+      if (!Number.isFinite(durationMin) || durationMin <= 0) {
+        showError("Please enter a valid minimum duration");
+        setIsSubmitting(false);
         return;
       }
-
-      // ── Parallel file uploads ────────────────────────────────────────────
-      const mediaFileIds: string[] = new Array(data.mediaFiles.length).fill("");
-      const documentFileIds: string[] = new Array(data.documentFiles.length).fill("");
-
-      const mediaTasks = data.mediaFiles.map((item, i) => {
-        if (item.file) {
-          return uploadFile(item.file, "work_showcase", "Work Showcase").then((res) => {
-            mediaFileIds[i] = res.id;
-            setValue(`mediaFiles.${i}.fileId`, res.id);
-          });
-        }
-        if (item.fileId) {
-          mediaFileIds[i] = item.fileId;
-        }
-        return Promise.resolve();
-      });
-
-      const documentTasks = data.documentFiles.map((item, i) => {
-        if (item.file) {
-          return uploadFile(item.file, "work_showcase", "Project Showcase").then((res) => {
-            documentFileIds[i] = res.id;
-            setValue(`documentFiles.${i}.fileId`, res.id);
-          });
-        }
-        if (item.fileId) {
-          documentFileIds[i] = item.fileId;
-        }
-        return Promise.resolve();
-      });
-
-      const allResults = await Promise.allSettled([...mediaTasks, ...documentTasks]);
-      const failed = allResults.filter((r) => r.status === "rejected");
-      if (failed.length > 0) {
-        const reasons = failed
-          .map((r) => (r as PromiseRejectedResult).reason?.message)
-          .filter(Boolean)
-          .join(", ");
-        Toast.show({
-          type: "error",
-          text1: `${failed.length} file(s) failed to upload`,
-          text2: reasons || "Please retry.",
-        });
-        setIsUploading(false);
+      if (!Number.isFinite(durationMax) || durationMax <= 0) {
+        showError("Please enter a valid maximum duration");
+        setIsSubmitting(false);
+        return;
+      }
+      if (durationMax <= durationMin) {
+        showError("Duration max must be greater than duration min");
+        setIsSubmitting(false);
         return;
       }
 
-      // ── Build & fire payload ─────────────────────────────────────────────
-      const apiPayload = {
-        title: data.projectName,
-        description: data.description,
+      let drawingFileId: string | undefined;
+      if (data.hasApprovedDrawings && data.drawingFile) {
+        const uploaded = await uploadFile(
+          data.drawingFile,
+          "work_showcase",
+          "Building Drawing",
+        );
+        drawingFileId = uploaded.id;
+      }
+
+      const payload = {
+        name: data.projectName,
         location: data.location,
-        projectTypeId: selectedProjectType.id,
-        budgetRangeId: selectedBudgetRange.id,
-        exactBudget: budgetNum,
-        timelineId: selectedTimeline.id,
-        startDate: formatDate(data.startDate),
-        endDate: formatDate(data.endDate),
-        milestones: data.milestones.map((m) => ({
-          name: m.milestoneName,
-          description: m.milestoneDescription,
-          completionDate: formatDate(m.completionDate),
-          amount: m.paymentAmount,
-        })),
-        mediaFileIds: mediaFileIds.filter(Boolean),
-        fileIds: documentFileIds.filter(Boolean),
-        metadata: {},
+        description: data.description,
+        budgetMinimum: budgetMin,
+        budgetMaximum: budgetMax,
+        currency: data.currency,
+        durationMinimum: durationMin,
+        durationMaximum: durationMax,
+        isApprovedBuildingDrawings: data.hasApprovedDrawings,
+        metadata: drawingFileId ? { fileIds: [drawingFileId] } : {},
       };
 
-
-
-      submitBidMutation.mutate(apiPayload, {
-        onSettled: () => setIsUploading(false),
-        onError: (error: any) => {
+      submitBidMutation.mutate(payload, {
+        onSuccess: () => {
+          router.push("/sign_up/client/account_success");
+        },
+        onSettled: () => {
+          setIsSubmitting(false);
+        },
+        onError: (err: any) => {
+          const message =
+            err?.response?.data?.message ||
+            err?.message ||
+            "Something went wrong. Please try again.";
           Toast.show({
             type: "error",
             text1: "Submission Failed",
-            text2: error?.message ?? "Something went wrong. Please try again.",
+            text2: message,
           });
         },
       });
-    } catch (error: any) {
-      setIsUploading(false);
+    } catch (err: any) {
+      setIsSubmitting(false);
       Toast.show({
         type: "error",
         text1: "Upload Failed",
-        text2: error?.message ?? "Failed to upload files. Please try again.",
+        text2: err?.message || "Failed to upload file. Please try again.",
       });
     }
   };
 
-  const isLoading = isUploading || submitBidMutation.isPending;
-
+  const isLoading = isSubmitting || submitBidMutation.isPending;
 
   if (submitBidSuccess) {
     return (
@@ -271,14 +195,12 @@ const AddProject = () => {
     );
   }
 
-
+  // ── RENDER - UI FROM THIRD FILE (COMPLETELY UNTOUCHED) ──────────────────
   return (
     <AppLayout screenName="Add Project">
       <ScrollView showsVerticalScrollIndicator={false}>
         <View className="px-1 flex-1">
-
-       
-      
+          {/* Project Name - FROM FIRST FILE */}
           <View className="px-4 pt-4">
             <Controller
               control={control}
@@ -294,47 +216,13 @@ const AddProject = () => {
               )}
             />
             {errors.projectName && (
-              <Text className="font-inter pt-1 text-red-500 text-sm">{errors.projectName.message}</Text>
+              <Text className="font-inter pt-1 text-red-500 text-sm">
+                {errors.projectName.message}
+              </Text>
             )}
           </View>
 
-      
-          <View className="px-4 pt-3">
-            <DropdownField
-              name="projectType"
-              control={control}
-              label="Project Type"
-              placeholder={isLoadingProjectTypes ? "Loading..." : "Select project type"}
-              data={projectTypesData}
-              error={errors.projectType?.message as string}
-            />
-          </View>
-
-       
-          <View className="px-4 pt-3">
-            <DropdownField
-              name="budgetRangeId"
-              control={control}
-              label="Budget Range"
-              placeholder={isLoadingBudgetRanges ? "Loading..." : "Select budget range"}
-              data={budgetData}
-              error={errors.budgetRangeId?.message as string}
-            />
-          </View>
-
-      
-          <View className="px-4 pt-3">
-            <DropdownField
-              name="timelineId"
-              control={control}
-              label="Timeline"
-              placeholder={isLoadingTimeline ? "Loading..." : "Select timeline"}
-              data={timelineData}
-              error={errors.timelineId?.message as string}
-            />
-          </View>
-
-          {/* Location */}
+          {/* Location - FROM FIRST FILE */}
           <View className="px-4 pt-3">
             <Controller
               control={control}
@@ -350,75 +238,13 @@ const AddProject = () => {
               )}
             />
             {errors.location && (
-              <Text className="font-inter pt-1 text-red-500 text-sm">{errors.location.message}</Text>
+              <Text className="font-inter pt-1 text-red-500 text-sm">
+                {errors.location.message}
+              </Text>
             )}
           </View>
 
-          {/* Exact Budget */}
-          <View className="px-4 pt-3">
-            <Controller
-              control={control}
-              name="budget"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <FormInput
-                  label="Exact Budget (₦)"
-                  placeholder="0"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  keyboardType="numeric"
-                  formatNumber
-                  hasError={!!errors.budget}
-                />
-              )}
-            />
-            {errors.budget && (
-              <Text className="font-inter pt-1 text-red-500 text-sm">{errors.budget.message}</Text>
-            )}
-          </View>
-
-          {/* Start & End Dates */}
-          <View className="px-4 flex-row justify-between">
-            <View className="pt-3 flex-1 mr-2">
-              <Controller
-                control={control}
-                name="startDate"
-                render={({ field }) => (
-                  <FormDatePicker
-                    label="Start Date"
-                    value={field.value ? new Date(field.value) : new Date()}
-                    onChange={(date) => field.onChange(date.toISOString())}
-                    hasError={!!errors.startDate}
-                    errorMessage={errors.startDate?.message}
-                    isOpen={openDatePicker === "start"}
-                    onOpen={() => setOpenDatePicker("start")}
-                    onClose={() => setOpenDatePicker(null)}
-                    minimumDate={new Date()}
-                  />
-                )}
-              />
-            </View>
-            <View className="pt-3 flex-1 ml-2">
-              <Controller
-                control={control}
-                name="endDate"
-                render={({ field }) => (
-                  <FormDatePicker
-                    label="End Date"
-                    value={field.value ? new Date(field.value) : new Date()}
-                    onChange={(date) => field.onChange(date.toISOString())}
-                    hasError={!!errors.endDate}
-                    errorMessage={errors.endDate?.message}
-                    isOpen={openDatePicker === "end"}
-                    onOpen={() => setOpenDatePicker("end")}
-                    onClose={() => setOpenDatePicker(null)}
-                  />
-                )}
-              />
-            </View>
-          </View>
-
-          {/* Description */}
+          {/* Description - FROM FIRST FILE */}
           <View className="px-4 pt-4">
             <Controller
               control={control}
@@ -437,222 +263,172 @@ const AddProject = () => {
             />
           </View>
 
-          {/* ── Milestones ───────────────────────────────────────────────── */}
-          <View className="px-4 mt-6">
-            <Text className="font-worksanssemibold text-xl mb-4">Milestones</Text>
+          {/* Currency - FROM FIRST FILE */}
+          <View className="px-4 pt-3">
+            <DropdownField
+              name="currency"
+              control={control}
+              label="Currency"
+              placeholder="Select currency"
+              data={CURRENCY_OPTIONS}
+              error={errors.currency?.message as string}
+            />
+          </View>
 
-            {milestoneFields.map((field, index) => (
-              <View key={field.id} className="border border-gray-300 rounded-xl p-4 mb-4">
-                <View className="flex-row justify-between items-center mb-4">
-                  <Text className="font-inter text-xl">Milestone {index + 1}</Text>
-                  {milestoneFields.length > 1 && (
-                    <TouchableOpacity onPress={() => removeMilestone(index)}>
-                      <X size={24} color="#6b7280" />
-                    </TouchableOpacity>
-                  )}
-                </View>
-
-                {/* Milestone Name */}
-                <Controller
-                  control={control}
-                  name={`milestones.${index}.milestoneName`}
-                  render={({ field }) => (
-                    <FormInput
-                      label="Milestone Name"
-                      placeholder="e.g Foundation"
-                      value={field.value}
-                      hasError={!!errors.milestones?.[index]?.milestoneName}
-                      onChangeText={field.onChange}
-                    />
-                  )}
-                />
-                {errors.milestones?.[index]?.milestoneName && (
-                  <Text className="font-inter pt-1 text-red-500 text-sm">
-                    {errors.milestones[index]?.milestoneName?.message}
-                  </Text>
-                )}
-
-                {/* Milestone Description */}
-                <View className="pt-3">
-                  <Controller
-                    control={control}
-                    name={`milestones.${index}.milestoneDescription`}
-                    render={({ field }) => (
-                      <FormTextArea
-                        label="Milestone Description"
-                        placeholder="Describe what this milestone involves..."
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        hasError={!!errors.milestones?.[index]?.milestoneDescription}
-                        errorMessage={errors.milestones?.[index]?.milestoneDescription?.message}
-                        width="w-full"
-                      />
-                    )}
+          {/* Budget Min & Max - FROM FIRST FILE */}
+          <View className="flex-row gap-4 px-4 pt-3">
+            <View className="flex-1">
+              <Controller
+                control={control}
+                name="budgetMin"
+                render={({ field }) => (
+                  <FormInput
+                    label="Budget Min"
+                    placeholder="100,000"
+                    value={field.value}
+                    onChangeText={field.onChange}
+                    onBlur={field.onBlur}
+                    keyboardType="numeric"
+                    formatNumber
+                    hasError={!!errors.budgetMin}
                   />
-                </View>
-
-                <View className="flex-row gap-2 justify-between">
-                  {/* Completion Date */}
-                  <View className="pt-7 flex-1">
-                    <Controller
-                      control={control}
-                      name={`milestones.${index}.completionDate`}
-                      render={({ field }) => (
-                        <FormDatePicker
-                          label="Completion Date"
-                          value={field.value ? new Date(field.value) : new Date()}
-                          onChange={(date) => field.onChange(date.toISOString())}
-                          hasError={!!errors.milestones?.[index]?.completionDate}
-                          errorMessage={errors.milestones?.[index]?.completionDate?.message}
-                        />
-                      )}
-                    />
-                  </View>
-
-                  {/* Payment Amount */}
-                  <View className="pt-3 flex-1">
-                    <Controller
-                      control={control}
-                      name={`milestones.${index}.paymentAmount`}
-                      render={({ field }) => (
-                        <FormInput
-                          label="Amount (₦)"
-                          placeholder="Enter amount"
-                          value={String(field.value)}
-                          hasError={!!errors.milestones?.[index]?.paymentAmount}
-                          onChangeText={(text) => field.onChange(Number(text.replace(/,/g, "")))}
-                          keyboardType="numeric"
-                          formatNumber
-                        />
-                      )}
-                    />
-                    {errors.milestones?.[index]?.paymentAmount && (
-                      <Text className="font-inter pt-1 text-red-500 text-sm">
-                        {errors.milestones[index]?.paymentAmount?.message}
-                      </Text>
-                    )}
-                  </View>
-                </View>
-              </View>
-            ))}
-
-            <TouchableOpacity
-              onPress={() =>
-                appendMilestone({
-                  milestoneName: "",
-                  milestoneDescription: "",
-                  completionDate: "",
-                  paymentAmount: 0,
-                })
-              }
-              className="flex-row gap-2 justify-end mb-4"
-            >
-              <Plus size={20} color="#2563eb" />
-              <Text className="text-blue-600 font-inter">Add milestone</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* ── Media Files ──────────────────────────────────────────────── */}
-          <View className="px-4 mt-4">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="font-worksanssemibold text-xl">Media Files</Text>
-              <Text className="font-inter text-gray-400 text-sm">Images, Videos (Optional)</Text>
+                )}
+              />
+              {errors.budgetMin && (
+                <Text className="font-inter pt-1 text-red-500 text-sm">
+                  {errors.budgetMin.message}
+                </Text>
+              )}
             </View>
 
-            {mediaFields.map((field, index) => (
-              <View key={field.id} className="border border-gray-300 rounded-xl p-4 mb-4">
-                <View className="flex-row justify-between items-center mb-4">
-                  <View className="flex-row items-center gap-2">
-                    <Image size={20} color="#2563eb" />
-                    <Text className="font-inter text-lg">Media {index + 1}</Text>
-                  </View>
-                  <TouchableOpacity onPress={() => removeMedia(index)}>
-                    <X size={24} color="#6b7280" />
-                  </TouchableOpacity>
-                </View>
+            <View className="flex-1">
+              <Controller
+                control={control}
+                name="budgetMax"
+                render={({ field }) => (
+                  <FormInput
+                    label="Budget Max"
+                    placeholder="300,000"
+                    value={field.value}
+                    onChangeText={field.onChange}
+                    onBlur={field.onBlur}
+                    keyboardType="numeric"
+                    formatNumber
+                    hasError={!!errors.budgetMax}
+                  />
+                )}
+              />
+              {errors.budgetMax && (
+                <Text className="font-inter pt-1 text-red-500 text-sm">
+                  {errors.budgetMax.message}
+                </Text>
+              )}
+            </View>
+          </View>
 
-                {/* ✅ field is now passed through — file saves to form state */}
+          {/* Duration Min & Max - FROM FIRST FILE */}
+          <View className="flex-row gap-4 px-4 pt-3">
+            <View className="flex-1">
+              <Controller
+                control={control}
+                name="durationMin"
+                render={({ field }) => (
+                  <FormInput
+                    label="Duration Min (mo)"
+                    placeholder="3"
+                    value={field.value}
+                    onChangeText={field.onChange}
+                    onBlur={field.onBlur}
+                    keyboardType="numeric"
+                    hasError={!!errors.durationMin}
+                  />
+                )}
+              />
+              {errors.durationMin && (
+                <Text className="font-inter pt-1 text-red-500 text-sm">
+                  {errors.durationMin.message}
+                </Text>
+              )}
+            </View>
+
+            <View className="flex-1">
+              <Controller
+                control={control}
+                name="durationMax"
+                render={({ field }) => (
+                  <FormInput
+                    label="Duration Max (mo)"
+                    placeholder="12"
+                    value={field.value}
+                    onChangeText={field.onChange}
+                    onBlur={field.onBlur}
+                    keyboardType="numeric"
+                    hasError={!!errors.durationMax}
+                  />
+                )}
+              />
+              {errors.durationMax && (
+                <Text className="font-inter pt-1 text-red-500 text-sm">
+                  {errors.durationMax.message}
+                </Text>
+              )}
+            </View>
+          </View>
+
+          {/* Has Approved Drawings - FROM FIRST FILE */}
+          <View className="px-4 pt-6">
+            <View className="flex-row justify-between items-center">
+              <Text className="font-worksanssemibold text-base text-gray-800">
+                Approved Building Drawings?
+              </Text>
+              <Controller
+                control={control}
+                name="hasApprovedDrawings"
+                render={({ field }) => (
+                  <Switch
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    trackColor={{ false: "#d1d5db", true: "#6366f1" }}
+                    thumbColor="#ffffff"
+                  />
+                )}
+              />
+            </View>
+
+            {hasApprovedDrawings ? (
+              <View className="mt-4">
                 <Controller
                   control={control}
-                  name={`mediaFiles.${index}.file`}
+                  name="drawingFile"
                   render={({ field }) => (
                     <FileUploadComponent
-                      title="Click to upload media"
+                      title="Click to upload documents"
                       image={reportImage}
-                      label="Upload Media"
-                      note="PNG, JPG, MP4 (max. 10MB)"
+                      label="Upload Drawing"
+                      note="PDF, DWG, images (max. 20MB)"
                       control={control}
-                      name={`mediaFiles.${index}.file`}
+                      name="drawingFile"
                       value={field.value}
                       onChange={field.onChange}
-                      error={errors.mediaFiles?.[index]?.file?.message as string | undefined}
-                      maxSizeMB={10}
+                      error={errors.drawingFile?.message as string | undefined}
+                      maxSizeMB={20}
                     />
                   )}
                 />
               </View>
-            ))}
-
-            <TouchableOpacity
-              onPress={() => appendMedia({ file: null })}
-              className="flex-row gap-2 justify-end mb-6"
-            >
-              <Plus size={20} color="#2563eb" />
-              <Text className="text-blue-600 font-inter">Add media file</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* ── Document Files ───────────────────────────────────────────── */}
-          <View className="px-4 mt-2">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="font-worksanssemibold text-xl">Document Files</Text>
-              <Text className="font-inter text-gray-400 text-sm">PDF, DOC (Optional)</Text>
-            </View>
-
-            {documentFields.map((field, index) => (
-              <View key={field.id} className="border border-gray-300 rounded-xl p-4 mb-4">
-                <View className="flex-row justify-between items-center mb-4">
-                  <View className="flex-row items-center gap-2">
-                    <FileText size={20} color="#2563eb" />
-                    <Text className="font-inter text-lg">Document {index + 1}</Text>
-                  </View>
-                  <TouchableOpacity onPress={() => removeDocument(index)}>
-                    <X size={24} color="#6b7280" />
-                  </TouchableOpacity>
-                </View>
-
-                {/* ✅ field is now passed through — file saves to form state */}
-                <Controller
-                  control={control}
-                  name={`documentFiles.${index}.file`}
-                  render={({ field }) => (
-                    <FileUploadComponent
-                      title="Click to upload document"
-                      image={reportImage}
-                      label="Upload Document"
-                      note="PDF, DOC, DOCX (max. 10MB)"
-                      control={control}
-                      name={`documentFiles.${index}.file`}
-                      value={field.value}
-                      onChange={field.onChange}
-                      error={errors.documentFiles?.[index]?.file?.message as string | undefined}
-                      maxSizeMB={10}
-                    />
-                  )}
-                />
+            ) : (
+              <View className="mt-4 border border-dashed border-gray-300 rounded-xl p-6 items-center justify-center">
+                <Text className="font-inter text-gray-400 text-base">
+                  Tap to upload documents
+                </Text>
+                <Text className="font-inter text-gray-400 text-sm mt-1">
+                  PDF, DWG, images
+                </Text>
               </View>
-            ))}
-
-            <TouchableOpacity
-              onPress={() => appendDocument({ file: null })}
-              className="flex-row gap-2 justify-end mb-6"
-            >
-              <Plus size={20} color="#2563eb" />
-              <Text className="text-blue-600 font-inter">Add document file</Text>
-            </TouchableOpacity>
+            )}
           </View>
 
-          {/* ── Submit ───────────────────────────────────────────────────── */}
+          {/* Submit Button */}
           <View className="pt-6 pb-8 px-4">
             <GradientButton
               title="Create Project"
@@ -661,7 +437,6 @@ const AddProject = () => {
               disabled={isLoading}
             />
           </View>
-
         </View>
       </ScrollView>
     </AppLayout>
