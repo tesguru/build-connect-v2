@@ -1,72 +1,141 @@
-import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 
-interface MilestoneProps {
+function getStatusConfig(status: string | null | undefined) {
+  const normalized = status?.toLowerCase();
+  switch (normalized) {
+    case "completed":
+      return {
+        dotColor: "#16a34a",
+        labelColor: "#16a34a",
+        lineColor: "#86efac",
+        icon: "checkmark-circle",
+        iconColor: "#16a34a",
+      };
+    case "in_progress":
+    case "in progress":
+      return {
+        dotColor: "#2463EB",
+        labelColor: "#2463EB",
+        lineColor: "#93c5fd",
+        icon: "play-circle",
+        iconColor: "#2463EB",
+      };
+    default:
+      return {
+        dotColor: "#f59e0b",
+        labelColor: "#d97706",
+        lineColor: "#e5e7eb",
+        icon: null,
+        iconColor: "#d1d5db",
+      };
+  }
+}
+
+type MilestoneCardProps = {
   milestoneName: string;
   dueDate: string;
   budget: string;
-  progress: number;
-  onPress?: () => void;
   status?: string;
-}
-
-const getStatusStyle = (status: string) => {
-  switch (status?.toLowerCase()) {
-    case 'completed':
-      return { bg: 'bg-green-100', text: 'text-green-700' };
-    case 'pending':
-      return { bg: 'bg-yellow-100', text: 'text-yellow-700' };
-    case 'in_progress':
-    case 'in progress':
-      return { bg: 'bg-blue-100', text: 'text-blue-700' };
-    case 'overdue':
-      return { bg: 'bg-red-100', text: 'text-red-700' };
-    case 'cancelled':
-      return { bg: 'bg-gray-100', text: 'text-gray-500' };
-    default:
-      return { bg: 'bg-gray-100', text: 'text-gray-600' };
-  }
+  onPress?: () => void;
+  isFirst?: boolean;
+  isLast?: boolean;
 };
 
-const Milestone: React.FC<MilestoneProps> = ({
+export default function MilestoneCard({
   milestoneName,
   dueDate,
   budget,
-  progress,
+  status = "Pending",
   onPress,
-  status = 'Pending',
-}) => {
-  const statusStyle = getStatusStyle(status);
+  isFirst = false,
+  isLast = false,
+}: MilestoneCardProps) {
+  const statusConfig = getStatusConfig(status);
 
   return (
-    <TouchableOpacity
-      className="mx-1 my-1 p-4 bg-white rounded-xl"
-      onPress={onPress}
-    >
-      {/* Header with title and status */}
-      <View className="flex-row justify-between items-start mb-3">
-        <Text className="text-xl font-worksanssemibold text-gray-900 flex-1 mr-2">
-          {milestoneName}
-        </Text>
-        <View className={`px-3 py-1 rounded-full ${statusStyle.bg}`}>
-          <Text className={`text-xs font-medium ${statusStyle.text}`}>
+    <View className="flex-row px-4 mb-0.5">
+      <View className="items-center">
+        <View
+          style={{
+            width: 2,
+            height: 18,
+            backgroundColor: isFirst ? "transparent" : statusConfig.lineColor,
+          }}
+        />
+        {statusConfig.icon ? (
+          <Ionicons
+            name={statusConfig.icon as any}
+            size={28}
+            color={statusConfig.iconColor}
+          />
+        ) : (
+          <View className="w-5 h-5 rounded-full border-2 border-gray-300 bg-gray-50" />
+        )}
+        <View
+          style={{
+            width: 2,
+            flex: 1,
+            minHeight: 24,
+            backgroundColor: isLast ? "transparent" : statusConfig.lineColor,
+          }}
+        />
+      </View>
+
+      <View className="flex-1 bg-white rounded-2xl ml-3 mb-2.5 px-4 py-3.5 shadow-sm shadow-black/10 elevation-2">
+        <View className="flex-row items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-full self-start mb-2">
+          <Ionicons name="flag-outline" size={12} color="#64748b" />
+          <Text className="text-xs text-slate-500 font-inter">Milestone</Text>
+        </View>
+
+        <View className="flex-row items-center gap-1.5 mb-2">
+          <View
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: 4,
+              backgroundColor: statusConfig.dotColor,
+            }}
+          />
+          <Text
+            style={{
+              fontSize: 12,
+              color: statusConfig.labelColor,
+              fontWeight: "500",
+            }}
+          >
             {status}
           </Text>
         </View>
-      </View>
 
-      {/* Due date */}
-      <Text className="text-gray-500 font-inter mb-3">Due: {dueDate}</Text>
+        <View className="flex-row justify-between items-center mb-3">
+          <Text
+            className="font-interbold text-base text-gray-900 flex-1 pr-2"
+            numberOfLines={2}
+          >
+            {milestoneName}
+          </Text>
+          <Text className="font-interbold text-sm text-gray-700">{budget}</Text>
+        </View>
 
-      {/* Payment amount */}
-      <View className="flex-row items-baseline mb-4">
-        <Text className="text-gray-600 font-inter mr-2">Payment:</Text>
-        <Text className="text-lg font-worksanssemibold text-gray-900">
-          {budget}
-        </Text>
+        <View className="h-px bg-gray-100 mb-2.5" />
+
+        <View className="flex-row justify-between items-center">
+          <Text className="text-xs text-gray-400 font-inter">{dueDate}</Text>
+          <View className="items-end">
+            <TouchableOpacity
+              onPress={onPress}
+              activeOpacity={0.8}
+              className="bg-blue-600 rounded-full px-4 py-1.5"
+            >
+              <Text className="text-white text-sm font-intersemibold">
+                View Details
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
-    </TouchableOpacity>
+    </View>
   );
-};
-
-export default Milestone;
+}

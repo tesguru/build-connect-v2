@@ -1,50 +1,58 @@
-import PrimaryButton from '@/components/Buttons/Button'
-import GradientButton from '@/components/Buttons/GradientButton'
-import AppLayout from '@/components/Layouts/AppLayout'
-import SuccessScreen from '@/components/Notifications/SucessScreen'
-import { MarkEmoji } from '@/constants/icon'
-import { useBids } from '@/core/hooks/UseBids'
-import { useLocalSearchParams } from 'expo-router'
-import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Alert, Image, Text, View } from 'react-native'
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-const ClientContractdetailsScreen = () => {
-  const { 
-    bidId, 
-    projectId, 
-    projectTitle, 
-    companyName, 
-    bidsData 
-  } = useLocalSearchParams<{
-    bidId: string
-    companyName: string
-    projectTitle: string
-    bidsData: string
-    projectId: string
-  }>()
+import GradientButton from "@/components/Buttons/GradientButton";
+import AppLayout from "@/components/Layouts/AppLayout";
+import SuccessScreen from "@/components/Notifications/SucessScreen";
 
-  const [parsedBidsData, setParsedBidsData] = useState<any>({})
-  const [milestones, setMilestones] = useState<any[]>([])
-  const [startDate, setStartDate] = useState<string>('')
-  const [endDate, setEndDate] = useState<string>('')
+import PrimaryButton from "@/components/Buttons/Button";
+import { MarkEmoji } from "@/constants/icon";
+import { useBids } from "@/core/hooks/UseBids";
+import { useCurrencyStore } from "@/store/useCurrencyStore";
 
-  // Parse bidsData safely
-  useEffect(() => {
-    if (bidsData) {
-      try {
-        const parsed = typeof bidsData === 'string' ? JSON.parse(bidsData) : bidsData
-        setParsedBidsData(parsed)
-        const milestoneData = parsed?.milestones || []
-        setMilestones(milestoneData)
-        setStartDate(milestoneData[0]?.completionDate || '')
-        setEndDate(milestoneData[milestoneData.length - 1]?.completionDate || '')
-      } catch (error) {
-        console.error('Error parsing bidsData:', error)
-        setParsedBidsData({})
-        setMilestones([])
-      }
-    }
-  }, [bidsData])
+// ─────────────────────────────────────────────────────────────────────────────
+// Helper Functions - Preserved from original
+// ─────────────────────────────────────────────────────────────────────────────
+function formatDate(date: string) {
+  if (!date) return "—";
+  try {
+    return new Date(date).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return "—";
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Component
+// ─────────────────────────────────────────────────────────────────────────────
+export default function ClientContractdetailsScreen() {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [contractData, setContractData] = useState<any>({});
+  const [milestones, setMilestones] = useState<any[]>([]);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const { bidId, projectId, projectTitle, companyName, bidsData } =
+    useLocalSearchParams<{
+      bidId: string;
+      projectId: string;
+      projectTitle: string;
+      companyName: string;
+      bidsData: string;
+    }>();
 
   const {
     sendContractMutation,
@@ -52,89 +60,142 @@ const ClientContractdetailsScreen = () => {
     signSuccess,
     signContractMutation,
     getContractByBidQuery,
-  } = useBids()
+  } = useBids();
 
-  const { 
-    data: contractResponse, 
-    isLoading: isLoadingContract,
-    error: contractError 
-  } = getContractByBidQuery(bidId as string)
+  const { currencySymbol } = useCurrencyStore();
 
- 
-  const parsedcontractData = contractResponse?.data?.data || contractResponse?.data || {}
-  const contractStatus = parsedcontractData?.status
-  const contractId = parsedcontractData?.id
-
-  const isClientSigned = contractStatus === 'client_signed'
-  const isActive = contractStatus === 'active'
-  const isContractReady = contractStatus === 'draft' || contractStatus === 'pending'
-
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return '—'
+  // ── Parse bidsData ────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!bidsData) return;
     try {
-      return new Date(dateStr).toLocaleDateString('en-GB', {
-        day: 'numeric', 
-        month: 'short', 
-        year: 'numeric',
-      })
-    } catch (error) {
-      return '—'
+      const parsed =
+        typeof bidsData === "string" ? JSON.parse(bidsData) : bidsData;
+      setContractData(parsed || {});
+      const ms = parsed?.milestones || [];
+      setMilestones(ms);
+      setStartDate(ms[0]?.completionDate || "");
+      setEndDate(ms[ms.length - 1]?.completionDate || "");
+    } catch (err) {
+      console.error("Error parsing bidsData:", err);
+      setContractData({});
+      setMilestones([]);
     }
-  }
+  }, [bidsData]);
 
-  const formatAmount = (amount: string | number) => {
-    if (!amount) return '—'
-    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
-    if (isNaN(numAmount)) return '—'
-    return `₦${numAmount.toLocaleString('en-NG')}`
-  }
+  // ── Queries ────────────────────────────────────────────────────────────────
+  const { data, isLoading, error, refetch } = getContractByBidQuery(bidId);
+  const contract = data?.data?.data || data?.data || {};
+  const contractStatus = contract?.status;
+  const contractId = contract?.id;
+
+  const isClientSigned = contractStatus === "client_signed";
+  const isActive = contractStatus === "active";
+  const isContractorSigned = contractStatus === "contractor_signed";
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
+  const showError = (message: string) => {
+    Alert.alert("Error", message);
+  };
+
+  const formatCurrency = (amount: any) => {
+    if (!amount) return "—";
+    const num = typeof amount === "string" ? parseFloat(amount) : amount;
+    if (isNaN(num)) return "—";
+    return `${currencySymbol}${num.toLocaleString()}`;
+  };
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
+  const viewContract = () => {
+    router.push({
+      pathname: "/(clients)/projects/contractviewscreen",
+      params: {
+        projectTitle,
+        companyName,
+        bidsData,
+        contractData: JSON.stringify(contract),
+      },
+    });
+  };
 
   const sendContract = () => {
     if (!contractId) {
-      Alert.alert('Error', 'Contract ID not found')
-      return
+      showError("Contract ID not found");
+      return;
     }
-    sendContractMutation.mutate(contractId)
-  }
+    setIsSubmitting(true);
+    sendContractMutation.mutate(contractId, {
+      onSettled: () => {
+        setIsSubmitting(false);
+      },
+      onError: (err: any) => {
+        const message =
+          err?.response?.data?.message ||
+          err?.message ||
+          "Failed to send contract. Please try again.";
+        showError(message);
+      },
+    });
+  };
 
   const signContract = () => {
     if (!contractId) {
-      Alert.alert('Error', 'Contract ID not found')
-      return
+      showError("Contract ID not found");
+      return;
     }
-    signContractMutation.mutate(contractId)
-  }
+    setIsSubmitting(true);
+    signContractMutation.mutate(contractId, {
+      onSettled: () => {
+        setIsSubmitting(false);
+      },
+      onError: (err: any) => {
+        const message =
+          err?.response?.data?.message ||
+          err?.message ||
+          "Failed to sign contract. Please try again.";
+        showError(message);
+      },
+    });
+  };
 
-  // Handle errors from mutations
-  useEffect(() => {
-    if (sendContractMutation.error) {
-      Alert.alert('Error', 'Failed to send contract. Please try again.')
-    }
-  }, [sendContractMutation.error])
+  const startWork = () => {
+    router.push({ pathname: "/share/startwork", params: { projectId } });
+  };
 
-  useEffect(() => {
-    if (signContractMutation.error) {
-      Alert.alert('Error', 'Failed to sign contract. Please try again.')
-    }
-  }, [signContractMutation.error])
+  const handleBack = () => {
+    router.back();
+  };
 
-  // Success screens
+  const isLoadingSend = isSubmitting || sendContractMutation.isPending;
+  const isLoadingSign = isSubmitting || signContractMutation.isPending;
+
+  const steps = [
+    { label: "Contract generated", done: !!contractId },
+    {
+      label:
+        isContractorSigned || isActive
+          ? "Builder signed"
+          : "Awaiting builder signature",
+      done: isContractorSigned || isActive,
+    },
+    {
+      label:
+        isClientSigned || isActive
+          ? "Client signed"
+          : "Awaiting client signature",
+      done: isClientSigned || isActive,
+    },
+  ];
+
+  // ── Success States ──────────────────────────────────────────────────────
   if (sendSuccess) {
     return (
       <SuccessScreen
         title="Contract Sent!"
         message="The contract has been successfully sent via email."
-        navigateTo="/(clients)/proposalscreen/proposalscreen"
-        params={{ 
-          bidId: bidId as string, 
-          projectTitle: projectTitle as string, 
-          projectId: projectId as string, 
-          companyName: companyName as string, 
-          bidsData: bidsData as string 
-        }}
-        buttonTitle="Return to Proposal"
+        buttonTitle="Return to Contract"
+        navigateTo="/(clients)/projects/contractscreen"
       />
-    )
+    );
   }
 
   if (signSuccess) {
@@ -142,78 +203,82 @@ const ClientContractdetailsScreen = () => {
       <SuccessScreen
         title="Contract Signed!"
         message="You have successfully signed the contract."
-        navigateTo="/(tab)"
-        params={{ 
-          bidId: bidId as string, 
-          projectTitle: projectTitle as string, 
-          companyName: companyName as string, 
-          projectId: projectId as string, 
-          bidsData: bidsData as string 
-        }}
-        buttonTitle="Return to Home"
+        buttonTitle="Return to Contract"
+        navigateTo="/(clients)/projects/contractscreen"
       />
-    )
+    );
   }
 
-  if (isLoadingContract) {
+  // ── Loading State ─────────────────────────────────────────────────────────
+  if (isLoading) {
     return (
       <AppLayout screenName="Contract Details">
         <View className="flex-1 justify-center items-center py-20">
           <ActivityIndicator size="large" color="#2463EB" />
-          <Text className="mt-4 text-gray-500 font-inter">Loading contract...</Text>
+          <Text className="mt-4 text-gray-500 font-inter">
+            Loading contract...
+          </Text>
         </View>
       </AppLayout>
-    )
+    );
   }
 
-  if (contractError) {
+  // ── Error State ──────────────────────────────────────────────────────────
+  if (error) {
     return (
       <AppLayout screenName="Contract Details">
         <View className="flex-1 justify-center items-center py-20 px-4">
           <Text className="text-red-500 text-center mb-4 font-inter">
             Failed to load contract details
           </Text>
-          <PrimaryButton
-            onPress={() => getContractByBidQuery.refetch()}
-            title="Retry"
-            textColor="white"
-            backgroundColor="#2563EB"
-          />
+          <GradientButton title="Retry" onPress={() => refetch()} />
         </View>
       </AppLayout>
-    )
+    );
   }
 
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <AppLayout screenName="Contract Details">
       <View className="pt-4">
-
         {/* Header */}
         <View className="items-center mb-6">
-          <Image style={{ width: 90, height: 90 }} source={MarkEmoji} resizeMode="contain" />
+          <Image
+            style={{ width: 90, height: 90 }}
+            source={MarkEmoji}
+            resizeMode="contain"
+          />
           <Text className="font-interbold pt-2 text-center">Bid Selected</Text>
           <Text className="font-inter pt-1 text-center text-gray-500">
-            You've selected {companyName as string}
+            You've selected {companyName}
           </Text>
         </View>
 
-        {/* Contract Details */}
-        <View className="mx-4 mb-4 bg-white rounded-xl px-4">
-          <Text className="font-interbold py-4 text-xl">{projectTitle as string}</Text>
+        {/* Contract Card */}
+        <TouchableOpacity
+          className="mx-4 mb-4 bg-white rounded-xl p-4"
+          activeOpacity={0.8}
+          onPress={viewContract}
+        >
+          <Text className="font-interbold text-xl">{projectTitle}</Text>
 
           <View className="flex-row py-3 justify-between border-b border-gray-100">
             <Text className="text-gray-500 font-inter">Contractor</Text>
-            <Text className="font-interbold">{companyName as string}</Text>
+            <Text className="font-interbold">{companyName}</Text>
           </View>
 
           <View className="flex-row py-3 justify-between border-b border-gray-100">
             <Text className="text-gray-500 font-inter">Total Amount</Text>
-            <Text className="font-interbold">{formatAmount(parsedBidsData?.bidAmount)}</Text>
+            <Text className="font-interbold">
+              {formatCurrency(contractData.bidAmount)}
+            </Text>
           </View>
 
           <View className="flex-row py-3 justify-between border-b border-gray-100">
             <Text className="text-gray-500 font-inter">Timeline</Text>
-            <Text className="font-interbold">{parsedBidsData?.proposedTimeline || '—'}</Text>
+            <Text className="font-interbold">
+              {contractData.proposedTimeline || "—"}
+            </Text>
           </View>
 
           <View className="flex-row py-3 justify-between border-b border-gray-100">
@@ -225,55 +290,54 @@ const ClientContractdetailsScreen = () => {
             <Text className="text-gray-500 font-inter">End Date</Text>
             <Text className="font-interbold">{formatDate(endDate)}</Text>
           </View>
-        </View>
+
+          <View className="flex-row justify-end py-3">
+            <Text className="text-[#2463EB] text-xs font-interbold">
+              View Contract →
+            </Text>
+          </View>
+        </TouchableOpacity>
 
         {/* Contract Status */}
         <View className="mx-4 mb-4 bg-white rounded-xl px-4">
           <Text className="font-interbold text-xl py-4">Contract Status</Text>
-
-          {[
-            { 
-              label: 'Contract generated', 
-              done: !!contractId 
-            },
-            { 
-              label: isClientSigned || isActive ? 'Client signed' : 'Awaiting client signature', 
-              done: isClientSigned || isActive 
-            },
-            { 
-              label: isActive ? 'Builder signed' : 'Awaiting builder signature', 
-              done: isActive 
-            },
-          ].map((step, idx) => (
-            <View key={idx} className="flex-row py-3 gap-3 items-center border-b border-gray-100 last:border-0">
+          {steps.map((step, i) => (
+            <View
+              key={i}
+              className="flex-row py-3 gap-3 items-center border-b border-gray-100 last:border-0"
+            >
               <View
                 className={`w-5 h-5 rounded-full items-center justify-center ${
-                  step.done ? 'bg-green-500' : 'bg-gray-200'
+                  step.done ? "bg-green-500" : "bg-gray-200"
                 }`}
               >
                 {step.done && (
-                  <Text style={{ color: '#fff', fontSize: 10, fontWeight: 'bold' }}>✓</Text>
+                  <Text
+                    style={{ color: "#fff", fontSize: 10, fontWeight: "bold" }}
+                  >
+                    ✓
+                  </Text>
                 )}
               </View>
-              <Text className={`font-inter text-sm ${step.done ? 'text-gray-900' : 'text-gray-400'}`}>
+              <Text
+                className={`font-inter text-sm ${step.done ? "text-gray-900" : "text-gray-400"}`}
+              >
                 {step.label}
               </Text>
             </View>
           ))}
         </View>
 
+        {/* Action Buttons */}
         <View className="mx-4 gap-4">
-          {/* Send Contract - Show only if contract exists and not active */}
-          { isClientSigned && (
-            <GradientButton
-              loading={sendContractMutation.isPending}
-              onPress={sendContract}
-              title="Send Contract Via Email"
-            />
-          )}
+          <GradientButton
+            loading={isLoadingSend}
+            onPress={sendContract}
+            title="Send Contract Via Email"
+            disabled={isLoadingSend}
+          />
 
-          {/* Sign Contract - Show only if contract exists and not signed by client */}
-          {contractId && !isClientSigned && !isActive && (
+          {isContractorSigned && (
             <PrimaryButton
               loading={signContractMutation.isPending}
               onPress={signContract}
@@ -283,19 +347,22 @@ const ClientContractdetailsScreen = () => {
             />
           )}
 
-         
           {isActive && (
-            <View className="bg-green-50 p-4 rounded-lg">
-              <Text className="text-green-700 font-interbold text-center">✓ Contract Active</Text>
-              <Text className="text-green-600 text-center text-sm mt-1">Both parties have signed</Text>
-            </View>
+            <GradientButton onPress={startWork} title="Start Project" />
           )}
 
+          {isActive && (
+            <View className="bg-green-50 p-4 rounded-lg">
+              <Text className="text-green-700 font-interbold text-center">
+                ✓ Contract Active
+              </Text>
+              <Text className="text-green-600 text-center text-sm mt-1">
+                Both parties have signed
+              </Text>
+            </View>
+          )}
         </View>
-
       </View>
     </AppLayout>
-  )
+  );
 }
-
-export default ClientContractdetailsScreen

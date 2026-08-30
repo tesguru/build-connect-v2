@@ -1,159 +1,132 @@
-
-import { useMutation, useQuery } from "@tanstack/react-query";
-import Toast from "react-native-toast-message";
-
-
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 import { useState } from "react";
+import Toast from "react-native-toast-message";
 import { escrowService } from "../services/escrow/escrowservice";
 import { handleApiError } from "../utils/handleapierror";
 
+function isOk(response: any) {
+  const data = response?.data;
+  return (
+    (data?.statusCode === 200 || data?.statusCode === 201) &&
+    data?.success === true
+  );
+}
 
-export type { Project, ProjectsResponse } from "../services/projects/projectTypes";
-
-export const useEscrow = () => {
-  const [submitBidSuccess, setSubmitBidSuccess] = useState(false);
-
-  
-
-  const getWalletFunding = ( params: object) => {
-  return useQuery({
-    queryKey: ['getAllWalletFunding',  params], 
-    queryFn: () => escrowService.walletFunding(params),
-  });
-};
-
+export function useEscrow() {
+  const [paymentInstructionSuccess, setPaymentInstructionSuccess] =
+    useState(false);
+  const queryClient = useQueryClient();
+  const router = useRouter();
 
   const createPaymentInstructionsMutation = useMutation({
     mutationFn: escrowService.paymentInstructions,
-    onSuccess: (res: any) => {
-      const responseData = res?.data;
-      if (
-        (responseData.statusCode === 200 || responseData.statusCode === 201) &&
-        responseData.success === true
-      ) {
-        Toast.show({
-          type: "success",
-          text1: "Payment Instructions Created",
-          text2: "Your Payment Instructions has been created successfully",
-        });
-        setSubmitBidSuccess(true);
-      }
+    onSuccess: (response: any) => {
+      if (!isOk(response)) return;
+      Toast.show({
+        type: "success",
+        text1: "Payment Instructions Created",
+        text2: "Your Payment Instructions has been created successfully",
+      });
+      setPaymentInstructionSuccess(true);
     },
-    onError: (error: any) => {
-        handleApiError(error, "Failed to create payment instructions")
-    },
+    onError: (err: any) =>
+      handleApiError(err, "Failed to create payment instructions"),
   });
 
-   const createWalletFunding = useMutation({
+  const createWalletFunding = useMutation({
     mutationFn: escrowService.createwalletFunding,
-    onSuccess: (res: any) => {
-      const responseData = res?.data;
-      if (
-        (responseData.statusCode === 200 || responseData.statusCode === 201) &&
-        responseData.success === true
-      ) {
-        Toast.show({
-          type: "success",
-          text1: "Wallet Funding Created",
-          text2: "Wallet Funding has been created successfully",
-        });
-        setSubmitBidSuccess(true);
-      }
+    onSuccess: (response: any) => {
+      if (!isOk(response)) return;
+      Toast.show({
+        type: "success",
+        text1: "Wallet Funding Created",
+        text2: "Wallet Funding has been created successfully",
+      });
+      router.back();
     },
-    onError: (error: any) => {
-         handleApiError(error, "Failed to create wallet funding")
-    },
+    onError: (err: any) =>
+      handleApiError(err, "Failed to create wallet funding"),
   });
-    const createEscrowAccount = useMutation({
+
+  const createEscrowAccount = useMutation({
     mutationFn: escrowService.createEscrowAccount,
-    onSuccess: (res: any) => {
-      const responseData = res?.data;
-      if (
-        (responseData.statusCode === 200 || responseData.statusCode === 201) &&
-        responseData.success === true
-      ) {
-        Toast.show({
-          type: "success",
-          text1: "Escrow Account Created",
-          text2: "Escrow Account has been created successfully",
-        });
-        setSubmitBidSuccess(true);
-      }
+    onSuccess: (response: any) => {
+      if (!isOk(response)) return;
+      Toast.show({
+        type: "success",
+        text1: "Escrow Account Created",
+        text2: "Escrow Account has been created successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["getEscrowAccount"] });
+      router.back();
     },
-    onError: (error: any) => {
-        handleApiError(error, "Failed to create escrow account")
-    },
+    onError: (err: any) =>
+      handleApiError(err, "Failed to create escrow account"),
   });
 
-    const createPayoutAccount = useMutation({
+  const createPayoutAccount = useMutation({
     mutationFn: escrowService.createPayoutAccount,
-    onSuccess: (res: any) => {
-      const responseData = res?.data;
-      if (
-        (responseData.statusCode === 200 || responseData.statusCode === 201) &&
-        responseData.success === true
-      ) {
-        Toast.show({
-          type: "success",
-          text1: "Payout Account Created",
-          text2: "Payout Account has been created successfully",
-        });
-        setSubmitBidSuccess(true);
-      }
+    onSuccess: (response: any) => {
+      if (!isOk(response)) return;
+      Toast.show({
+        type: "success",
+        text1: "Payout Account Created",
+        text2: "Payout Account has been created successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["getPayoutAccount"] });
+      router.back();
     },
-    onError: (error: any) => {
-        handleApiError(error, "Failed to create payout account")
-    },
+    onError: (err: any) =>
+      handleApiError(err, "Failed to create payout account"),
   });
 
-   const getEscrowAccount = () => {
-      return useQuery({
-        queryKey: ['getEscrowAccount', ],
-        queryFn: () => escrowService.getEscrowAccount(),
-      });
-    };
+  const getWalletFunding = (params: any) =>
+    useQuery({
+      queryKey: ["getAllWalletFunding", params],
+      queryFn: () => escrowService.walletFunding(params),
+    });
 
-  const getPaymentInstructions = (params :any) => {
-      return useQuery({
-        queryKey: ['getPaymentInstructions', ],
-        queryFn: () => escrowService.getPaymentInstructions(params),
-      });
-  };
+  const getEscrowAccount = () =>
+    useQuery({
+      queryKey: ["getEscrowAccount"],
+      queryFn: () => escrowService.getEscrowAccount(),
+    });
 
+  const getPaymentInstructions = (params: any) =>
+    useQuery({
+      queryKey: ["getPaymentInstructions"],
+      queryFn: () => escrowService.getPaymentInstructions(params),
+    });
 
-  const getSinglePaymentInstruction = (id :any) => {
-      return useQuery({
-        queryKey: ['getSinglePaymentInstructions', id], 
-        queryFn: () => escrowService.getSinglePaymentInstructions(id),
-      });
-    };
+  const getPayoutAccount = () =>
+    useQuery({
+      queryKey: ["getPayoutAccount"],
+      queryFn: () => escrowService.getPayoutAccount(),
+    });
 
-    const getSingleWalletFunding = (id :any) => {
-      return useQuery({
-        queryKey: ['getSinglePaymentInstructions', id], 
-        queryFn: () => escrowService.getSingleWalletFunding(id),
-      });
-    };
+  const getSinglePaymentInstruction = (instructionId: string) =>
+    useQuery({
+      queryKey: ["getSinglePaymentInstructions", instructionId],
+      queryFn: () => escrowService.getSinglePaymentInstructions(instructionId),
+    });
 
-
-
-  const getPayoutAccount = () => {
-      return useQuery({
-        queryKey: ['getPayoutAccount', ],
-        queryFn: () => escrowService.getPayoutAccount(),
-      });
-  };
+  const getSingleWalletFunding = (fundingId: string) =>
+    useQuery({
+      queryKey: ["getSingleWalletFunding", fundingId],
+      queryFn: () => escrowService.getSingleWalletFunding(fundingId),
+    });
 
   return {
-  createPaymentInstructionsMutation,
-  createWalletFunding,
-  createEscrowAccount,
-  getWalletFunding,
-  getEscrowAccount,
-  getPaymentInstructions,
-  createPayoutAccount,
-  getPayoutAccount,
-  getSinglePaymentInstruction,
-  getSingleWalletFunding
+    createPaymentInstructionsMutation,
+    createWalletFunding,
+    createEscrowAccount,
+    getWalletFunding,
+    getEscrowAccount,
+    getPaymentInstructions,
+    createPayoutAccount,
+    getPayoutAccount,
+    getSinglePaymentInstruction,
+    getSingleWalletFunding,
   };
-};
+}

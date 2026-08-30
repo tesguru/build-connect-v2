@@ -16,9 +16,6 @@ import { reportImage } from "@/constants/icon";
 import { useBids } from "@/core/hooks/UseBids";
 import { uploadFile } from "@/core/utils/fileUpload";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SCHEMA - Using first file's pattern
-// ─────────────────────────────────────────────────────────────────────────────
 const invitationSchema = z.object({
   deadline: z.date({ required_error: "Bid submission deadline is required" }),
   notes: z.string().optional(),
@@ -27,9 +24,6 @@ const invitationSchema = z.object({
 
 type InvitationFormValues = z.infer<typeof invitationSchema>;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Component
-// ─────────────────────────────────────────────────────────────────────────────
 export default function SendInvitationToBid() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,7 +35,6 @@ export default function SendInvitationToBid() {
 
   const { inviteBidMutation, inviteBidsuccess } = useBids();
 
-  // ── Form ───────────────────────────────────────────────────────────────────
   const {
     control,
     handleSubmit,
@@ -55,16 +48,13 @@ export default function SendInvitationToBid() {
     },
   });
 
-  // ── Helpers from first file ──────────────────────────────────────────────
   const showError = (message: string) => {
     Toast.show({ type: "error", text1: "Validation Error", text2: message });
   };
 
-  // ── Submit - Using first file's pattern ──────────────────────────────────
   const onSubmit = async (data: InvitationFormValues) => {
     setIsSubmitting(true);
     try {
-      // ── File upload - using AddProject pattern ─────────────────────────
       let documentIds: string[] = [];
       if (data.document) {
         const uploaded = await uploadFile(
@@ -77,7 +67,6 @@ export default function SendInvitationToBid() {
 
       const deadlineDate = data.deadline.toISOString().split("T")[0];
 
-      // ── Mutation - using first file's pattern ──────────────────────────
       inviteBidMutation.mutate(
         {
           projectId,
@@ -87,9 +76,7 @@ export default function SendInvitationToBid() {
           documentIds,
         },
         {
-          onSuccess: () => {
-            // Success message is handled by the inviteBidsuccess check below
-          },
+          onSuccess: () => {},
           onSettled: () => {
             setIsSubmitting(false);
           },
