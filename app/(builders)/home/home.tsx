@@ -178,11 +178,11 @@ const Home = () => {
                   projectName={project.name}
                   location={project.location}
                   description={project.description}
-                  budgetMin={project.budgetMinimum}
-                  budgetMax={project.budgetMaximum}
+                  budgetMin={project.budgetMin}
+                  budgetMax={project.budgetMax}
                   currency={project.currency}
-                  durationMin={project.durationMinimum}
-                  durationMax={project.durationMaximum}
+                  durationMin={project.durationMin}
+                  durationMax={project.durationMax}
                   bids={project.bidsCount}
                   status={project.status}
                   onPress={() =>

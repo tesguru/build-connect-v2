@@ -12,10 +12,13 @@ interface ProjectsComponentProps {
   postedTime: string;
   projectName: string;
   location: string;
-  description: string;
-  budget: string;
-  duration: string;
-  bids: string;
+  description?: string;
+  budgetMin?: number;
+  budgetMax?: number;
+  currency?: string;
+  durationMin?: number;
+  durationMax?: number;
+  bids: number | string;
   status?:
     | "draft"
     | "posted"
@@ -33,9 +36,11 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
   postedTime,
   projectName,
   location,
-  description,
-  budget,
-  duration,
+  budgetMin,
+  budgetMax,
+  currency,
+  durationMin,
+  durationMax,
   bids,
   status,
   onPress,
@@ -43,6 +48,14 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
   clockIcon = ClockIcon,
   userIcon = UserIcon,
 }) => {
+  // Helper function to format number with commas
+  const formatAmount = (amount?: number): string => {
+    if (amount == null) return "0";
+    const num = typeof amount === "string" ? parseFloat(amount) : amount;
+    if (isNaN(num)) return "0";
+    return num.toLocaleString("en-NG");
+  };
+
   // Function to get status badge styling
   const getStatusBadgeStyles = () => {
     switch (status) {
@@ -75,6 +88,11 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
 
   const statusStyles = getStatusBadgeStyles();
 
+  const durationLabel =
+    durationMin != null && durationMax != null
+      ? `${durationMin}–${durationMax} months`
+      : "Not specified";
+
   return (
     <TouchableOpacity className="m-4 p-4 bg-white rounded-xl" onPress={onPress}>
       <View className="flex-row justify-between items-start mb-2">
@@ -106,9 +124,16 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
 
         <View className="flex-row gap-2 items-center mb-4">
           <Text className="font-inter text-gray-600">Budget:</Text>
-          <Text className="font-worksanssemibold text-xl text-blue-600">
-            {budget}
-          </Text>
+          {budgetMin != null && budgetMax != null ? (
+            <Text className="font-worksanssemibold text-md text-blue-600">
+              {currency} {formatAmount(budgetMin)} – {currency}{" "}
+              {formatAmount(budgetMax)}
+            </Text>
+          ) : (
+            <Text className="font-worksanssemibold text-xl text-blue-600">
+              Not specified
+            </Text>
+          )}
         </View>
 
         <View className="flex-row justify-between items-center pt-3 border-t border-gray-100">
@@ -118,9 +143,7 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
               source={clockIcon}
               resizeMode="contain"
             />
-            <Text className="font-inter text-gray-600">
-              Duration: {duration}
-            </Text>
+            <Text className="font-inter text-gray-600">{durationLabel}</Text>
           </View>
 
           <View className="flex-row gap-1 items-center">
