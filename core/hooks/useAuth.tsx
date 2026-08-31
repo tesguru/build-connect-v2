@@ -294,9 +294,65 @@ export function useAuth() {
       queryKey: ["getUserProfile"],
       queryFn: () => AuthService.getProfile(),
     });
+  const createDeleteMutation = useMutation({
+    mutationFn: AuthService.AccountDeletion,
+    onSuccess: (response: any) => {
+      const data = response?.data;
+      if (
+        (data?.statusCode === 200 || data?.statusCode === 201) &&
+        data?.success === true
+      ) {
+        Toast.show({
+          type: "success",
+          text1: "Profile Updated",
+          text2: "Account Deletion Initiated successfully.",
+        });
+        router.push("/(tab)");
+      }
+    },
+    onError: (err: any) => {
+      Toast.show({
+        type: "error",
+        text1: "Submit Failed",
+        text2: getErrorMessage(err, "Failed to request for account deletion."),
+      });
+    },
+  });
 
+  const getAccountDeletion = () =>
+    useQuery({
+      queryKey: ["getAccountDeletion"],
+      queryFn: () => AuthService.getAccountDeletion(),
+    });
+  const cancelProfileDeleteMutation = useMutation({
+    mutationFn: AuthService.cancelDeletion,
+    onSuccess: (response: any) => {
+      const data = response?.data;
+      if (
+        (data?.statusCode === 200 || data?.statusCode === 201) &&
+        data?.success === true
+      ) {
+        Toast.show({
+          type: "success",
+          text1: "Profile Updated",
+          text2: "Account Deletion Initiated successfully.",
+        });
+        router.push("/(tab)");
+      }
+    },
+    onError: (err: any) => {
+      Toast.show({
+        type: "error",
+        text1: "Submit Failed",
+        text2: getErrorMessage(err, "Failed to request for account deletion."),
+      });
+    },
+  });
   return {
     loginMutation,
+    createDeleteMutation,
+    getAccountDeletion,
+    cancelProfileDeleteMutation,
     registerMutation,
     forgotPasswordMutation,
     verifyOTPMutation,

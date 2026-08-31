@@ -1,4 +1,3 @@
-
 export const ENDPOINTS = {
   AUTH: {
     LOGIN: "/auth/login",
@@ -10,6 +9,9 @@ export const ENDPOINTS = {
     CLIENT_VERIFY_IDENTITY: "/auth/client-verify-identity",
     RESET_PASSWORD: "/auth/reset-password",
     CHANGE_PASSWORD: "/auth/change-password",
+    DELETE_ACCOUNT: "/account/deletion-requests",
+    GET_ACCOUNT_DELETION: "/account/deletion-requests/me",
+    CANCEL_ACCOUNT_DELETION: "/account/deletion-requests/me",
     PROFILE: "/auth/profile",
   },
 
@@ -33,41 +35,40 @@ export const ENDPOINTS = {
 
   DASHBOARD: {
     GET_PROFILE: "/user/profile",
-    UPDATE_PROFILE: "/user/update",  
+    UPDATE_PROFILE: "/user/update",
   },
 
   PROJECTS: {
     GET_PROJECTS: "/projects/",
     CREATE_PROJECT: "/projects/enhanced",
-      PROJECTS:"/projects",
-    MARKETPLACE:"/marketplace",
-     PROPERTIES:"/properties",
-      PROPERTIES_MARKETPLACE:"/marketplace/properties",
-   
+    PROJECTS: "/projects",
+    MARKETPLACE: "/marketplace",
+    PROPERTIES: "/properties",
+    PROPERTIES_MARKETPLACE: "/marketplace/properties",
   },
-   MORTGAGE: {
-    MY_MORTGAGE:"/mortgage-applications/mine",
-      ClIENT_MORTGAGE:"/mortgage-applications",
-     MORTGAGE:"properties/mortgage-applications"
+  MORTGAGE: {
+    MY_MORTGAGE: "/mortgage-applications/mine",
+    ClIENT_MORTGAGE: "/mortgage-applications",
+    MORTGAGE: "properties/mortgage-applications",
   },
-   CONTRACT: {
+  CONTRACT: {
     CONTRACT: "/contracts/",
   },
   CONTRACTORS: {
-  GET_CONTRACTOR: "/contractors/",
-  CREATE_COMPLETE_PROFILE: "/profile/contractor/complete",
-  VIEW_PROFILE: "/profile/contractor/complete",
+    GET_CONTRACTOR: "/contractors/",
+    CREATE_COMPLETE_PROFILE: "/profile/contractor/complete",
+    VIEW_PROFILE: "/profile/contractor/complete",
   },
-    BID:{
-    BIDS:"/bids/",
+  BID: {
+    BIDS: "/bids/",
   },
-   MEETINGS:{
-    MEETINGS:"/meetings/"
+  MEETINGS: {
+    MEETINGS: "/meetings/",
   },
-   SUPPORT:{
-    TICKETS:"/support/tickets"
+  SUPPORT: {
+    TICKETS: "/support/tickets",
   },
-    ESCROW:{
-    ESCROW:"/escrow/"
-  }
+  ESCROW: {
+    ESCROW: "/escrow/",
+  },
 };

@@ -3,14 +3,26 @@ import axiosInstance from "../axios";
 
 export const AuthService = {
   login: (data: any) => axiosInstance.post(ENDPOINTS.AUTH.LOGIN, data),
-  createCompleteProfile: (data: any) => axiosInstance.post(ENDPOINTS.CONTRACTORS.CREATE_COMPLETE_PROFILE, data),
+  createCompleteProfile: (data: any) =>
+    axiosInstance.post(ENDPOINTS.CONTRACTORS.CREATE_COMPLETE_PROFILE, data),
   register: (data: any) => axiosInstance.post(ENDPOINTS.AUTH.REGISTER, data),
   verifyOTP: (data: any) => axiosInstance.post(ENDPOINTS.AUTH.VERIFY_OTP, data),
-  forgotPassword: (data: any) => axiosInstance.post(ENDPOINTS.AUTH.FORGOT_PASSWORD, data),
+  forgotPassword: (data: any) =>
+    axiosInstance.post(ENDPOINTS.AUTH.FORGOT_PASSWORD, data),
   resendOtp: (data: any) => axiosInstance.post(ENDPOINTS.AUTH.RESEND_OTP, data),
-  resetPassword: (data: any) => axiosInstance.post(ENDPOINTS.AUTH.RESET_PASSWORD, data),
-  changePassword: (data: any) => axiosInstance.patch(ENDPOINTS.AUTH.CHANGE_PASSWORD, data),
-    changeProfile: (data: any) => axiosInstance.patch(ENDPOINTS.AUTH.PROFILE, data),
-    getProfile: () => axiosInstance.get(ENDPOINTS.AUTH.PROFILE),
-  refreshToken: (refreshToken: string) => axiosInstance.post(ENDPOINTS.AUTH.REFRESH_TOKEN, { refreshToken }),
+  resetPassword: (data: any) =>
+    axiosInstance.post(ENDPOINTS.AUTH.RESET_PASSWORD, data),
+  changePassword: (data: any) =>
+    axiosInstance.patch(ENDPOINTS.AUTH.CHANGE_PASSWORD, data),
+  changeProfile: (data: any) =>
+    axiosInstance.patch(ENDPOINTS.AUTH.PROFILE, data),
+  getProfile: () => axiosInstance.get(ENDPOINTS.AUTH.PROFILE),
+  getAccountDeletion: () =>
+    axiosInstance.get(ENDPOINTS.AUTH.GET_ACCOUNT_DELETION),
+  AccountDeletion: (data: any) =>
+    axiosInstance.post(ENDPOINTS.AUTH.DELETE_ACCOUNT, data),
+  cancelDeletion: () =>
+    axiosInstance.delete(ENDPOINTS.AUTH.CANCEL_ACCOUNT_DELETION),
+  refreshToken: (refreshToken: string) =>
+    axiosInstance.post(ENDPOINTS.AUTH.REFRESH_TOKEN, { refreshToken }),
 };
