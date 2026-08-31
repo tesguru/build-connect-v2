@@ -8,9 +8,14 @@ import AppLayout from "@/components/Layouts/AppLayout";
 import SuccessScreen from "@/components/Notifications/SucessScreen";
 import { reportImage } from "@/constants/icon";
 import { useBids } from "@/core/hooks/UseBids";
-import { BuilderRevisionInput, builderrevisionSchema, RevisionInput } from "@/core/schemas/dashboardschema";
+import {
+  BuilderRevisionInput,
+  builderrevisionSchema,
+  RevisionInput,
+} from "@/core/schemas/dashboardschema";
 import { LookupService } from "@/core/services/lookup/LookupService";
 import { uploadFile } from "@/core/utils/fileUpload";
+import { useCurrencyStore } from "@/store/useCurrencyStore"; // ✅ Added
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
@@ -28,9 +33,12 @@ const Revisionscreen = () => {
   }>();
 
   const [isUploading, setIsUploading] = useState(false);
-  const [portfolioReferenceError, setPortfolioReferenceError] = useState<string | null>(null);
+  const [portfolioReferenceError, setPortfolioReferenceError] = useState<
+    string | null
+  >(null);
 
   const { builderBidRevisionMutation, revisionSuccess } = useBids();
+  const { currencySymbol } = useCurrencyStore(); // ✅ Added
 
   // ── Timeline Lookup ────────────────────────────────────────────────────────
   const { data: getTimelineResponse, isLoading: isLoadingTimeline } = useQuery({
@@ -47,7 +55,6 @@ const Revisionscreen = () => {
       value: item.value,
       id: item.id,
     })) ?? [];
-
 
   const {
     control,
@@ -84,13 +91,19 @@ const Revisionscreen = () => {
   const milestones = watch("milestones");
 
   const totalMilestonePayments =
-    milestones?.reduce((total, m) => total + (Number(m.paymentAmount) || 0), 0) ?? 0;
+    milestones?.reduce(
+      (total, m) => total + (Number(m.paymentAmount) || 0),
+      0,
+    ) ?? 0;
   const isPaymentValid = totalMilestonePayments === bidAmount;
 
   // ── Submit ─────────────────────────────────────────────────────────────────
   const onSubmit = async (data: RevisionInput) => {
     try {
-      const total = data.milestones.reduce((sum, m) => sum + (Number(m.paymentAmount) || 0), 0);
+      const total = data.milestones.reduce(
+        (sum, m) => sum + (Number(m.paymentAmount) || 0),
+        0,
+      );
       if (total !== Number(data.bidAmount)) {
         Toast.show({
           type: "error",
@@ -108,13 +121,13 @@ const Revisionscreen = () => {
         const uploadResult = await uploadFile(
           data.portfolioReferences,
           "portfolio",
-          "Portfolio Reference"
+          "Portfolio Reference",
         );
         portfolioFileId = uploadResult.id;
       }
 
       const selectedTimeline = getTimelineResponse?.find(
-        (i) => i.value === data.proposedTimeline
+        (i) => i.value === data.proposedTimeline,
       );
 
       const apiPayload = {
@@ -130,7 +143,7 @@ const Revisionscreen = () => {
           completionDate: m.completionDate.split("T")[0],
           paymentAmount: Number(m.paymentAmount),
           paymentPercentage: m.paymentPercentage,
-          orderIndex: index+1,
+          orderIndex: index + 1,
         })),
       };
 
@@ -142,7 +155,11 @@ const Revisionscreen = () => {
             error?.response?.data?.message ??
             error?.message ??
             "Failed to submit revision.";
-          Toast.show({ type: "error", text1: "Revision Failed", text2: message });
+          Toast.show({
+            type: "error",
+            text1: "Revision Failed",
+            text2: message,
+          });
           setPortfolioReferenceError(message);
         },
       });
@@ -164,7 +181,7 @@ const Revisionscreen = () => {
         message="Your revision request has been sent to the client. They have been notified and will review your request shortly."
         buttonTitle="Return home"
         navigateTo="/(tab)"
-        params={{ bidId,}}
+        params={{ bidId }}
       />
     );
   }
@@ -178,7 +195,6 @@ const Revisionscreen = () => {
         </Text>
 
         <View className="px-3">
-
           {/* Revision Message */}
           <View className="pt-4">
             <Controller
@@ -205,7 +221,7 @@ const Revisionscreen = () => {
               name="bidAmount"
               render={({ field }) => (
                 <FormInput
-                  label="Bid Amount (₦)"
+                  label={`Bid Amount (${currencySymbol})`}
                   placeholder="Enter bid amount"
                   value={field.value === 0 ? "" : String(field.value)}
                   hasError={!!errors.bidAmount}
@@ -259,24 +275,36 @@ const Revisionscreen = () => {
           <View className="mt-4 p-3 bg-blue-50 rounded-lg">
             <View className="flex-row justify-between items-center">
               <Text className="font-inter font-medium">Payment Summary</Text>
-              <Text className={`font-inter ${isPaymentValid ? "text-green-600" : "text-red-600"}`}>
+              <Text
+                className={`font-inter ${isPaymentValid ? "text-green-600" : "text-red-600"}`}
+              >
                 {isPaymentValid ? "✓ Valid" : "✗ Invalid"}
               </Text>
             </View>
             <View className="flex-row justify-between mt-1">
               <Text className="font-inter text-gray-600">Bid Amount:</Text>
-              <Text className="font-inter font-medium">₦{bidAmount?.toLocaleString() || 0}</Text>
+              <Text className="font-inter font-medium">
+                {currencySymbol}
+                {bidAmount?.toLocaleString() || 0}
+              </Text>
             </View>
             <View className="flex-row justify-between">
-              <Text className="font-inter text-gray-600">Total Milestone Payments:</Text>
-              <Text className="font-inter font-medium">₦{totalMilestonePayments?.toLocaleString()}</Text>
+              <Text className="font-inter text-gray-600">
+                Total Milestone Payments:
+              </Text>
+              <Text className="font-inter font-medium">
+                {currencySymbol}
+                {totalMilestonePayments?.toLocaleString()}
+              </Text>
             </View>
             {!isPaymentValid && (
               <View className="flex-row items-center mt-2 p-2 bg-red-50 rounded">
                 <AlertCircle size={16} color="#EF4444" />
                 <Text className="text-red-600 text-sm flex-1 ml-2">
-                  Milestone payments ({totalMilestonePayments?.toLocaleString()}) must equal bid
-                  amount ({bidAmount?.toLocaleString() || 0})
+                  Milestone payments ({currencySymbol}
+                  {totalMilestonePayments?.toLocaleString()}) must equal bid
+                  amount ({currencySymbol}
+                  {bidAmount?.toLocaleString() || 0})
                 </Text>
               </View>
             )}
@@ -305,9 +333,14 @@ const Revisionscreen = () => {
             </View>
 
             {fields.map((field, index) => (
-              <View key={field.id} className="border border-gray-300 rounded-xl p-4 mb-4">
+              <View
+                key={field.id}
+                className="border border-gray-300 rounded-xl p-4 mb-4"
+              >
                 <View className="flex-row justify-between items-center mb-4">
-                  <Text className="font-inter text-xl">Milestone {index + 1}</Text>
+                  <Text className="font-inter text-xl">
+                    Milestone {index + 1}
+                  </Text>
                   {fields.length > 1 && (
                     <TouchableOpacity onPress={() => remove(index)}>
                       <X size={24} color="#6b7280" />
@@ -363,7 +396,9 @@ const Revisionscreen = () => {
                       <FormDatePicker
                         label="Completion Date"
                         value={field.value ? new Date(field.value) : new Date()}
-                        onChange={(date) => field.onChange(date.toISOString().split("T")[0])}
+                        onChange={(date) =>
+                          field.onChange(date.toISOString().split("T")[0])
+                        }
                         hasError={!!errors.milestones?.[index]?.completionDate}
                       />
                     )}
@@ -377,7 +412,7 @@ const Revisionscreen = () => {
                     name={`milestones.${index}.paymentAmount`}
                     render={({ field }) => (
                       <FormInput
-                        label="Payment Amount (₦)"
+                        label={`Payment Amount (${currencySymbol})`}
                         placeholder="Enter amount"
                         value={field.value === 0 ? "" : String(field.value)}
                         hasError={!!errors.milestones?.[index]?.paymentAmount}
@@ -406,7 +441,9 @@ const Revisionscreen = () => {
                         label="Payment Percentage (%)"
                         placeholder="Enter percentage"
                         value={field.value === 0 ? "" : String(field.value)}
-                        hasError={!!errors.milestones?.[index]?.paymentPercentage}
+                        hasError={
+                          !!errors.milestones?.[index]?.paymentPercentage
+                        }
                         onChangeText={(text) =>
                           field.onChange(Number(text.replace(/,/g, "")) || 0)
                         }
@@ -440,7 +477,10 @@ const Revisionscreen = () => {
                   maxSizeMB={5}
                   value={field.value}
                   onChange={field.onChange}
-                  error={portfolioReferenceError || (errors.portfolioReferences?.message as string)}
+                  error={
+                    portfolioReferenceError ||
+                    (errors.portfolioReferences?.message as string)
+                  }
                 />
               )}
             />
@@ -455,7 +495,6 @@ const Revisionscreen = () => {
               disabled={!isPaymentValid || isLoading}
             />
           </View>
-
         </View>
       </ScrollView>
     </AppLayout>

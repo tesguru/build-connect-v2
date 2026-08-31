@@ -257,7 +257,7 @@ const ClientProjectsScreen = () => {
           }}
         >
           <Text className="text-white font-work-sans text-base font-medium">
-            + Create Project
+            + Add Project
           </Text>
         </TouchableOpacity>
       </View>
