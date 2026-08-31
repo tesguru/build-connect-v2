@@ -1,23 +1,36 @@
-import AppLayout from '@/components/Layouts/AppLayout'
-import React, { useState } from 'react'
-import { Pressable, ScrollView, Text, View } from 'react-native'
-import InvitedBids from './invitedbids'
-import MyBids from './mybids'
+import AppLayout from "@/components/Layouts/AppLayout";
+import React, { useState } from "react";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import ExpressionOfInterest from "./expressionofinterest";
+import InvitedInvitations from "./invitedbids";
+import MyBids from "./mybids";
 
-type TabName = 'Bids' | 'InvitedBids'
+type TabName = "Bids" | "InvitedBids" | "EOI";
 
 const BidsTab = () => {
-  const [activeTab, setActiveTab] = useState<TabName>('Bids')
+  const [activeTab, setActiveTab] = useState<TabName>("Bids");
 
-  const tabs: { name: TabName; component: React.ReactNode }[] = [
-    { name: 'Bids', component: <MyBids /> },
-    { name: 'InvitedBids', component: <InvitedBids /> },
-  ]
+  const tabs: {
+    name: TabName;
+    displayName: string;
+    component: React.ReactNode;
+  }[] = [
+    { name: "Bids", displayName: "Bids", component: <MyBids /> },
+    {
+      name: "InvitedBids",
+      displayName: "Invited Bids",
+      component: <InvitedInvitations />,
+    },
+    {
+      name: "EOI",
+      displayName: "Expression of Interest",
+      component: <ExpressionOfInterest />,
+    },
+  ];
 
   return (
     <AppLayout screenName={activeTab}>
       <View>
-
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -33,11 +46,11 @@ const BidsTab = () => {
                 <Text
                   className={`text-md font-inter ${
                     activeTab === tab.name
-                      ? 'text-blue-600 font-semibold'
-                      : 'text-gray-500'
+                      ? "text-blue-600 font-semibold"
+                      : "text-gray-500"
                   }`}
                 >
-                  {tab.name === 'InvitedBids' ? 'Invited Bids' : tab.name}
+                  {tab.displayName}
                 </Text>
                 {activeTab === tab.name && (
                   <View className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
@@ -47,19 +60,17 @@ const BidsTab = () => {
           </View>
         </ScrollView>
 
-      
         {tabs.map((tab) => (
           <View
             key={tab.name}
-            style={{ display: activeTab === tab.name ? 'flex' : 'none' }}
+            style={{ display: activeTab === tab.name ? "flex" : "none" }}
           >
             {tab.component}
           </View>
         ))}
-
       </View>
     </AppLayout>
-  )
-}
+  );
+};
 
-export default BidsTab
+export default BidsTab;

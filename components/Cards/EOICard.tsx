@@ -1,25 +1,41 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter } from "expo-router";
+import {
+  Building2,
+  CheckCircle2,
+  FileText,
+  Inbox,
+  MapPin,
+  X,
+} from "lucide-react-native";
+import React, { useState } from "react";
+import { Modal, Text, TouchableOpacity, View } from "react-native";
 
-const STATUS_CONFIG: Record<string, { bg: string; text: string; dot: string; label: string }> = {
-  approved: { bg: 'bg-emerald-50', text: 'text-emerald-600', dot: '#10b981', label: 'Approved' },
-  accepted: { bg: 'bg-emerald-50', text: 'text-emerald-600', dot: '#10b981', label: 'Approved' },
-  pending: { bg: 'bg-amber-50', text: 'text-amber-600', dot: '#f59e0b', label: 'Pending' },
-  rejected: { bg: 'bg-red-50', text: 'text-red-500', dot: '#ef4444', label: 'Rejected' },
+const STATUS_CONFIG: Record<
+  string,
+  { dot: string; text: string; label: string }
+> = {
+  approved: { dot: "#10b981", text: "text-emerald-600", label: "Approved" },
+  accepted: { dot: "#10b981", text: "text-emerald-600", label: "Approved" },
+  pending: { dot: "#f59e0b", text: "text-amber-600", label: "Pending" },
+  rejected: { dot: "#ef4444", text: "text-red-500", label: "Rejected" },
 };
 
 function getStatusConfig(status: string | null | undefined) {
   const normalized = status?.toLowerCase();
   if (normalized && STATUS_CONFIG[normalized]) return STATUS_CONFIG[normalized];
-  const label = status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Pending';
-  return { bg: 'bg-gray-100', text: 'text-gray-500', dot: '#9ca3af', label };
+  const label = status
+    ? status.charAt(0).toUpperCase() + status.slice(1)
+    : "Pending";
+  return { dot: "#9ca3af", text: "text-gray-500", label };
 }
 
 function formatDate(date: string | null) {
-  if (!date) return '';
-  return new Date(date).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+  if (!date) return "";
+  return new Date(date).toLocaleDateString("en-NG", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 type EOICardProps = {
@@ -39,7 +55,8 @@ export default function EOICard({
   projectId,
   projectName,
   projectLocation,
-  status = 'pending',
+  projectStatus,
+  status = "pending",
   message,
   reviewNote,
   createdAt,
@@ -48,101 +65,242 @@ export default function EOICard({
   const [showReviewNote, setShowReviewNote] = useState(false);
 
   const normalizedStatus = status?.toLowerCase();
-  const isDecided = normalizedStatus === 'approved' || normalizedStatus === 'accepted' || normalizedStatus === 'rejected';
-  const isApproved = normalizedStatus === 'approved' || normalizedStatus === 'accepted';
+  const isApproved =
+    normalizedStatus === "approved" || normalizedStatus === "accepted";
+  const isRejected = normalizedStatus === "rejected";
   const statusConfig = getStatusConfig(status);
 
-  const bannerConfig = isApproved
-    ? { borderColor: '#a7f3d0', bg: '#ecfdf5', iconColor: '#059669', textColor: '#059669', icon: 'checkmark-circle-outline' }
-    : { borderColor: '#fecaca', bg: '#fff1f2', iconColor: '#ef4444', textColor: '#ef4444', icon: 'close-circle-outline' };
+  const normalizedProjectStatus = projectStatus?.toLowerCase();
+  const hasProjectStarted =
+    normalizedProjectStatus === "started" ||
+    normalizedProjectStatus === "in_progress" ||
+    normalizedProjectStatus === "active";
 
-  const iconConfig = isApproved
-    ? { iconBg: '#ecfdf5', iconColor: '#059669', icon: 'checkmark-circle' }
-    : { iconBg: '#fff1f2', iconColor: '#ef4444', icon: 'close-circle' };
+  const viewProjectMessage = isApproved
+    ? "You've been approved to bid on this project."
+    : "Your expression of interest was not approved.";
 
-  const onPress = () => {
-    router.push({ pathname: '/projectdetails/projectdetails', params: { projectId, eoiId } });
+  const onViewProject = () => {
+    router.push({
+      pathname: "/projectdetails/projectdetails",
+      params: { projectId, eoiId },
+    });
   };
 
+  const showViewProjectButton = !isRejected && !hasProjectStarted;
+  const showStartedText = !isRejected && hasProjectStarted;
+
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.8}
+    <View
       className="bg-white rounded-2xl p-4"
       style={{
         borderWidth: 1,
-        borderColor: '#f1f5f9',
-        shadowColor: '#94a3b8',
+        borderColor: "#f1f5f9",
+        shadowColor: "#94a3b8",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 3,
       }}
     >
-      <View className="flex-row items-center gap-3 mb-2">
-        <View style={{ backgroundColor: iconConfig.iconBg, width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' }}>
-          <Ionicons name={iconConfig.icon as any} size={20} color={iconConfig.iconColor} />
-        </View>
-        <View className="flex-1">
-          <Text className="font-interbold text-gray-900 text-base" numberOfLines={1}>
-            {projectName}
+      {/* ── Header ── */}
+      <View className="flex-row items-start gap-3">
+        <View
+          className="bg-gray-100 items-center justify-center"
+          style={{ width: 56, height: 56, borderRadius: 14 }}
+        >
+          <Inbox size={20} color="#64748B" />
+          <Text className="text-gray-400 text-[9px] font-interbold mt-0.5">
+            EOI
           </Text>
-          {projectLocation && <Text className="text-gray-400 text-xs font-inter">{projectLocation}</Text>}
         </View>
-        <View className={`flex-row items-center gap-1.5 px-2.5 py-1 rounded-full ${statusConfig.bg}`}>
-          <View className="w-2 h-2 rounded-full" style={{ backgroundColor: statusConfig.dot }} />
-          <Text className={`font-interbold text-xs ${statusConfig.text}`}>{statusConfig.label}</Text>
+
+        <View className="flex-1">
+          <View className="flex-row items-start justify-between">
+            <Text
+              className="font-interbold text-gray-900 text-base flex-1 mr-2"
+              numberOfLines={1}
+            >
+              {projectName}
+            </Text>
+            <View className="flex-row items-center gap-1.5">
+              <View
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ backgroundColor: statusConfig.dot }}
+              />
+              <Text className={`font-inter text-xs ${statusConfig.text}`}>
+                {statusConfig.label}
+              </Text>
+            </View>
+          </View>
+
+          {projectLocation && (
+            <View className="flex-row items-center gap-1 mt-1">
+              <MapPin size={12} color="#9CA3AF" />
+              <Text className="text-gray-400 text-xs font-inter">
+                {projectLocation}
+              </Text>
+            </View>
+          )}
+
+          {createdAt && (
+            <Text className="text-gray-400 text-xs font-inter mt-1">
+              Submitted {formatDate(createdAt)}
+            </Text>
+          )}
         </View>
       </View>
 
       {message && (
-        <Text className="text-gray-600 font-inter text-sm mt-1" numberOfLines={2}>
+        <Text
+          className="text-gray-600 font-inter text-sm mt-3"
+          numberOfLines={2}
+        >
           {message}
         </Text>
       )}
 
-      {isDecided && (
-        <View
-          className="flex-row items-center gap-2 mt-3 p-3 rounded-xl"
-          style={{ borderWidth: 1, borderColor: bannerConfig.borderColor, backgroundColor: bannerConfig.bg }}
-        >
-          <Ionicons name={bannerConfig.icon as any} size={18} color={bannerConfig.iconColor} />
-          <Text className="flex-1 text-sm font-inter" style={{ color: bannerConfig.textColor }}>
-            {isApproved
-              ? "You've been approved to bid on this project."
-              : 'Your expression of interest was not approved.'}
-          </Text>
-        </View>
-      )}
-
-      {reviewNote && (
-        <TouchableOpacity onPress={() => setShowReviewNote(true)} className="mt-2">
-          <Text className="text-blue-600 font-intersemibold text-xs">View review note</Text>
-        </TouchableOpacity>
-      )}
-
-      {createdAt && <Text className="text-gray-300 font-inter text-xs mt-2">{formatDate(createdAt)}</Text>}
-
-      <Modal visible={showReviewNote} transparent animationType="fade" onRequestClose={() => setShowReviewNote(false)}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', padding: 24 }}>
-          <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 20 }}>
-            <View className="flex-row justify-between items-center mb-4">
-              <Text style={{ fontFamily: 'InterBold', fontSize: 18, fontWeight: '700', color: '#0f172a' }}>
-                Review Note
+      {/* ── Actions ── */}
+      {(showViewProjectButton || showStartedText || reviewNote) && (
+        <>
+          <View className="h-px bg-gray-100 mt-3 mb-3" />
+          <View className="flex-row items-center gap-3">
+            {showStartedText && (
+              <Text className="flex-1 text-gray-400 font-inter text-sm text-center">
+                Project has started
               </Text>
+            )}
+
+            {showViewProjectButton && (
+              <TouchableOpacity
+                onPress={onViewProject}
+                activeOpacity={0.8}
+                className="flex-1 bg-blue-700 rounded-xl py-3 flex-row items-center justify-center gap-2"
+              >
+                <FileText size={16} color="#fff" />
+                <Text className="text-white font-inter text-sm">
+                  View Project
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            {reviewNote && (
+              <TouchableOpacity
+                onPress={() => setShowReviewNote(true)}
+                activeOpacity={0.8}
+                className="flex-1 bg-emerald-50 rounded-xl py-3 flex-row items-center justify-center gap-2"
+                style={{ borderWidth: 1, borderColor: "#a7f3d0" }}
+              >
+                <CheckCircle2 size={16} color="#059669" />
+                <Text className="text-emerald-700 font-inter text-sm">
+                  Review Note
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </>
+      )}
+
+      {/* ── Review Note Bottom Sheet ── */}
+      <Modal
+        visible={showReviewNote}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowReviewNote(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.45)",
+            justifyContent: "flex-end",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#fff",
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              paddingTop: 10,
+              paddingHorizontal: 20,
+              paddingBottom: 32,
+            }}
+          >
+            <View
+              style={{
+                width: 40,
+                height: 4,
+                borderRadius: 2,
+                backgroundColor: "#e2e8f0",
+                alignSelf: "center",
+                marginBottom: 16,
+              }}
+            />
+
+            <View className="flex-row justify-between items-center mb-4">
+              <View className="flex-row items-center gap-2">
+                <View
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 14,
+                    backgroundColor: "#ecfdf5",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <CheckCircle2 size={16} color="#059669" />
+                </View>
+                <Text className="font-intersemibold text-lg text-gray-900">
+                  Review Note
+                </Text>
+              </View>
               <TouchableOpacity
                 onPress={() => setShowReviewNote(false)}
-                style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: '#f1f5f9', alignItems: 'center', justifyContent: 'center' }}
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  backgroundColor: "#f1f5f9",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
-                <Ionicons name="close" size={20} color="#475569" />
+                <X size={20} color="#475569" />
               </TouchableOpacity>
             </View>
-            <Text style={{ fontFamily: 'Inter', fontSize: 14, color: '#334155', lineHeight: 20 }}>
-              {reviewNote}
+
+            <View
+              className="flex-row items-center gap-2"
+              style={{
+                backgroundColor: "#eff6ff",
+                borderRadius: 12,
+                padding: 12,
+                marginBottom: 16,
+              }}
+            >
+              <Building2 size={16} color="#2463EB" />
+              <Text
+                className="text-blue-700 font-interbold text-sm flex-1"
+                numberOfLines={1}
+              >
+                {projectName}
+              </Text>
+            </View>
+
+            <View className="h-px bg-gray-100 mb-4" />
+
+            <Text
+              className="font-inter text-sm text-slate-700"
+              style={{ lineHeight: 20 }}
+            >
+              {reviewNote ||
+                (isApproved
+                  ? "Your interest has been accepted"
+                  : viewProjectMessage)}
             </Text>
           </View>
         </View>
       </Modal>
-    </TouchableOpacity>
+    </View>
   );
 }

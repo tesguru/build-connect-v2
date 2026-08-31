@@ -194,9 +194,6 @@ function EntryCard({ item }: { item: ThreadEntry }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Component
-// ─────────────────────────────────────────────────────────────────────────────
 export default function ReviewSummaryScreen() {
   const scrollRef = useRef<ScrollView>(null);
   const router = useRouter();
@@ -248,7 +245,6 @@ export default function ReviewSummaryScreen() {
     );
   }
 
-  // ── Error State ──────────────────────────────────────────────────────────
   if (error) {
     return (
       <AppLayout screenName={projectTitle || "Review Summary"}>
@@ -268,7 +264,6 @@ export default function ReviewSummaryScreen() {
     );
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <AppLayout screenName={projectTitle || "Review Summary"}>
       <KeyboardAvoidingView

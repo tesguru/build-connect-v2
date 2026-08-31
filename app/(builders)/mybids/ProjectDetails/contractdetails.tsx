@@ -1,5 +1,4 @@
 import PrimaryButton from "@/components/Buttons/Button";
-import GradientButton from "@/components/Buttons/GradientButton";
 import AppLayout from "@/components/Layouts/AppLayout";
 import SuccessScreen from "@/components/Notifications/SucessScreen";
 import { MarkEmoji } from "@/constants/icon";
@@ -275,7 +274,11 @@ export default function BuidlerContractdetailsScreen() {
 
           {isActive && (
             <>
-              <GradientButton onPress={startWork} title="Start Project" />
+              <PrimaryButton
+                onPress={startWork}
+                title="Start Project"
+                backgroundColor="#4A5D75"
+              />
               <View className="bg-green-50 p-4 rounded-lg">
                 <Text className="text-green-700 font-interbold text-center">
                   ✓ Contract Active

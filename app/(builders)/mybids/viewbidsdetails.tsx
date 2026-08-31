@@ -2,7 +2,7 @@ import AppLayout from "@/components/Layouts/AppLayout";
 import { useBids } from "@/core/hooks/UseBids";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -102,31 +102,40 @@ const ViewBidDetails = () => {
     currency?: string;
   }>();
 
-  const { singleBidQuery } = useBids();
-  const { data, isLoading, error } = singleBidQuery(bidId);
-  const router = useRouter();
   const { setCurrency, currencySymbol } = useCurrencyStore();
+  const [isCurrencyReady, setIsCurrencyReady] = useState(false);
 
+  // Set currency from params first
   useEffect(() => {
     if (currency) {
       setCurrency(currency);
+      setIsCurrencyReady(true);
+    } else {
+      setIsCurrencyReady(true);
     }
   }, [currency, setCurrency]);
+
+  const { singleBidQuery } = useBids();
+  const { data, isLoading, error } = singleBidQuery(bidId);
+  const router = useRouter();
+
   const bidsData = data?.data?.data ?? {};
   const projectTitle = bidsData?.project?.name ?? "Review summary";
   const handleRevision = () =>
     router.push({
       pathname: "/(builders)/reviewsummary/reviewsummary",
-      params: { projectTitle, bidId, currencySymbol },
+      params: { projectTitle, bidId, currencySymbol: currencySymbol || "$" },
     });
 
-  if (isLoading) {
+  if (isLoading || !isCurrencyReady) {
     return (
       <AppLayout screenName="Bid Details">
         <View className="flex-1 justify-center items-center py-20">
           <ActivityIndicator size="large" color="#2463EB" />
           <Text className="mt-4 text-gray-500 font-inter">
-            Loading bid details...
+            {!isCurrencyReady
+              ? "Setting currency..."
+              : "Loading bid details..."}
           </Text>
         </View>
       </AppLayout>
@@ -201,7 +210,7 @@ const ViewBidDetails = () => {
               Bid Amount:{" "}
             </Text>
             <Text className="text-[14px] font-interbold text-green-600">
-              {currencySymbol}
+              {currencySymbol || "$"}
               {parseFloat(bidsData.bidAmount || "0").toLocaleString()}
             </Text>
           </View>
@@ -234,7 +243,7 @@ const ViewBidDetails = () => {
                   label={item.milestoneName}
                   amount={item.paymentAmount}
                   isLast={index === milestones.length - 1}
-                  currencySymbol={currencySymbol}
+                  currencySymbol={currencySymbol || "$"}
                 />
               ))}
               <View className="flex-row justify-between pt-4 mt-1 border-t-2 border-gray-900">
@@ -242,7 +251,7 @@ const ViewBidDetails = () => {
                   Total
                 </Text>
                 <Text className="text-base font-interbold text-gray-900">
-                  {currencySymbol}
+                  {currencySymbol || "$"}
                   {totalAmount.toLocaleString()}
                 </Text>
               </View>

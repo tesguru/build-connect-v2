@@ -1,19 +1,22 @@
 import GradientButton from "@/components/Buttons/GradientButton";
 import AppLayout from "@/components/Layouts/AppLayout";
 import EmptyScreenComponent from "@/components/Miscallaneous/EmptyScreenComponent";
+import ExpressInterestConfirmModal from "@/components/Miscallaneous/ExressionOfInterestConfirmationModal";
+
+import SuccessScreen from "@/components/Notifications/SucessScreen";
 import { useProjects } from "@/core/hooks/useProjects";
 import { useRoute } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import {
   AlertCircle,
-  Briefcase,
-  Calendar,
   CheckCircle,
   Clock,
+  Clock as ClockIcon,
   FileText,
   Flag,
+  Hourglass,
   MapPin,
-  Users
+  Users,
 } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -32,19 +35,48 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const ProjectDetailsScreen = ({ navigation }: any) => {
   const route = useRoute();
   const { projectId } = route.params as { projectId: string };
-  const { singleProjectMarketPlaceQuery } = useProjects();
+  const {
+    singleProjectMarketPlaceQuery,
+    createExpressionOfInterestMutation,
+    expressInterestSuccess,
+  } = useProjects();
   const { data, isLoading, error } = singleProjectMarketPlaceQuery(projectId);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [showExpressInterestModal, setShowExpressInterestModal] =
+    useState(false);
 
   const apiResponse = data?.data;
   const projectData = apiResponse?.data || apiResponse;
   const router = useRouter();
 
+  // ── Extract flags from API data ──────────────────────────────────────────
+  const canBid = projectData?.canBid ?? false;
+  const hasExpressedInterest = projectData?.hasExpressedInterest ?? false;
+
   const handleSubmitBid = () => {
     router.push({
       pathname: "/submitbid/submitbid",
-      params: { projectId: projectData.id },
+      params: { projectId: projectData.id, currency: projectData.currency },
     });
+  };
+
+  // ── Express Interest ──────────────────────────────────────────────────────
+  const onExpressInterestPress = () => {
+    setShowExpressInterestModal(true);
+  };
+
+  const onConfirmExpressInterest = () => {
+    createExpressionOfInterestMutation.mutate(
+      { projectId },
+      {
+        onSuccess: () => {
+          setShowExpressInterestModal(false);
+        },
+        onError: () => {
+          setShowExpressInterestModal(false);
+        },
+      },
+    );
   };
 
   const getStatus = () => {
@@ -77,6 +109,18 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
       minimumFractionDigits: 0,
     }).format(amount);
   };
+
+  // ── Success State ──────────────────────────────────────────────────────
+  if (expressInterestSuccess) {
+    return (
+      <SuccessScreen
+        title="Successfully!"
+        message="Congratulations! Your Interest Has Been Expressed Successfully"
+        navigateTo="/(builders)/findprojects/findprojects"
+        buttonTitle="Return to projects"
+      />
+    );
+  }
 
   if (isLoading) {
     return (
@@ -115,39 +159,55 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
     );
   }
 
-  const title = projectData.title || "Untitled Project";
+  const title = projectData.name || "Untitled Project";
   const description = projectData.description || "No description available";
   const location = projectData.location || "Location not specified";
-  const startDate = projectData.startDate || "Not specified";
-  const endDate = projectData.endDate || "Not specified";
   const bidCount = projectData.bidCount || 0;
   const status = getStatus();
-  const budgetRange = projectData.budgetRange || {};
-  const timeline = projectData.timeline || {};
-  const projectType = projectData.projectType || {};
+  const budgetMin = projectData.budgetMin || 0;
+  const budgetMax = projectData.budgetMax || 0;
+  const currency = projectData.currency || "NGN";
+  const durationMin = projectData.durationMin || 0;
+  const durationMax = projectData.durationMax || 0;
   const requiredSkills = projectData.requiredSkills || [];
   const attachedDocuments = projectData.attachedDocuments || [];
   const deadlinePassed = projectData.deadlinePassed || false;
   const owner = projectData.owner || {};
-  const applicationDeadline =
-    projectData.applicationDeadline || "Not specified";
   const images = projectData.images || [];
   const milestones = projectData.milestones || [];
 
+  // Format budget label
+  const budgetLabel =
+    budgetMin && budgetMax
+      ? `${currency} ${budgetMin.toLocaleString()} - ${currency} ${budgetMax.toLocaleString()}`
+      : "Not specified";
+
+  // Format duration label
+  const durationLabel =
+    durationMin && durationMax
+      ? durationMin === durationMax
+        ? `${durationMin} months`
+        : `${durationMin} - ${durationMax} months`
+      : "Not specified";
+
   const totalMilestoneAmount = milestones.reduce(
     (sum: number, m: any) => sum + (m.amount || 0),
-    0
+    0,
   );
   const completedMilestones = milestones.filter(
-    (m: any) => m.status === "completed"
+    (m: any) => m.status === "completed",
   ).length;
+
+  // ── Determine which button to show ──────────────────────────────────────
+  const showExpressInterest = !hasExpressedInterest && !canBid;
+  const showAwaitingApproval = hasExpressedInterest && !canBid;
+  const showSubmitBid = hasExpressedInterest && canBid;
 
   return (
     <AppLayout screenName="Project Details">
       <ScrollView showsVerticalScrollIndicator={false}>
-
         {/* Hero Image Gallery */}
-        {images.length > 0 && (
+        {images.length > 0 ? (
           <View>
             <ScrollView
               horizontal
@@ -156,7 +216,7 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
             >
               {images.map((img: any, index: number) => (
                 <TouchableOpacity
-                  key={img.fileId}
+                  key={img.fileId || index}
                   activeOpacity={0.92}
                   onPress={() => setSelectedImage(img.publicUrl)}
                 >
@@ -175,6 +235,16 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
                 ))}
               </View>
             )}
+          </View>
+        ) : (
+          <View className="h-48 bg-gray-100 items-center justify-center">
+            <Image
+              source={{
+                uri: "https://via.placeholder.com/400x240/EAEAEA/808080?text=No+Image",
+              }}
+              style={{ width: SCREEN_WIDTH, height: 200 }}
+              resizeMode="cover"
+            />
           </View>
         )}
 
@@ -233,19 +303,19 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
                 </Text>
               </View>
               <Text className="text-center text-sm font-worksanssemibold text-blue-600">
-                {(budgetRange as any)?.label || "Not specified"}
+                {budgetLabel}
               </Text>
             </View>
 
             <View className="flex-1 bg-white p-4 rounded-xl border border-gray-100">
               <View className="flex-row items-center justify-center mb-2">
-                <Clock size={20} color="#3B82F6" />
+                <ClockIcon size={20} color="#3B82F6" />
                 <Text className="text-center text-md font-inter text-gray-600 ml-2">
                   Timeline
                 </Text>
               </View>
               <Text className="text-center text-sm font-worksanssemibold text-gray-800">
-                {(timeline as any)?.label || "Not specified"}
+                {durationLabel}
               </Text>
             </View>
           </View>
@@ -284,48 +354,6 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
                 </View>
               </View>
 
-              {/* Project Type */}
-              {Object.keys(projectType).length > 0 && (
-                <View className="flex-row items-center p-4 border-b border-gray-100">
-                  <View className="w-12 h-12 bg-purple-50 rounded-xl items-center justify-center mr-4">
-                    <Briefcase size={22} color="#8B5CF6" />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="font-inter text-sm text-gray-500 mb-1">
-                      Project Type
-                    </Text>
-                    <Text className="font-worksanssemibold text-gray-900">
-                      {(projectType as any)?.label || "Not specified"}
-                    </Text>
-                  </View>
-                </View>
-              )}
-
-              {/* Project Duration */}
-              <View className="flex-row items-center p-4 border-b border-gray-100">
-                <View className="w-12 h-12 bg-green-50 rounded-xl items-center justify-center mr-4">
-                  <Calendar size={22} color="#10B981" />
-                </View>
-                <View className="flex-1">
-                  <Text className="font-inter text-sm text-gray-500 mb-1">
-                    Project Duration
-                  </Text>
-                  <Text className="font-worksanssemibold text-gray-900">
-                    {new Date(startDate).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}{" "}
-                    -{" "}
-                    {new Date(endDate).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </Text>
-                </View>
-              </View>
-
               {/* Competition */}
               <View className="flex-row items-center p-4 border-b border-gray-100">
                 <View className="w-12 h-12 bg-orange-50 rounded-xl items-center justify-center mr-4">
@@ -352,12 +380,7 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
                     Bid Deadline
                   </Text>
                   <Text className="font-worksanssemibold text-gray-900">
-                    {applicationDeadline !== "Not specified"
-                      ? new Date(applicationDeadline).toLocaleDateString(
-                          "en-US",
-                          { month: "short", day: "numeric", year: "numeric" }
-                        )
-                      : "Not specified"}
+                    {deadlinePassed ? "Deadline has passed" : "Not specified"}
                   </Text>
                   {deadlinePassed && (
                     <Text className="text-red-600 text-xs mt-1 font-inter">
@@ -370,20 +393,20 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
           </View>
 
           {/* ── MILESTONES ── */}
-          <View className="pt-6">
-            <View className="flex-row items-center justify-between mb-3">
-              <Text className="font-worksanssemibold text-xl">Milestones</Text>
-              {milestones.length > 0 && (
+          {milestones.length > 0 && (
+            <View className="pt-6">
+              <View className="flex-row items-center justify-between mb-3">
+                <Text className="font-worksanssemibold text-xl">
+                  Milestones
+                </Text>
                 <View className="bg-blue-100 px-3 py-1 rounded-full">
                   <Text className="text-blue-800 font-worksanssemibold text-xs">
                     {milestones.length}{" "}
                     {milestones.length === 1 ? "milestone" : "milestones"}
                   </Text>
                 </View>
-              )}
-            </View>
+              </View>
 
-            {milestones.length > 0 ? (
               <>
                 {/* Summary strip */}
                 <View className="flex-row gap-3 mb-3">
@@ -411,7 +434,7 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
                     const mStyle = getMilestoneStatusStyle(milestone.status);
                     return (
                       <View
-                        key={milestone.id}
+                        key={milestone.id || index}
                         className={`p-4 ${
                           index < milestones.length - 1
                             ? "border-b border-gray-100"
@@ -433,8 +456,12 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
                               {milestone.name}
                             </Text>
                           </View>
-                          <View className={`px-2 py-1 rounded-full ${mStyle.bg}`}>
-                            <Text className={`text-xs font-worksanssemibold ${mStyle.text}`}>
+                          <View
+                            className={`px-2 py-1 rounded-full ${mStyle.bg}`}
+                          >
+                            <Text
+                              className={`text-xs font-worksanssemibold ${mStyle.text}`}
+                            >
                               {formatStatus(milestone.status)}
                             </Text>
                           </View>
@@ -458,7 +485,7 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
                               <Text className="font-inter text-gray-500 text-xs ml-1">
                                 Due:{" "}
                                 {new Date(
-                                  milestone.completionDate
+                                  milestone.completionDate,
                                 ).toLocaleDateString("en-US", {
                                   month: "short",
                                   day: "numeric",
@@ -473,18 +500,8 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
                   })}
                 </View>
               </>
-            ) : (
-              <View className="bg-gray-50 p-6 rounded-xl border border-gray-100 items-center">
-                <Flag size={40} color="#9CA3AF" />
-                <Text className="font-worksanssemibold text-gray-500 mt-3">
-                  No Milestones Yet
-                </Text>
-                <Text className="font-inter text-gray-400 text-sm mt-1 text-center">
-                  The client hasn't added any milestones to this project
-                </Text>
-              </View>
-            )}
-          </View>
+            </View>
+          )}
 
           {/* Required Skills */}
           {requiredSkills.length > 0 && (
@@ -509,26 +526,24 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
           )}
 
           {/* Project Documents */}
-          <View className="pt-6">
-            <View className="flex-row items-center justify-between mb-3">
-              <Text className="font-worksanssemibold text-xl">
-                Attached Documents
-              </Text>
-              {attachedDocuments.length > 0 && (
+          {attachedDocuments.length > 0 && (
+            <View className="pt-6">
+              <View className="flex-row items-center justify-between mb-3">
+                <Text className="font-worksanssemibold text-xl">
+                  Attached Documents
+                </Text>
                 <View className="bg-blue-100 px-3 py-1 rounded-full">
                   <Text className="text-blue-800 font-worksanssemibold text-xs">
                     {attachedDocuments.length}{" "}
                     {attachedDocuments.length === 1 ? "file" : "files"}
                   </Text>
                 </View>
-              )}
-            </View>
+              </View>
 
-            {attachedDocuments.length > 0 ? (
               <View className="bg-white rounded-xl border border-gray-100 overflow-hidden">
                 {attachedDocuments.map((doc: any, index: number) => (
                   <View
-                    key={doc.fileId}
+                    key={doc.fileId || index}
                     className={`flex-row items-center p-4 ${
                       index < attachedDocuments.length - 1
                         ? "border-b border-gray-100"
@@ -570,7 +585,7 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
                         <Text className="text-xs text-gray-500 font-inter">
                           {new Date(doc.uploadedAt).toLocaleDateString(
                             "en-US",
-                            { month: "short", day: "numeric" }
+                            { month: "short", day: "numeric" },
                           )}
                         </Text>
                       </View>
@@ -578,36 +593,46 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
                   </View>
                 ))}
               </View>
-            ) : (
-              <View className="bg-gray-50 p-6 rounded-xl border border-gray-100 items-center">
-                <FileText size={40} color="#9CA3AF" />
-                <Text className="font-worksanssemibold text-gray-500 mt-3">
-                  Not Available
-                </Text>
-                <Text className="font-inter text-gray-400 text-sm mt-1">
-                  No documents attached to this project
-                </Text>
+            </View>
+          )}
+
+          {/* ── ACTION BUTTONS ── */}
+          <View className="pt-6 pb-8 gap-3">
+            {/* Case 1: Show Express Interest - User hasn't expressed interest yet */}
+            {showExpressInterest && (
+              <GradientButton
+                title="Express Interest"
+                onPress={onExpressInterestPress}
+                loading={createExpressionOfInterestMutation.isPending}
+              />
+            )}
+
+            {/* Case 2: Show Awaiting Approval - User expressed interest but not approved yet */}
+            {showAwaitingApproval && (
+              <View className="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+                <View className="flex-row items-center gap-3">
+                  <Hourglass size={24} color="#D97706" />
+                  <View className="flex-1">
+                    <Text className="font-worksanssemibold text-yellow-800">
+                      Awaiting Approval
+                    </Text>
+                    <Text className="font-inter text-yellow-600 text-sm mt-1">
+                      You have expressed interest in this project. The client
+                      will review your profile and approve you to bid.
+                    </Text>
+                  </View>
+                </View>
               </View>
             )}
-          </View>
 
-          {projectData.requirements || projectData.clientRequirements ? (
-            <View className="pt-6">
-              <Text className="font-worksanssemibold text-xl mb-3">
-                Client Requirements
-              </Text>
-              <View className="bg-amber-50 p-4 rounded-xl border border-amber-100">
-                <Text className="font-inter text-gray-700 leading-6">
-                  {projectData.requirements ||
-                    projectData.clientRequirements ||
-                    "No specific requirements mentioned."}
-                </Text>
-              </View>
-            </View>
-          ) : null}
-
-          <View className="pt-6 pb-8">
-            <GradientButton title="Submit Bid" onPress={handleSubmitBid} />
+            {/* Case 3: Show Submit Bid - User is approved to bid */}
+            {showSubmitBid && (
+              <GradientButton
+                title="Submit Bid"
+                onPress={handleSubmitBid}
+                disabled={deadlinePassed}
+              />
+            )}
 
             {deadlinePassed && (
               <View className="flex-row items-center justify-center mt-3 bg-red-50 p-3 rounded-lg">
@@ -645,6 +670,14 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
           </Text>
         </TouchableOpacity>
       </Modal>
+
+      <ExpressInterestConfirmModal
+        visible={showExpressInterestModal}
+        projectTitle={title}
+        onCancel={() => setShowExpressInterestModal(false)}
+        onConfirm={onConfirmExpressInterest}
+        isLoading={createExpressionOfInterestMutation.isPending}
+      />
     </AppLayout>
   );
 };

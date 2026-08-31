@@ -52,7 +52,7 @@ export const BidsCard = ({
   const viewBidDetails = () => {
     router.push({
       pathname: "/mybids/viewbidsdetails",
-      params: { bidId },
+      params: { currency, bidId },
     });
   };
 
