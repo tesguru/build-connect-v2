@@ -1,8 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -14,11 +12,10 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
-import * as z from "zod";
 
-import FileUploadComponent from "@/components/Forms/FileUploadComponent";
+import ChatUploadFile from "@/components/Forms/ChatUploadFile";
+import { FileUploadResult } from "@/components/Forms/FileUploadComponent";
 import AppLayout from "@/components/Layouts/AppLayout";
-import { reportImage } from "@/constants/icon";
 import { useProjects } from "@/core/hooks/useProjects";
 import { uploadFile } from "@/core/utils/fileUpload";
 
@@ -41,15 +38,6 @@ interface Attachment {
   fileName: string;
   url: string;
 }
-
-interface ChatFormValues {
-  attachments: { file: File | null }[];
-}
-
-// Zod schema for form validation
-const chatSchema = z.object({
-  attachments: z.array(z.object({ file: z.any().nullable() })).default([]),
-});
 
 // Helper functions
 const formatSentAt = (dateString: string): string => {
@@ -293,6 +281,7 @@ const ChatScreen = () => {
   const { projectId } = useLocalSearchParams<{ projectId: string }>();
   const scrollRef = useRef<ScrollView>(null);
   const [message, setMessage] = useState("");
+  const [attachments, setAttachments] = useState<FileUploadResult[]>([]);
   const [isSending, setIsSending] = useState(false);
 
   // Use projects hook
@@ -304,24 +293,7 @@ const ChatScreen = () => {
     refetch,
   } = viewMessages(projectId);
 
-  const messages = messagesData?.data?.messages || [];
-
-  const {
-    control,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<ChatFormValues>({
-    resolver: zodResolver(chatSchema),
-    defaultValues: { attachments: [] },
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "attachments",
-  });
-
-  const attachments = watch("attachments");
+  const messages = messagesData?.data?.data?.messages || [];
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -332,23 +304,15 @@ const ChatScreen = () => {
   }, [messages.length]);
 
   const handleSend = async () => {
-    if (!message.trim() && !attachments.some((a) => a.file)) return;
+    if (!message.trim() && attachments.length === 0) return;
 
     setIsSending(true);
 
     try {
-      // Upload files using uploadFile from core/utils
-      const filesWithAttachments = attachments.filter((a) => a.file);
-
       const uploadResults = await Promise.allSettled(
-        filesWithAttachments.map(async (attachment) => {
-          const result = await uploadFile(
-            attachment.file,
-            "work_showcase",
-            "Chat Attachment",
-          );
-          return result.id;
-        }),
+        attachments.map((file) =>
+          uploadFile(file, "work_showcase", "Chat Attachment"),
+        ),
       );
 
       const failed = uploadResults.filter((r) => r.status === "rejected");
@@ -368,10 +332,9 @@ const ChatScreen = () => {
       }
 
       const attachmentIds = (
-        uploadResults as PromiseFulfilledResult<string>[]
-      ).map((r) => r.value);
+        uploadResults as PromiseFulfilledResult<{ id: string }>[]
+      ).map((r) => r.value.id);
 
-      // Send message with attachments
       await createMessage.mutateAsync({
         projectId,
         message: message.trim(),
@@ -379,7 +342,7 @@ const ChatScreen = () => {
       });
 
       setMessage("");
-      setValue("attachments", []);
+      setAttachments([]);
       refetch();
     } catch (err: any) {
       Toast.show({
@@ -393,12 +356,11 @@ const ChatScreen = () => {
   };
 
   const canSend =
-    (message.trim().length > 0 || attachments.some((a) => a.file)) &&
-    !isSending;
+    (message.trim().length > 0 || attachments.length > 0) && !isSending;
 
   if (isLoading) {
     return (
-      <AppLayout screenName="Chats">
+      <AppLayout screenName="Chats" fullHeightContent>
         <View
           style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
         >
@@ -420,7 +382,7 @@ const ChatScreen = () => {
 
   if (error) {
     return (
-      <AppLayout screenName="Chats">
+      <AppLayout screenName="Chats" fullHeightContent>
         <View
           style={{
             flex: 1,
@@ -461,7 +423,7 @@ const ChatScreen = () => {
   }
 
   return (
-    <AppLayout screenName="Chats">
+    <AppLayout screenName="Chats" fullHeightContent>
       <View style={{ flex: 1, backgroundColor: "#f8fafc" }}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
@@ -470,6 +432,7 @@ const ChatScreen = () => {
         >
           <ScrollView
             ref={scrollRef}
+            style={{ flex: 1 }}
             contentContainerStyle={{
               paddingHorizontal: 16,
               paddingTop: 20,
@@ -520,65 +483,13 @@ const ChatScreen = () => {
               paddingBottom: 14,
             }}
           >
-            {/* Attachment previews using FileUploadComponent */}
-            {fields.map((field, index) => (
-              <View key={field.id} className="mb-4">
-                <Controller
-                  control={control}
-                  name={`attachments.${index}.file`}
-                  render={({ field: { value, onChange } }) => (
-                    <FileUploadComponent
-                      title="Tap to upload document"
-                      image={reportImage}
-                      label={`Attachment ${index + 1}`}
-                      note="PDF, DOC, JPG, PNG (max. 10MB)"
-                      control={control}
-                      name={`attachments.${index}.file`}
-                      value={value}
-                      onChange={onChange}
-                      maxSizeMB={10}
-                    />
-                  )}
-                />
-                <TouchableOpacity
-                  onPress={() => remove(index)}
-                  style={{ alignSelf: "flex-end", marginTop: 4 }}
-                >
-                  <Text
-                    style={{
-                      color: "#ef4444",
-                      fontFamily: "Inter_500Medium",
-                      fontSize: 12,
-                    }}
-                  >
-                    Remove
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            ))}
-
-            {/* Add attachment button */}
-            <TouchableOpacity
-              onPress={() => append({ file: null })}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 4,
-                alignSelf: "flex-start",
-                marginBottom: 8,
-              }}
-            >
-              <Ionicons name="attach-outline" size={16} color="#2563eb" />
-              <Text
-                style={{
-                  fontSize: 13,
-                  fontFamily: "Inter_500Medium",
-                  color: "#2563eb",
-                }}
-              >
-                Add attachment
-              </Text>
-            </TouchableOpacity>
+            <ChatUploadFile
+              attachments={attachments}
+              onChange={setAttachments}
+              maxFiles={5}
+              maxSizeMB={10}
+              disabled={isSending}
+            />
 
             {/* Input row */}
             <View

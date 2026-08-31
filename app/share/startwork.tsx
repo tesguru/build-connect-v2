@@ -172,7 +172,7 @@ export default function StartWork() {
   const progressPercent = project?.progress?.progressPercentage || 0;
 
   return (
-    <AppLayout screenName="Start Project">
+    <AppLayout screenName="Project Dashboard">
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}

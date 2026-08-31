@@ -14,7 +14,6 @@ import {
   View,
 } from "react-native";
 
-
 const VERIFICATION_STATUS_CONFIG: Record<
   string,
   { label: string; badgeBg: string; badgeText: string; dot: string }
@@ -57,7 +56,9 @@ const Badge = ({
   badgeText: string;
   dot: string;
 }) => (
-  <View className={`flex-row items-center mt-3 px-4 py-1.5 rounded-full ${badgeBg}`}>
+  <View
+    className={`flex-row items-center mt-3 px-4 py-1.5 rounded-full ${badgeBg}`}
+  >
     <View className={`w-2 h-2 rounded-full mr-2 ${dot}`} />
     <Text className={`font-interbold text-xs tracking-wide ${badgeText}`}>
       {label}
@@ -130,7 +131,6 @@ const MenuItem = ({
   </TouchableOpacity>
 );
 
-
 const ProfileScreen = () => {
   const { user, clearAuthData } = useAuthStore();
   const router = useRouter();
@@ -138,15 +138,14 @@ const ProfileScreen = () => {
 
   const { data, isLoading } = getUserProfile();
 
-
   const userData = data?.data?.data;
-  const userRole = user?.role; 
+  const userRole = user?.role;
 
   const fullName = userData
     ? `${userData.firstName} ${userData.lastName}`
     : user
-    ? `${user.firstName} ${user.lastName}`
-    : "User Name";
+      ? `${user.firstName} ${user.lastName}`
+      : "User Name";
 
   const email = userData?.email ?? user?.email ?? "user@example.com";
 
@@ -155,14 +154,14 @@ const ProfileScreen = () => {
     VERIFICATION_STATUS_CONFIG[verificationStatus] ??
     VERIFICATION_STATUS_CONFIG.not_started;
 
-  
-const clientVerification = userData?.verification?.documents?.length > 0 
-  ? userData.verification.documents 
-  : null;
+  const clientVerification =
+    userData?.verification?.documents?.length > 0
+      ? userData.verification.documents
+      : null;
   const clientHasSubmitted = clientVerification !== null;
   const contractorProfile = userData?.contractorProfile ?? null;
-  const builderHasSubmitted = contractorProfile !== null && contractorProfile !== undefined;
-
+  const builderHasSubmitted =
+    contractorProfile !== null && contractorProfile !== undefined;
 
   const menuConfig =
     userRole === "builder"
@@ -180,19 +179,18 @@ const clientVerification = userData?.verification?.documents?.length > 0
             subtitle: "Submit your profile and documents to get verified",
           }
       : clientHasSubmitted
-      ? {
-          iconBg: "bg-green-50",
-          iconTint: "#16A34A",
-          title: "Documents Submitted",
-          subtitle: "View your submitted verification documents",
-        }
-      : {
-          iconBg: "bg-blue-50",
-          iconTint: "#3B82F6",
-          title: "Verify Your Identity",
-          subtitle: "Submit your identity documents to get verified",
-        };
-
+        ? {
+            iconBg: "bg-green-50",
+            iconTint: "#16A34A",
+            title: "Documents Submitted",
+            subtitle: "View your submitted verification documents",
+          }
+        : {
+            iconBg: "bg-blue-50",
+            iconTint: "#3B82F6",
+            title: "Verify Your Identity",
+            subtitle: "Submit your identity documents to get verified",
+          };
 
   const handleBack = () => {
     if (router.canGoBack()) {
@@ -207,10 +205,8 @@ const clientVerification = userData?.verification?.documents?.length > 0
   const handleVerificationAction = () => {
     if (userRole === "client") {
       if (clientHasSubmitted) {
-    
         router.push("/verification_details");
       } else {
-       
         router.push({
           pathname: "/(auth)/sign_up/client/verify_identity",
           params: { dontShowSkip: "true" },
@@ -243,7 +239,7 @@ const clientVerification = userData?.verification?.documents?.length > 0
           },
         },
       ],
-      { cancelable: true }
+      { cancelable: true },
     );
   };
 
@@ -269,7 +265,6 @@ const clientVerification = userData?.verification?.documents?.length > 0
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-       
         <View className="items-center pt-8 pb-8 bg-white mx-4 mt-4 rounded-2xl border border-gray-100 shadow-sm">
           <View className="relative">
             <Image source={AvatarImage} className="w-24 h-24 rounded-full" />
@@ -283,7 +278,6 @@ const clientVerification = userData?.verification?.documents?.length > 0
           </Text>
           <Text className="font-inter text-sm mt-1 text-gray-500">{email}</Text>
 
-
           <Badge
             label={verificationBadge.label}
             badgeBg={verificationBadge.badgeBg}
@@ -291,7 +285,6 @@ const clientVerification = userData?.verification?.documents?.length > 0
             dot={verificationBadge.dot}
           />
         </View>
-
 
         <View className="px-4 mt-6">
           <Text className="font-interbold text-sm text-gray-400 uppercase tracking-widest mb-3 ml-1">
@@ -307,7 +300,6 @@ const clientVerification = userData?.verification?.documents?.length > 0
           />
         </View>
 
-
         <View className="px-4 mt-4">
           <Text className="font-interbold text-sm text-gray-400 uppercase tracking-widest mb-3 ml-1">
             Settings
@@ -321,8 +313,20 @@ const clientVerification = userData?.verification?.documents?.length > 0
             onPress={handleVerificationAction}
           />
         </View>
-
-
+        <View className="px-4 mt-4">
+          <Text className="font-interbold text-sm text-gray-400 uppercase tracking-widest mb-3 ml-1">
+            Danger Zone
+          </Text>
+          <MenuItem
+            iconSource="🗑"
+            iconBg="bg-red-50"
+            iconTint="text-red-600"
+            title="Delete Account"
+            subtitle="Permanently delete your account"
+            onPress={() => router.push("/account_deletion")}
+            danger
+          />
+        </View>
         <View className="px-4 mt-4">
           <MenuItem
             iconSource="↪"
