@@ -431,7 +431,7 @@ const AddProject = () => {
           {/* Submit Button */}
           <View className="pt-6 pb-8 px-4">
             <GradientButton
-              title="Create Project"
+              title="Add Project"
               onPress={handleSubmit(onSubmit)}
               loading={isLoading}
               disabled={isLoading}

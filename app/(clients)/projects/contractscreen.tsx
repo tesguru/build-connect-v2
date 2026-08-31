@@ -194,6 +194,7 @@ export default function ClientContractdetailsScreen() {
         message="The contract has been successfully sent via email."
         buttonTitle="Return to Contract"
         navigateTo="/(clients)/projects/contractscreen"
+        params={{ bidId, projectId, projectTitle, companyName, bidsData }}
       />
     );
   }
@@ -205,6 +206,7 @@ export default function ClientContractdetailsScreen() {
         message="You have successfully signed the contract."
         buttonTitle="Return to Contract"
         navigateTo="/(clients)/projects/contractscreen"
+        params={{ bidId, projectId, projectTitle, companyName, bidsData }}
       />
     );
   }
@@ -348,7 +350,11 @@ export default function ClientContractdetailsScreen() {
           )}
 
           {isActive && (
-            <GradientButton onPress={startWork} title="Start Project" />
+            <PrimaryButton
+              onPress={startWork}
+              title="Start Project"
+              backgroundColor="#4A5D75"
+            />
           )}
 
           {isActive && (

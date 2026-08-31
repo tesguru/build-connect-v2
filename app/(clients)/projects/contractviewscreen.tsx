@@ -2,14 +2,20 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   Building2,
   Calendar,
+  Download,
   FileText,
   MapPin,
   User,
 } from "lucide-react-native";
 import React, { useState } from "react";
-import { Linking, ScrollView, Text, View } from "react-native";
+import {
+  Linking,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import GradientButton from "@/components/Buttons/GradientButton";
 import AppLayout from "@/components/Layouts/AppLayout";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 
@@ -113,13 +119,17 @@ export default function ClientContractViewScreen() {
     },
     {
       label: isBuilderSigned ? "Builder Signed" : "Awaiting builder signature",
-      sub: isBuilderSigned ? "Builder Signed" : "Awaiting builder signature",
+      sub: isBuilderSigned
+        ? "Builder has signed the contract"
+        : "Waiting on the builder to sign",
       date: contract?.contractorSignedAt,
       done: isBuilderSigned,
     },
     {
       label: isClientSigned ? "Client Signed" : "Awaiting client signature",
-      sub: isClientSigned ? "Client Signed" : "Awaiting client signature",
+      sub: isClientSigned
+        ? "You have signed the contract"
+        : "Waiting on you to sign",
       date: contract?.clientSignedAt,
       done: isClientSigned,
     },
@@ -134,6 +144,10 @@ export default function ClientContractViewScreen() {
   const canDownload =
     contract?.document?.publicUrl &&
     !contract.document.publicUrl.includes("localhost");
+
+  const downloadFilename = canDownload
+    ? contract.document.publicUrl.split("/").pop()?.split("?")[0]
+    : "";
 
   const handleDownload = () => {
     if (contract?.document?.publicUrl) {
@@ -171,13 +185,13 @@ export default function ClientContractViewScreen() {
           </View>
 
           <Text className="font-interbold text-xl px-4 pb-1" numberOfLines={2}>
-            {contract.project.title}
+            {contract?.project?.title}
           </Text>
 
           <View className="flex-row items-center gap-1.5 px-4 pb-4">
             <MapPin size={13} color="#9CA3AF" />
             <Text className="text-gray-400 text-sm font-inter">
-              {contract.project.location}
+              {contract?.project?.location}
             </Text>
           </View>
 
@@ -321,57 +335,100 @@ export default function ClientContractViewScreen() {
 
         {/* ── Contract Timeline Card ── */}
         <View className="mx-4 mb-4 bg-white rounded-xl p-4">
-          <Text className="font-interbold text-base mb-4">
-            Contract Timeline
-          </Text>
+          <Text className="font-interbold text-xl mb-4">Contract Timeline</Text>
+          <View className="h-px bg-gray-100 mb-4" />
+
           {timelineSteps.map((step, index) => (
-            <View key={index} className="flex-row gap-3 pb-5">
+            <View key={index} className="flex-row gap-4">
               <View className="items-center">
                 <View
-                  className={`w-6 h-6 rounded-full items-center justify-center ${
+                  className={`w-8 h-8 rounded-full items-center justify-center ${
                     step.done ? "bg-blue-600" : "bg-gray-200"
                   }`}
                 >
                   {step.done ? (
-                    <Text style={{ color: "#fff", fontSize: 12 }}>✓</Text>
+                    <Text
+                      style={{
+                        color: "#fff",
+                        fontSize: 14,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      ✓
+                    </Text>
                   ) : (
-                    <Text style={{ color: "#CBD5E1", fontSize: 10 }}>○</Text>
+                    <Text style={{ color: "#94A3B8", fontSize: 10 }}>○</Text>
                   )}
                 </View>
                 {index < timelineSteps.length - 1 && (
-                  <View className="w-0.5 flex-1 bg-gray-200 mt-1" />
+                  <View
+                    className={`w-0.5 flex-1 my-1 ${
+                      step.done ? "bg-blue-100" : "bg-gray-100"
+                    }`}
+                    style={{ minHeight: 40 }}
+                  />
                 )}
               </View>
-              <View className="flex-1">
+              <View className="flex-1 pb-6">
                 <Text
-                  className={`font-interbold text-sm ${
+                  className={`font-interbold text-base ${
                     step.done ? "text-gray-900" : "text-gray-400"
                   }`}
                 >
+                  {step.label}
+                </Text>
+                <Text className="text-gray-400 text-sm font-inter mt-0.5 mb-2">
                   {step.sub}
                 </Text>
-                <Text className="text-gray-400 text-xs mt-1">
-                  {step.date ? formatDate(step.date) : "Pending"}
-                </Text>
+                {step.done && step.date && (
+                  <View className="bg-blue-50 self-start rounded-lg px-3 py-1.5">
+                    <Text className="text-blue-600 text-sm font-interbold">
+                      {formatDate(step.date)}
+                    </Text>
+                  </View>
+                )}
               </View>
             </View>
           ))}
         </View>
 
+        {/* ── Download Contract PDF Card ── */}
         {canDownload && (
-          <View className="mx-4 mt-2">
-            <GradientButton
-              title="Download Contract PDF"
+          <View className="mx-4 mb-4 bg-white rounded-xl p-4 flex-row items-center gap-3">
+            <View className="bg-blue-50 rounded-xl p-3">
+              <FileText size={22} color="#2463EB" />
+            </View>
+            <View className="flex-1">
+              <Text className="font-interbold text-base mb-1">
+                Download Contract PDF
+              </Text>
+              <Text
+                className="text-gray-400 text-xs font-inter"
+                numberOfLines={2}
+              >
+                {downloadFilename}
+              </Text>
+            </View>
+            <TouchableOpacity
               onPress={handleDownload}
-              loading={isSubmitting}
               disabled={isSubmitting}
-            />
+              className="bg-blue-50 rounded-xl p-3"
+              activeOpacity={0.7}
+            >
+              <Download size={18} color="#2463EB" />
+            </TouchableOpacity>
           </View>
         )}
 
-        <Text className="text-gray-400 text-xs text-center mt-4 px-6">
-          {`Contract ID: ${contract?.id || "—"}\nThis contract is legally binding once signed by both parties.`}
-        </Text>
+        {/* ── Footer Notice ── */}
+        <View className="mx-4 mb-4 bg-gray-50 rounded-xl py-4 px-4">
+          <Text className="text-gray-400 text-xs text-center font-inter">
+            This contract is legally binding once signed by both parties.
+          </Text>
+          <Text className="text-gray-400 text-xs text-center font-inter mt-1">
+            Contract ID: ...{contract?.id?.slice(-7) || "—"}
+          </Text>
+        </View>
       </ScrollView>
     </AppLayout>
   );
