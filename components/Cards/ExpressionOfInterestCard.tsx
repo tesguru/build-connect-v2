@@ -1,5 +1,6 @@
 import { useProjects } from "@/core/hooks/useProjects";
 import { useRouter } from "expo-router";
+import { CheckCircle2, ChevronRight, XCircle } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -15,31 +16,31 @@ const STATUS_CONFIG: Record<
   { bg: string; border: string; dot: string; text: string; label: string }
 > = {
   approved: {
-    bg: "#ecfdf5",
-    border: "#a7f3d0",
-    dot: "#10b981",
-    text: "#059669",
+    bg: "bg-emerald-50",
+    border: "border-emerald-200",
+    dot: "bg-emerald-500",
+    text: "text-emerald-600",
     label: "Approved",
   },
   accepted: {
-    bg: "#ecfdf5",
-    border: "#a7f3d0",
-    dot: "#10b981",
-    text: "#059669",
+    bg: "bg-emerald-50",
+    border: "border-emerald-200",
+    dot: "bg-emerald-500",
+    text: "text-emerald-600",
     label: "Approved",
   },
   pending: {
-    bg: "#fffbeb",
-    border: "#fde68a",
-    dot: "#f59e0b",
-    text: "#d97706",
+    bg: "bg-amber-50",
+    border: "border-amber-200",
+    dot: "bg-amber-500",
+    text: "text-amber-600",
     label: "Pending",
   },
   rejected: {
-    bg: "#fff1f2",
-    border: "#fecaca",
-    dot: "#ef4444",
-    text: "#dc2626",
+    bg: "bg-rose-50",
+    border: "border-rose-200",
+    dot: "bg-red-500",
+    text: "text-red-600",
     label: "Rejected",
   },
 };
@@ -48,19 +49,29 @@ function getStatusConfig(status: string | null | undefined) {
   const normalized = status?.toLowerCase();
   return (
     (normalized && STATUS_CONFIG[normalized]) || {
-      bg: "#f8fafc",
-      border: "#e2e8f0",
-      dot: "#94a3b8",
-      text: "#64748b",
+      bg: "bg-gray-50",
+      border: "border-gray-200",
+      dot: "bg-gray-400",
+      text: "text-gray-500",
       label: "Pending",
     }
   );
+}
+
+function formatSubmittedDate(date: string | null | undefined) {
+  if (!date) return null;
+  return new Date(date).toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 type Interest = {
   id: string;
   status: string;
   message?: string;
+  createdAt?: string | null;
   builder: {
     id: string;
     firstName?: string;
@@ -100,6 +111,7 @@ export default function ExpressionOfInterestCard({
 
   const statusConfig = getStatusConfig(interest.status);
   const isPending = (interest.status || "").toLowerCase() === "pending";
+  const submittedDate = formatSubmittedDate(interest.createdAt);
 
   const handleViewBuilder = () => {
     if (!builder?.id) return;
@@ -117,21 +129,17 @@ export default function ExpressionOfInterestCard({
   const modalConfig =
     modalAction === "accept"
       ? {
-          iconBg: "#eff6ff",
-          iconColor: "#1d4ed8",
           title: "Accept Interest",
           message: `Add a review note for ${displayName} (optional)`,
-          confirmBg: "#1d4ed8",
+          confirmBg: "bg-blue-700",
           confirmLabel: "Yes, Accept",
           inputPlaceholder:
             "e.g. Great profile, looking forward to working together...",
         }
       : {
-          iconBg: "#fff1f2",
-          iconColor: "#dc2626",
           title: "Reject Interest",
           message: `Add a review note for ${displayName} (optional)`,
-          confirmBg: "#dc2626",
+          confirmBg: "bg-red-600",
           confirmLabel: "Yes, Reject",
           inputPlaceholder: "e.g. Not the right fit for this project...",
         };
@@ -158,172 +166,89 @@ export default function ExpressionOfInterestCard({
 
   return (
     <>
-      <View
-        style={{
-          backgroundColor: "#fff",
-          borderRadius: 16,
-          borderWidth: 1,
-          borderColor: "#f1f5f9",
-          marginBottom: 12,
-          shadowColor: "#94a3b8",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.08,
-          shadowRadius: 8,
-          elevation: 2,
-          overflow: "hidden",
-        }}
-      >
-        <View
-          style={{
-            flexDirection: "row",
-            padding: 14,
-            gap: 12,
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 24,
-              backgroundColor: "#eff6ff",
-              borderWidth: 1,
-              borderColor: "#bfdbfe",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 15,
-                fontWeight: "700",
-                color: "#1d4ed8",
-                fontFamily: "InterBold",
-              }}
-            >
-              {initials}
-            </Text>
-          </View>
+      <View className="bg-white rounded-3xl p-5 mb-3 shadow-md shadow-black/10">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-3.5 flex-1 mr-3">
+            <View className="w-14 h-14 rounded-full bg-blue-50 items-center justify-center">
+              <Text className="text-lg font-interbold text-blue-700">
+                {initials}
+              </Text>
+            </View>
 
-          <View style={{ flex: 1 }}>
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
+            <View className="flex-1">
               <TouchableOpacity onPress={handleViewBuilder}>
                 <Text
-                  style={{
-                    fontSize: 15,
-                    fontWeight: "700",
-                    fontFamily: "InterBold",
-                    color: "#0f172a",
-                  }}
+                  className="text-lg font-interbold text-gray-900"
+                  numberOfLines={1}
                 >
                   {displayName}
                 </Text>
               </TouchableOpacity>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 6,
-                  backgroundColor: statusConfig.bg,
-                  borderWidth: 1,
-                  borderColor: statusConfig.border,
-                  borderRadius: 999,
-                  paddingHorizontal: 10,
-                  paddingVertical: 4,
-                }}
-              >
-                <View
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: 3,
-                    backgroundColor: statusConfig.dot,
-                  }}
-                />
-                <Text
-                  style={{
-                    fontSize: 11,
-                    fontWeight: "600",
-                    color: statusConfig.text,
-                  }}
-                >
-                  {statusConfig.label}
+              {submittedDate && (
+                <Text className="text-sm text-gray-400 font-inter mt-0.5">
+                  Submitted {submittedDate}
                 </Text>
-              </View>
+              )}
+              {interest.message && (
+                <Text
+                  className="text-sm text-gray-500 font-inter mt-1"
+                  numberOfLines={2}
+                >
+                  {interest.message}
+                </Text>
+              )}
             </View>
-            {interest.message && (
-              <Text
-                style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}
-                numberOfLines={2}
-              >
-                {interest.message}
-              </Text>
-            )}
+          </View>
+
+          <View
+            className={`flex-row items-center gap-1.5 rounded-full px-3 py-1.5 border ${statusConfig.bg} ${statusConfig.border}`}
+          >
+            <View className={`w-1.5 h-1.5 rounded-full ${statusConfig.dot}`} />
+            <Text
+              className={`text-sm font-inter font-semibold ${statusConfig.text}`}
+            >
+              {statusConfig.label}
+            </Text>
           </View>
         </View>
 
-        {isPending && (
-          <View
-            style={{
-              flexDirection: "row",
-              gap: 10,
-              padding: 14,
-              paddingTop: 0,
-            }}
+        <View className="h-px bg-gray-100 mt-4 mb-4" />
+
+        <View className="flex-row items-center gap-2.5">
+          {isPending && (
+            <>
+              <TouchableOpacity
+                onPress={() => handleOpenModal("accept")}
+                className="flex-row items-center gap-2 bg-blue-700 rounded-full px-5 py-3"
+              >
+                <CheckCircle2 size={18} color="#fff" />
+                <Text className="text-[12px] text-white font-intersemibold font-semibold">
+                  Accept
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => handleOpenModal("reject")}
+                className="flex-row items-center gap-2 rounded-full px-5 py-3 border border-gray-200"
+              >
+                <XCircle size={18} color="#94a3b8" />
+                <Text className="text-[12px] text-gray-500 font-intersemibold font-semibold">
+                  Reject
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          <TouchableOpacity
+            onPress={handleViewBuilder}
+            className="flex-row items-center gap-0.5 ml-auto"
           >
-            <TouchableOpacity
-              onPress={() => handleOpenModal("reject")}
-              style={{
-                flex: 1,
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: 12,
-                paddingVertical: 12,
-                borderWidth: 1,
-                borderColor: "#fecaca",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 14,
-                  color: "#dc2626",
-                  fontFamily: "InterSemiBold",
-                  fontWeight: "600",
-                }}
-              >
-                Reject
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => handleOpenModal("accept")}
-              style={{
-                flex: 1,
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: 12,
-                paddingVertical: 12,
-                backgroundColor: "#1d4ed8",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 14,
-                  color: "#fff",
-                  fontFamily: "InterSemiBold",
-                  fontWeight: "600",
-                }}
-              >
-                Accept
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
+            <Text className="text-[12px] text-indigo-600 font-intersemibold font-semibold">
+              View Builder
+            </Text>
+            <ChevronRight size={17} color="#4f46e5" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <Modal
@@ -340,28 +265,11 @@ export default function ExpressionOfInterestCard({
             padding: 24,
           }}
         >
-          <View
-            style={{ backgroundColor: "#fff", borderRadius: 16, padding: 20 }}
-          >
-            <Text
-              style={{
-                fontFamily: "InterBold",
-                fontSize: 18,
-                fontWeight: "700",
-                color: "#0f172a",
-                marginBottom: 8,
-              }}
-            >
+          <View className="bg-white rounded-2xl p-5">
+            <Text className="font-interbold text-lg text-gray-900 mb-2">
               {modalConfig.title}
             </Text>
-            <Text
-              style={{
-                fontFamily: "Inter",
-                fontSize: 13,
-                color: "#64748b",
-                marginBottom: 12,
-              }}
-            >
+            <Text className="font-inter text-sm text-gray-500 mb-3">
               {modalConfig.message}
             </Text>
             <TextInput
@@ -369,37 +277,15 @@ export default function ExpressionOfInterestCard({
               onChangeText={setReviewNote}
               placeholder={modalConfig.inputPlaceholder}
               multiline
-              style={{
-                borderWidth: 1,
-                borderColor: "#e2e8f0",
-                borderRadius: 12,
-                padding: 12,
-                minHeight: 80,
-                marginBottom: 16,
-                textAlignVertical: "top",
-              }}
+              className="font-inter border border-gray-200 rounded-xl p-3 mb-4"
+              style={{ minHeight: 80, textAlignVertical: "top" }}
             />
-            <View style={{ flexDirection: "row", gap: 10 }}>
+            <View className="flex-row gap-2.5">
               <TouchableOpacity
                 onPress={() => setModalAction(null)}
-                style={{
-                  flex: 1,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: 12,
-                  paddingVertical: 14,
-                  borderWidth: 1,
-                  borderColor: "#e2e8f0",
-                }}
+                className="flex-1 items-center justify-center rounded-xl py-3.5 border border-gray-200"
               >
-                <Text
-                  style={{
-                    fontSize: 14,
-                    color: "#475569",
-                    fontFamily: "InterSemiBold",
-                    fontWeight: "600",
-                  }}
-                >
+                <Text className="text-sm text-slate-600 font-intersemibold font-semibold">
                   Cancel
                 </Text>
               </TouchableOpacity>
@@ -407,27 +293,14 @@ export default function ExpressionOfInterestCard({
                 onPress={handleConfirm}
                 disabled={isConfirming}
                 activeOpacity={0.85}
-                style={{
-                  flex: 1,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: modalConfig.confirmBg,
-                  borderRadius: 12,
-                  paddingVertical: 14,
-                  opacity: isConfirming ? 0.7 : 1,
-                }}
+                className={`flex-1 items-center justify-center rounded-xl py-3.5 ${modalConfig.confirmBg} ${
+                  isConfirming ? "opacity-70" : ""
+                }`}
               >
                 {isConfirming ? (
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      color: "#fff",
-                      fontFamily: "InterSemiBold",
-                      fontWeight: "600",
-                    }}
-                  >
+                  <Text className="text-sm text-white font-intersemibold font-semibold">
                     {modalConfig.confirmLabel}
                   </Text>
                 )}

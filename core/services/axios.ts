@@ -1,152 +1,140 @@
-// axios.ts
 import { useAuthStore } from "@/store/Authstore";
-import Axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
+import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import Toast from "react-native-toast-message";
 import { AuthService } from "./auth/AuthService";
 
-const axiosInstance: AxiosInstance = Axios.create({
+const axiosInstance = axios.create({
   baseURL: "https://api-buildconnect.ivantage.africa/v1",
   timeout: 60000,
 });
 
-
-
 let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (value?: any) => void;
-  reject: (reason?: any) => void;
-}> = [];
+let failedQueue: {
+  resolve: (token: unknown) => void;
+  reject: (err: unknown) => void;
+}[] = [];
 
-const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach((prom) => {
+function processQueue(error: unknown, token: unknown = null) {
+  failedQueue.forEach((promise) => {
     if (error) {
-      prom.reject(error);
+      promise.reject(error);
     } else {
-      prom.resolve(token);
+      promise.resolve(token);
     }
   });
   failedQueue = [];
-};
+}
 
-/**
- * Centralized function to refresh authentication tokens
- * @returns Promise resolving to the new auth token, or rejects on failure
- */
-const refreshAuthToken = async (): Promise<string> => {
-  // Get refresh token from SecureStore
-  const refreshTokenString = await SecureStore.getItemAsync("refreshToken");
-  
-  if (!refreshTokenString) {
+async function refreshAuthToken() {
+  const storedRefreshToken = await SecureStore.getItemAsync("refreshToken");
+  if (!storedRefreshToken) {
     throw new Error("Refresh token not found");
   }
 
-  // Parse refresh token (handle both string and object formats)
-  const parsedRefreshToken = JSON.parse(refreshTokenString);
-  const refreshToken = typeof parsedRefreshToken === 'string' 
-    ? parsedRefreshToken 
-    : parsedRefreshToken?.token || parsedRefreshToken;
+  // The stored value may be a raw string or a JSON-stringified
+  // {token: string} object — both are handled.
+  let refreshTokenValue: string = storedRefreshToken;
+  try {
+    const parsed = JSON.parse(storedRefreshToken);
+    if (typeof parsed !== "string") {
+      refreshTokenValue = parsed?.token || parsed;
+    }
+  } catch {
+    // storedRefreshToken was already a plain string; use as-is
+  }
 
-  // Attempt to refresh the token
-  const response = await AuthService.refreshToken(refreshToken);
-  const refreshData = response.data;
+  const response = await AuthService.refreshToken(refreshTokenValue);
+  const result = response.data;
 
-  // Log refresh token response for debugging
+  // The refresh endpoint's response shape hasn't been directly confirmed —
+  // it's assumed to match the { success, data: { authToken, refreshToken } }
+  // envelope seen from /auth/signup. As a safety net, also accept a flat
+  // shape ({ authToken, refreshToken } directly on the body) in case the
+  // refresh endpoint doesn't nest under `data`.
+  const authToken: string | undefined =
+    result?.data?.authToken ?? result?.authToken;
+  const newRefreshToken: string | undefined =
+    result?.data?.refreshToken ?? result?.refreshToken;
+
   console.log("🔄 Refresh Token Response:", {
-    success: refreshData?.success,
-    statusCode: refreshData?.statusCode,
-    hasData: !!refreshData?.data,
-    hasAuthToken: !!refreshData?.data?.authToken,
-    hasRefreshToken: !!refreshData?.data?.refreshToken,
+    success: result?.success,
+    statusCode: result?.statusCode,
+    hasData: !!result?.data,
+    hasAuthToken: !!authToken,
+    hasRefreshToken: !!newRefreshToken,
+    shape: result?.data ? "nested" : "flat-or-missing",
   });
 
-  if (!refreshData?.success || !refreshData?.data?.authToken || !refreshData?.data?.refreshToken) {
+  if (!authToken || !newRefreshToken) {
     throw new Error("Token refresh failed: Invalid response structure");
   }
 
-  const { authToken: newAuthToken, refreshToken: newRefreshToken } = refreshData.data;
-  
-  // Update tokens in SecureStore
-  await SecureStore.setItemAsync('authToken', JSON.stringify(newAuthToken));
-  await SecureStore.setItemAsync('refreshToken', JSON.stringify(newRefreshToken));
+  await SecureStore.setItemAsync("authToken", JSON.stringify(authToken));
+  await SecureStore.setItemAsync(
+    "refreshToken",
+    JSON.stringify(newRefreshToken),
+  );
 
-  // Update auth store
-  const store = useAuthStore.getState();
-  store.setAuthData(newAuthToken, newRefreshToken, store.user || undefined);
+  const { setAuthData, user } = useAuthStore.getState();
+  setAuthData(authToken, newRefreshToken, user || undefined);
 
-  return newAuthToken;
-};
+  return authToken;
+}
 
-/**
- * Centralized function to handle logout when token refresh fails
- */
-const handleLogout = async () => {
-  const store = useAuthStore.getState();
-  await store.clearAuthData();
-
+async function handleLogout() {
+  await useAuthStore.getState().clearAuthData();
   Toast.show({
     type: "error",
     text1: "Session Expired",
     text2: "Please login again",
   });
-};
+}
 
-// Request interceptor — attach token
-axiosInstance.interceptors.request.use(
-  async (config) => {
-    // Skip adding auth token for refresh token endpoint (it uses refresh token in body)
-    if (config.url?.includes('/auth/refresh-token')) {
-      return config;
+axiosInstance.interceptors.request.use(async (config) => {
+  const isRefreshEndpoint = config.url?.includes("/auth/refresh-token");
+
+  if (!isRefreshEndpoint) {
+    let storedToken = await SecureStore.getItemAsync("authToken");
+    let usedRefreshFallback = false;
+
+    if (!storedToken) {
+      storedToken = await SecureStore.getItemAsync("refreshToken");
+      usedRefreshFallback = true;
     }
 
-    const tokenString = await SecureStore.getItemAsync("authToken");
-    if (tokenString) {
+    if (usedRefreshFallback && storedToken) {
+      // No auth token but a refresh token exists: proactively refresh
+      // before sending this request, rather than letting it 401 first.
       try {
-        const parsedToken = JSON.parse(tokenString);
-      
-        const authToken = typeof parsedToken === 'string' ? parsedToken : parsedToken?.token || parsedToken;
-        if (authToken) {
-          config.headers.Authorization = `Bearer ${authToken}`;
+        const newToken = await refreshAuthToken();
+        if (config.headers) {
+          config.headers.Authorization = `Bearer ${newToken}`;
         }
-      } catch (error) {
-        // If parsing fails, try using the raw string as token
-        if (tokenString) {
-          config.headers.Authorization = `Bearer ${tokenString}`;
+      } catch {
+        if (useAuthStore.getState().isLogin) {
+          await handleLogout();
         }
       }
-    } else {
-      // Token not found - try to refresh if refresh token exists
-      const refreshTokenString = await SecureStore.getItemAsync("refreshToken");
-      if (refreshTokenString && !config.url?.includes('/auth/refresh-token')) {
-        // Don't attempt refresh for refresh-token endpoint itself
-        try {
-          const newAuthToken = await refreshAuthToken();
-          // Attach new token to request
-          config.headers.Authorization = `Bearer ${newAuthToken}`;
-        } catch (refreshError) {
-          // Refresh failed - logout user
-          const store = useAuthStore.getState();
-          if (store.isLogin) {
-            await handleLogout();
-          }
-        }
+    } else if (storedToken) {
+      let tokenValue: string = storedToken;
+      try {
+        const parsed = JSON.parse(storedToken);
+        tokenValue =
+          typeof parsed === "string" ? parsed : parsed?.token || parsed;
+      } catch {
+        tokenValue = storedToken;
+      }
+      if (config.headers) {
+        config.headers.Authorization = `Bearer ${tokenValue}`;
       }
     }
-    console.log("➡️ Request:", {
-      url: config.url,
-      method: config.method,
-      headers: config.headers,
-      data: config.data,
-    });
-    return config;
-  },
-  (error) => {
-    console.log("❌ Request Error:", error);
-    return Promise.reject(error);
   }
-);
 
-// Response interceptor — handle token expiration and refresh
+  console.log({ url: config.url, method: config.method });
+  return config;
+});
+
 axiosInstance.interceptors.response.use(
   (response) => {
     console.log("✅ Response:", {
@@ -157,19 +145,30 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   async (error) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config;
+    const status = error.response?.status;
 
-    // Handle 401 Unauthorized (token expired or invalid)
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      // Skip refresh for auth endpoints to avoid infinite loops
-      if (originalRequest.url?.includes('/auth/login') || 
-          originalRequest.url?.includes('/auth/refresh-token') ||
-          originalRequest.url?.includes('/auth/signup')) {
-        return Promise.reject(error);
-      }
+    // Debug: inspect what's actually in SecureStore whenever a request
+    // errors out. Safe here because this outer function is async, unlike
+    // isAuthEndpoint below which must stay sync.
+    console.log("🔎 Auth check:", {
+      url: originalRequest?.url,
+      status,
+      authToken: await SecureStore.getItemAsync("authToken"),
+      refreshToken: await SecureStore.getItemAsync("refreshToken"),
+    });
 
+    const isAuthEndpoint = (url: string | undefined) =>
+      url?.includes("/auth/login") ||
+      url?.includes("/auth/refresh-token") ||
+      url?.includes("/auth/signup");
+
+    if (
+      status === 401 &&
+      !originalRequest._retry &&
+      !isAuthEndpoint(originalRequest?.url)
+    ) {
       if (isRefreshing) {
-        // If already refreshing, queue this request
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
@@ -179,102 +178,76 @@ axiosInstance.interceptors.response.use(
             }
             return axiosInstance(originalRequest);
           })
-          .catch((err) => {
-            return Promise.reject(err);
-          });
+          .catch((err) => Promise.reject(err));
       }
 
       originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        const newAuthToken = await refreshAuthToken();
-
-        // Update the original request with new token
+        const newToken = await refreshAuthToken();
         if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${newAuthToken}`;
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
         }
-
-        // Process queued requests
-        processQueue(null, newAuthToken);
-
-        // Retry the original request
+        processQueue(null, newToken);
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        // Refresh failed - logout user
-        processQueue(refreshError, null);
-        await handleLogout();
+        processQueue(refreshError);
+        if (useAuthStore.getState().isLogin) {
+          await handleLogout();
+        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
     }
 
-    // Handle 403 Forbidden - try to refresh token first
-    if (error.response?.status === 403 && !originalRequest._retry) {
-      // Skip refresh for auth endpoints to avoid infinite loops
-      if (originalRequest.url?.includes('/auth/login') || 
-          originalRequest.url?.includes('/auth/refresh-token') ||
-          originalRequest.url?.includes('/auth/signup')) {
-        const store = useAuthStore.getState();
-        if (store.isLogin) {
-          await store.clearAuthData();
-          Toast.show({
-            type: "error",
-            text1: "Access Denied",
-            text2: "Please login again",
-          });
-        }
-        return Promise.reject(error);
-      }
-
-      // Try to refresh token for 403 errors
+    if (
+      status === 403 &&
+      !originalRequest._retry &&
+      !isAuthEndpoint(originalRequest?.url)
+    ) {
       originalRequest._retry = true;
-      
       try {
-        const refreshTokenString = await SecureStore.getItemAsync("refreshToken");
-        
-        if (refreshTokenString) {
-          const newAuthToken = await refreshAuthToken();
-
-          // Update the original request with new token
-          if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${newAuthToken}`;
-          }
-
-          // Retry the original request
-          return axiosInstance(originalRequest);
-        } else {
-          // No refresh token available - logout
-          const store = useAuthStore.getState();
-          if (store.isLogin) {
+        const storedRefreshToken =
+          await SecureStore.getItemAsync("refreshToken");
+        if (!storedRefreshToken) {
+          if (useAuthStore.getState().isLogin) {
             await handleLogout();
           }
           return Promise.reject(error);
         }
-      } catch (refreshError) {
-        // Refresh failed - logout user
-        const store = useAuthStore.getState();
-        if (store.isLogin) {
+
+        const newToken = await refreshAuthToken();
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        }
+        return axiosInstance(originalRequest);
+      } catch {
+        if (useAuthStore.getState().isLogin) {
           await handleLogout();
         }
-        return Promise.reject(refreshError);
+        Toast.show({
+          type: "error",
+          text1: "Access Denied",
+          text2: "Please login again",
+        });
+        return Promise.reject(error);
       }
     }
 
-    // Log other errors
     if (error.response) {
       console.log("❌ API Error:", {
-        url: error.config?.url,
+        url: originalRequest?.url,
         status: error.response.status,
         data: error.response.data,
       });
     } else {
       console.log("❌ Network/Timeout Error:", error.message);
     }
-    
+
     return Promise.reject(error);
-  }
+  },
 );
 
 export default axiosInstance;

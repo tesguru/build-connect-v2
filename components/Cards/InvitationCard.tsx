@@ -90,9 +90,15 @@ export default function InvitationCard({
 
   const personName = getPersonName();
 
+  // Title: clients see the contractor's name, builders/contractors see the project name
+  const cardTitle = isClient
+    ? personName
+    : invitation.project?.name || "Untitled Project";
+
   const handleDeclineConfirm = () => {
     if (onDecline) onDecline(declineReason);
     setShowDeclineModal(false);
+
     setDeclineReason("");
   };
 
@@ -101,14 +107,14 @@ export default function InvitationCard({
 
   return (
     <>
-      <View className="bg-white rounded-3xl mx-4 my-2 p-5 shadow-md shadow-black/10">
+      <View className="bg-white rounded-3xl mx-3 my-2 p-4 shadow-md shadow-black/10">
         {/* ── Title + Status badge ── */}
         <View className="flex-row items-center justify-between mb-4">
           <Text
             className="text-gray-900 text-lg font-interbold flex-1 mr-3"
             numberOfLines={1}
           >
-            {invitation.project?.name || "Untitled Project"}
+            {cardTitle}
           </Text>
 
           <View className="flex-row items-center gap-2">

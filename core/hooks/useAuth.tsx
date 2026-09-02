@@ -85,12 +85,18 @@ export function useAuth() {
 
   const registerMutation = useMutation({
     mutationFn: AuthService.register,
-    onSuccess: (response: any) => {
+
+    onSuccess: async (response: any) => {
       const data = response?.data;
+
       if (
         (data?.statusCode === 200 || data?.statusCode === 201) &&
         data?.success === true
       ) {
+        const { authToken, refreshToken, user } = data.data;
+
+        await setAuthData(authToken, refreshToken, user);
+
         Toast.show({
           type: "success",
           text1: "Signup Successful",
@@ -98,6 +104,7 @@ export function useAuth() {
         });
       }
     },
+
     onError: (err: any) => {
       Toast.show({
         type: "error",

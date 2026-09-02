@@ -32,7 +32,7 @@ export default function ContractorProfileScreen() {
       params: {
         projectId,
         contractorId,
-        contractorName: contractor?.businessName,
+        contractorName: contractor?.businessInfo?.businessName,
       },
     });
   };
