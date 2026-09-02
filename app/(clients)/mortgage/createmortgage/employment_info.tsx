@@ -43,18 +43,16 @@ export default function EmploymentInfoScreen() {
             id: item.id,
             label: item.label,
             value: item.id,
-          }))
+          })),
         );
-      } catch (error) {
-        console.error("Failed to fetch employment status:", error);
-      }
+      } catch (error) {}
     };
     fetchEmploymentStatus();
   }, []);
 
   const methods = useForm<EmploymentInfoInput>({
     resolver: zodResolver(employmentInfoSchema),
-       mode: "onChange",
+    mode: "onChange",
     defaultValues: {
       employmentStatusId: formData.employmentStatusId || "",
       occupation: formData.occupation || "",
@@ -68,7 +66,12 @@ export default function EmploymentInfoScreen() {
     },
   });
 
-  const { control, trigger, getValues, formState: { errors } } = methods;
+  const {
+    control,
+    trigger,
+    getValues,
+    formState: { errors },
+  } = methods;
 
   const handleBack = () => router.back();
 
@@ -84,15 +87,14 @@ export default function EmploymentInfoScreen() {
     <AppLayout screenName="Employment Info">
       <FormProvider {...methods}>
         <View className="p-4 flex-1">
-
-          
-
           <ScrollView
             showsVerticalScrollIndicator={false}
             className="flex-1"
             contentContainerStyle={{ paddingBottom: 20 }}
           >
-            <Text className="font-interbold text-2xl text-gray-900">Employment & Income</Text>
+            <Text className="font-interbold text-2xl text-gray-900">
+              Employment & Income
+            </Text>
             <Text className="font-inter text-gray-500 text-sm mt-1 mb-6">
               Help us understand your financial situation
             </Text>
@@ -124,7 +126,9 @@ export default function EmploymentInfoScreen() {
                 )}
               />
               {errors.occupation && (
-                <Text className="text-red-500 text-xs mt-1 font-inter">{errors.occupation.message}</Text>
+                <Text className="text-red-500 text-xs mt-1 font-inter">
+                  {errors.occupation.message}
+                </Text>
               )}
             </View>
 
@@ -145,7 +149,9 @@ export default function EmploymentInfoScreen() {
                 )}
               />
               {errors.employerName && (
-                <Text className="text-red-500 text-xs mt-1 font-inter">{errors.employerName.message}</Text>
+                <Text className="text-red-500 text-xs mt-1 font-inter">
+                  {errors.employerName.message}
+                </Text>
               )}
             </View>
 
@@ -172,7 +178,9 @@ export default function EmploymentInfoScreen() {
                 )}
               />
               {errors.annualGrossIncome && (
-                <Text className="text-red-500 text-xs mt-1 font-inter">{errors.annualGrossIncome.message}</Text>
+                <Text className="text-red-500 text-xs mt-1 font-inter">
+                  {errors.annualGrossIncome.message}
+                </Text>
               )}
             </View>
 
@@ -188,7 +196,8 @@ export default function EmploymentInfoScreen() {
                       placeholder="0"
                       value={field.value ? String(field.value) : ""}
                       onChangeText={(text) => {
-                        const numericValue = Number(text.replace(/,/g, "")) || 0;
+                        const numericValue =
+                          Number(text.replace(/,/g, "")) || 0;
                         field.onChange(numericValue);
                       }}
                       onBlur={field.onBlur}
@@ -199,7 +208,9 @@ export default function EmploymentInfoScreen() {
                   )}
                 />
                 {errors.savingsAccountBalance && (
-                  <Text className="text-red-500 text-xs mt-1 font-inter">{errors.savingsAccountBalance.message}</Text>
+                  <Text className="text-red-500 text-xs mt-1 font-inter">
+                    {errors.savingsAccountBalance.message}
+                  </Text>
                 )}
               </View>
               <View className="flex-1">
@@ -212,7 +223,8 @@ export default function EmploymentInfoScreen() {
                       placeholder="0"
                       value={field.value ? String(field.value) : ""}
                       onChangeText={(text) => {
-                        const numericValue = Number(text.replace(/,/g, "")) || 0;
+                        const numericValue =
+                          Number(text.replace(/,/g, "")) || 0;
                         field.onChange(numericValue);
                       }}
                       onBlur={field.onBlur}
@@ -223,7 +235,9 @@ export default function EmploymentInfoScreen() {
                   )}
                 />
                 {errors.checkingAccountBalance && (
-                  <Text className="text-red-500 text-xs mt-1 font-inter">{errors.checkingAccountBalance.message}</Text>
+                  <Text className="text-red-500 text-xs mt-1 font-inter">
+                    {errors.checkingAccountBalance.message}
+                  </Text>
                 )}
               </View>
             </View>
@@ -250,7 +264,9 @@ export default function EmploymentInfoScreen() {
                 )}
               />
               {errors.investments && (
-                <Text className="text-red-500 text-xs mt-1 font-inter">{errors.investments.message}</Text>
+                <Text className="text-red-500 text-xs mt-1 font-inter">
+                  {errors.investments.message}
+                </Text>
               )}
             </View>
 
@@ -266,7 +282,8 @@ export default function EmploymentInfoScreen() {
                       placeholder="0"
                       value={field.value ? String(field.value) : ""}
                       onChangeText={(text) => {
-                        const numericValue = Number(text.replace(/,/g, "")) || 0;
+                        const numericValue =
+                          Number(text.replace(/,/g, "")) || 0;
                         field.onChange(numericValue);
                       }}
                       onBlur={field.onBlur}
@@ -277,7 +294,9 @@ export default function EmploymentInfoScreen() {
                   )}
                 />
                 {errors.creditCardDebits && (
-                  <Text className="text-red-500 text-xs mt-1 font-inter">{errors.creditCardDebits.message}</Text>
+                  <Text className="text-red-500 text-xs mt-1 font-inter">
+                    {errors.creditCardDebits.message}
+                  </Text>
                 )}
               </View>
               <View className="flex-1">
@@ -290,7 +309,8 @@ export default function EmploymentInfoScreen() {
                       placeholder="0"
                       value={field.value ? String(field.value) : ""}
                       onChangeText={(text) => {
-                        const numericValue = Number(text.replace(/,/g, "")) || 0;
+                        const numericValue =
+                          Number(text.replace(/,/g, "")) || 0;
                         field.onChange(numericValue);
                       }}
                       onBlur={field.onBlur}
@@ -301,7 +321,9 @@ export default function EmploymentInfoScreen() {
                   )}
                 />
                 {errors.otherLoans && (
-                  <Text className="text-red-500 text-xs mt-1 font-inter">{errors.otherLoans.message}</Text>
+                  <Text className="text-red-500 text-xs mt-1 font-inter">
+                    {errors.otherLoans.message}
+                  </Text>
                 )}
               </View>
             </View>

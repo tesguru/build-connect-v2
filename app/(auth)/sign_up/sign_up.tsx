@@ -5,9 +5,7 @@ import PasswordInput from "@/components/Forms/PasswordInput";
 import KeyboardAvoidingLayout from "@/components/Layouts/KeyboardAvoidLayout";
 import AuthLink from "@/components/Miscallaneous/AuthLink";
 import { arrowleft } from "@/constants/icon";
-import {
-  BuildConnectImage
-} from "@/constants/image";
+import { BuildConnectImage } from "@/constants/image";
 import React, { useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
@@ -23,11 +21,11 @@ const SignUpScreen = () => {
   // Get params from Expo Router
   const { selectedRole } = useLocalSearchParams<{ selectedRole?: string }>();
   const router = useRouter();
-  
+
   const handleBack = () => {
-     router.push("/get_started");
+    router.push("/get_started");
   };
-  
+
   const {
     control,
     handleSubmit,
@@ -41,12 +39,13 @@ const SignUpScreen = () => {
       mobileNumber: "",
       password: "",
       termsAccepted: false,
-      role: selectedRole?.trim().toLowerCase() === "client" ? "client" : "builder",
+      role:
+        selectedRole?.trim().toLowerCase() === "client" ? "client" : "builder",
     },
   });
-  
+
   const [selectedCountry, setSelectedCountry] = useState(null);
-  const [formattedPhoneNumber, setFormattedPhoneNumber] = useState<string>('');
+  const [formattedPhoneNumber, setFormattedPhoneNumber] = useState<string>("");
   const { registerMutation } = useAuth();
 
   const onSubmit = (data: SignUpInput) => {
@@ -54,18 +53,15 @@ const SignUpScreen = () => {
       ...data,
       mobileNumber: formattedPhoneNumber || data.mobileNumber,
     };
-    
-    console.log('📱 Final submission data:', submitData);
-    
+
     registerMutation.mutate(submitData, {
       onSuccess: () => {
-     
         router.replace({
           pathname: "/sign_up/verify_email",
-          params: { 
-            email: data.email, 
-            role: data.role 
-          }
+          params: {
+            email: data.email,
+            role: data.role,
+          },
         });
       },
     });
@@ -92,7 +88,9 @@ const SignUpScreen = () => {
 
         <View className="mt-6">
           <Text className="font-work-sans text-black text-center pb-6 text-3xl">
-            {selectedRole === "client" ? "Sign up to hire builder" : "Sign up to find work"}
+            {selectedRole === "client"
+              ? "Sign up to hire builder"
+              : "Sign up to find work"}
           </Text>
 
           {/* <View className="pb-4">
@@ -103,8 +101,6 @@ const SignUpScreen = () => {
               onPress={() => {}}
             />
           </View> */}
-
-          
         </View>
 
         {/* <View className="mt-8 mb-4">
@@ -251,7 +247,7 @@ const SignUpScreen = () => {
               title="Create Account"
             />
           </View>
-          
+
           <View className="mt-8 mb-10">
             <AuthLink
               questionText="Already have an account? "

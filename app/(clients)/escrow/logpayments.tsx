@@ -91,7 +91,7 @@ const LogPayment = () => {
         const uploadResult = await uploadFile(
           data.proofDocument,
           "portfolio",
-          "Proof of Payment"
+          "Proof of Payment",
         );
         proofDocumentId = uploadResult.id;
       }
@@ -105,15 +105,16 @@ const LogPayment = () => {
         note: data.note || "",
       };
 
-      console.log("Final payload:", JSON.stringify(apiPayload, null, 2));
-
       createWalletFunding.mutate(apiPayload, {
         onSettled: () => setIsUploading(false),
         onError: (error: any) => {
           Toast.show({
             type: "error",
             text1: "Submission Failed",
-            text2: error?.response?.data?.message ?? error?.message ?? "Something went wrong.",
+            text2:
+              error?.response?.data?.message ??
+              error?.message ??
+              "Something went wrong.",
           });
         },
       });

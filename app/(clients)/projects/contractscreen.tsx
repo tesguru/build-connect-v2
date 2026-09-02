@@ -76,7 +76,6 @@ export default function ClientContractdetailsScreen() {
       setStartDate(ms[0]?.completionDate || "");
       setEndDate(ms[ms.length - 1]?.completionDate || "");
     } catch (err) {
-      console.error("Error parsing bidsData:", err);
       setContractData({});
       setMilestones([]);
     }
@@ -333,7 +332,7 @@ export default function ClientContractdetailsScreen() {
         {/* Action Buttons */}
         <View className="mx-4 gap-4">
           <GradientButton
-            loading={isLoadingSend}
+            loading={sendContractMutation.isPending}
             onPress={sendContract}
             title="Send Contract Via Email"
             disabled={isLoadingSend}

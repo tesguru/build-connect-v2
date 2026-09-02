@@ -160,8 +160,6 @@ const CreateProperty = () => {
         status: data.status,
       };
 
-      console.log("Final payload:", JSON.stringify(apiPayload, null, 2));
-
       createPropertyMutation.mutate(apiPayload, {
         onSettled: () => setIsUploading(false),
         onError: (error: any) => {

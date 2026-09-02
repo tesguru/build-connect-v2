@@ -3,7 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus, X } from "lucide-react-native";
 import React from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Toast from "react-native-toast-message";
 import { z } from "zod";
 
@@ -34,7 +40,9 @@ const updatePropertySchema = z.object({
   description: z.string().min(1, "Description is required"),
   keyFeatures: z.string().min(1, "Key features are required"),
   mediaFiles: z
-    .array(z.object({ file: z.any().nullable(), fileId: z.string().optional() }))
+    .array(
+      z.object({ file: z.any().nullable(), fileId: z.string().optional() }),
+    )
     .default([]),
   status: z.enum(["draft", "published"]).default("draft"),
 });
@@ -53,19 +61,22 @@ const UpdateProperty = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [isUploading, setIsUploading] = React.useState(false);
 
-  const { singleProperty, updatePropertyMutation, propertySuccess } = useProperty();
+  const { singleProperty, updatePropertyMutation, propertySuccess } =
+    useProperty();
 
-  const { data: propertyResponse, isLoading: isLoadingProperty } = singleProperty(id);
+  const { data: propertyResponse, isLoading: isLoadingProperty } =
+    singleProperty(id);
   const propertyData = propertyResponse?.data?.data;
 
   // ── Lookups ────────────────────────────────────────────────────────────────
-  const { data: propertyTypesResponse, isLoading: isLoadingPropertyTypes } = useQuery({
-    queryKey: ["propertyTypes"],
-    queryFn: async () => {
-      const response = await LookupService.getPropertyTypes();
-      return response.data.data.items;
-    },
-  });
+  const { data: propertyTypesResponse, isLoading: isLoadingPropertyTypes } =
+    useQuery({
+      queryKey: ["propertyTypes"],
+      queryFn: async () => {
+        const response = await LookupService.getPropertyTypes();
+        return response.data.data.items;
+      },
+    });
 
   const propertyTypesData =
     propertyTypesResponse?.map((item) => ({
@@ -117,8 +128,11 @@ const UpdateProperty = () => {
     }
   }, [propertyData, reset]);
 
-  const { fields: mediaFields, append: appendMedia, remove: removeMedia } =
-    useFieldArray({ control, name: "mediaFiles" });
+  const {
+    fields: mediaFields,
+    append: appendMedia,
+    remove: removeMedia,
+  } = useFieldArray({ control, name: "mediaFiles" });
 
   // ── Submit ─────────────────────────────────────────────────────────────────
   const onSubmit = async (data: UpdatePropertyInput) => {
@@ -126,14 +140,18 @@ const UpdateProperty = () => {
       setIsUploading(true);
 
       // ✅ Build parallel upload tasks
-      const mediaFileIds: (string | null)[] = new Array(data.mediaFiles.length).fill(null);
+      const mediaFileIds: (string | null)[] = new Array(
+        data.mediaFiles.length,
+      ).fill(null);
 
       const mediaTasks = data.mediaFiles.map((item, i) => {
         if (item.file) {
-          return uploadFile(item.file, "property_media", "Property Media").then((res) => {
-            mediaFileIds[i] = res.id;
-            setValue(`mediaFiles.${i}.fileId`, res.id);
-          });
+          return uploadFile(item.file, "property_media", "Property Media").then(
+            (res) => {
+              mediaFileIds[i] = res.id;
+              setValue(`mediaFiles.${i}.fileId`, res.id);
+            },
+          );
         }
         if (item.fileId) {
           mediaFileIds[i] = item.fileId;
@@ -179,8 +197,6 @@ const UpdateProperty = () => {
         status: data.status,
       };
 
-      console.log("Final payload:", JSON.stringify(apiPayload, null, 2));
-
       updatePropertyMutation.mutate(
         { id, ...apiPayload },
         {
@@ -189,10 +205,13 @@ const UpdateProperty = () => {
             Toast.show({
               type: "error",
               text1: "Update Failed",
-              text2: error?.response?.data?.message ?? error?.message ?? "Something went wrong.",
+              text2:
+                error?.response?.data?.message ??
+                error?.message ??
+                "Something went wrong.",
             });
           },
-        }
+        },
       );
     } catch (error: any) {
       setIsUploading(false);
@@ -224,7 +243,9 @@ const UpdateProperty = () => {
       <AppLayout screenName="Update Property">
         <View className="flex-1 justify-center items-center py-20">
           <ActivityIndicator size="large" color="#2463EB" />
-          <Text className="font-inter text-gray-500 mt-4">Loading property...</Text>
+          <Text className="font-inter text-gray-500 mt-4">
+            Loading property...
+          </Text>
         </View>
       </AppLayout>
     );
@@ -235,7 +256,6 @@ const UpdateProperty = () => {
     <AppLayout screenName="Update Property Listing">
       <ScrollView showsVerticalScrollIndicator={false}>
         <View className="px-3">
-
           {/* Title */}
           <View className="pt-3">
             <Controller
@@ -252,7 +272,9 @@ const UpdateProperty = () => {
               )}
             />
             {errors.title && (
-              <Text className="font-inter pt-1 text-red-500 text-sm">{errors.title.message}</Text>
+              <Text className="font-inter pt-1 text-red-500 text-sm">
+                {errors.title.message}
+              </Text>
             )}
           </View>
 
@@ -268,14 +290,18 @@ const UpdateProperty = () => {
                     placeholder="Enter Price"
                     value={field.value === 0 ? "" : String(field.value)}
                     hasError={!!errors.price}
-                    onChangeText={(text) => field.onChange(parseFloat(text) || 0)}
+                    onChangeText={(text) =>
+                      field.onChange(parseFloat(text) || 0)
+                    }
                     keyboardType="numeric"
                     formatNumber
                   />
                 )}
               />
               {errors.price && (
-                <Text className="font-inter pt-1 text-red-500 text-sm">{errors.price.message}</Text>
+                <Text className="font-inter pt-1 text-red-500 text-sm">
+                  {errors.price.message}
+                </Text>
               )}
             </View>
             <View className="flex-1 pt-3">
@@ -283,7 +309,9 @@ const UpdateProperty = () => {
                 name="propertyTypeId"
                 control={control}
                 label="Property Type"
-                placeholder={isLoadingPropertyTypes ? "Loading..." : "Select type"}
+                placeholder={
+                  isLoadingPropertyTypes ? "Loading..." : "Select type"
+                }
                 data={propertyTypesData}
                 error={errors.propertyTypeId?.message as string}
               />
@@ -306,7 +334,9 @@ const UpdateProperty = () => {
               )}
             />
             {errors.location && (
-              <Text className="font-inter pt-1 text-red-500 text-sm">{errors.location.message}</Text>
+              <Text className="font-inter pt-1 text-red-500 text-sm">
+                {errors.location.message}
+              </Text>
             )}
           </View>
 
@@ -389,19 +419,27 @@ const UpdateProperty = () => {
             <View className="flex-row justify-between items-center mb-4">
               <Text className="font-worksanssemibold text-xl">Media Files</Text>
               <Text className="font-inter text-gray-400 text-sm">
-                {mediaFields.length === 0 ? "Add images to replace existing" : "Optional"}
+                {mediaFields.length === 0
+                  ? "Add images to replace existing"
+                  : "Optional"}
               </Text>
             </View>
 
             {/* ✅ Show existing image count as info */}
-            {propertyData?.media && propertyData.media.length > 0 && mediaFields.length === 0 && (
-              <Text className="font-inter text-gray-500 text-sm mb-4">
-                {propertyData.media.length} existing image(s) on this property. Add new images below to replace them.
-              </Text>
-            )}
+            {propertyData?.media &&
+              propertyData.media.length > 0 &&
+              mediaFields.length === 0 && (
+                <Text className="font-inter text-gray-500 text-sm mb-4">
+                  {propertyData.media.length} existing image(s) on this
+                  property. Add new images below to replace them.
+                </Text>
+              )}
 
             {mediaFields.map((field, index) => (
-              <View key={field.id} className="border border-gray-300 rounded-xl p-4 mb-4">
+              <View
+                key={field.id}
+                className="border border-gray-300 rounded-xl p-4 mb-4"
+              >
                 <View className="flex-row justify-between items-center mb-4">
                   <Text className="font-inter text-lg">Image {index + 1}</Text>
                   <TouchableOpacity onPress={() => removeMedia(index)}>
@@ -423,7 +461,11 @@ const UpdateProperty = () => {
                       name={`mediaFiles.${index}.file`}
                       value={field.value}
                       onChange={field.onChange}
-                      error={errors.mediaFiles?.[index]?.file?.message as string | undefined}
+                      error={
+                        errors.mediaFiles?.[index]?.file?.message as
+                          | string
+                          | undefined
+                      }
                       maxSizeMB={10}
                     />
                   )}
@@ -449,7 +491,6 @@ const UpdateProperty = () => {
               disabled={isLoading}
             />
           </View>
-
         </View>
       </ScrollView>
     </AppLayout>

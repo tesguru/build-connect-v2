@@ -1,30 +1,30 @@
-import React, { useState } from 'react';
+import { arrowleft, SearchIcon } from "@/constants/icon";
+import { useLocalSearchParams, useRouter } from "expo-router"; // Add Expo Router imports
+import { Star } from "lucide-react-native";
+import React, { useState } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  TextInput,
   Image,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { arrowleft, SearchIcon } from '@/constants/icon';
-import { Star } from 'lucide-react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router'; // Add Expo Router imports
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const PROPERTY_TYPES = ['All', 'Duplex', 'Apartment', 'Bungalow'];
-const BED_ROOMS = ['1', '2', '3', '4', '5+'];
+const PROPERTY_TYPES = ["All", "Duplex", "Apartment", "Bungalow"];
+const BED_ROOMS = ["1", "2", "3", "4", "5+"];
 const STAR_RANGES = [5, 4, 3, 2, 1];
 
 const PropertyFilterScreen = () => {
   const router = useRouter(); // Replace navigation prop with router
   const params = useLocalSearchParams(); // Get params if needed
-  
-  const [propertyType, setPropertyType] = useState('All');
-  const [location, setLocation] = useState('');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
-  const [bedRooms, setBedRooms] = useState('4');
+
+  const [propertyType, setPropertyType] = useState("All");
+  const [location, setLocation] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [bedRooms, setBedRooms] = useState("4");
   const [starRange, setStarRange] = useState(5);
 
   const handleBack = () => {
@@ -32,17 +32,17 @@ const PropertyFilterScreen = () => {
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.replace('/(dashboard)'); // Adjust based on your structure
+      router.replace("/(dashboard)"); // Adjust based on your structure
       // Or router.push('/(tabs)/dashboard');
     }
   };
 
   const handleReset = () => {
-    setPropertyType('All');
-    setLocation('');
-    setMinPrice('');
-    setMaxPrice('');
-    setBedRooms('4');
+    setPropertyType("All");
+    setLocation("");
+    setMinPrice("");
+    setMaxPrice("");
+    setBedRooms("4");
     setStarRange(5);
   };
 
@@ -51,8 +51,8 @@ const PropertyFilterScreen = () => {
     const filters = {
       propertyType,
       location,
-      minPrice: minPrice ? parseInt(minPrice.replace(/\D/g, '')) : undefined,
-      maxPrice: maxPrice ? parseInt(maxPrice.replace(/\D/g, '')) : undefined,
+      minPrice: minPrice ? parseInt(minPrice.replace(/\D/g, "")) : undefined,
+      maxPrice: maxPrice ? parseInt(maxPrice.replace(/\D/g, "")) : undefined,
       bedRooms,
       starRange,
     };
@@ -64,25 +64,21 @@ const PropertyFilterScreen = () => {
     } else {
       // Method 2: Navigate to properties screen with params
       router.push({
-        pathname: '/(dashboard)/properties',
+        pathname: "/(dashboard)/properties",
         params: filters,
       });
     }
-
-    // TODO: You might want to use a state management solution
-    // (like Zustand, React Context, or AsyncStorage) to pass filter data
-    console.log('Applied filters:', filters);
   };
 
   const formatPriceDisplay = (value: string) => {
-    if (!value) return '';
-    const num = value.replace(/\D/g, '');
-    if (!num) return '';
-    return '#' + num.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    if (!value) return "";
+    const num = value.replace(/\D/g, "");
+    if (!num) return "";
+    return "#" + num.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
       {/* Header */}
       <View className="flex-row items-center justify-between px-4 pt-2 pb-4 border-b border-gray-100">
         <TouchableOpacity
@@ -97,14 +93,19 @@ const PropertyFilterScreen = () => {
             style={{ width: 24, height: 24 }}
           />
         </TouchableOpacity>
-        <Text className="font-inter text-xl font-bold text-gray-900">Filter</Text>
+        <Text className="font-inter text-xl font-bold text-gray-900">
+          Filter
+        </Text>
         <TouchableOpacity
           onPress={handleReset}
           activeOpacity={0.6}
           className="px-4 py-2.5 rounded-2xl"
-          style={{ backgroundColor: 'rgba(36, 99, 235, 0.2)' }}
+          style={{ backgroundColor: "rgba(36, 99, 235, 0.2)" }}
         >
-          <Text className="font-inter font-semibold text-sm" style={{ color: '#2463EB' }}>
+          <Text
+            className="font-inter font-semibold text-sm"
+            style={{ color: "#2463EB" }}
+          >
             Reset
           </Text>
         </TouchableOpacity>
@@ -133,12 +134,14 @@ const PropertyFilterScreen = () => {
                   onPress={() => setPropertyType(type)}
                   activeOpacity={0.7}
                   className={`px-5 py-3 rounded-full border ${
-                    selected ? 'bg-[#2463EB] border-[#2463EB]' : 'bg-white border-gray-200'
+                    selected
+                      ? "bg-[#2463EB] border-[#2463EB]"
+                      : "bg-white border-gray-200"
                   }`}
                 >
                   <Text
                     className={`font-inter font-medium text-sm ${
-                      selected ? 'text-white' : 'text-gray-800'
+                      selected ? "text-white" : "text-gray-800"
                     }`}
                   >
                     {type}
@@ -182,7 +185,7 @@ const PropertyFilterScreen = () => {
               </Text>
               <TextInput
                 value={formatPriceDisplay(minPrice)}
-                onChangeText={(t) => setMinPrice(t.replace(/\D/g, ''))}
+                onChangeText={(t) => setMinPrice(t.replace(/\D/g, ""))}
                 placeholder="#80,000,000"
                 placeholderTextColor="#9CA3AF"
                 keyboardType="numeric"
@@ -195,7 +198,7 @@ const PropertyFilterScreen = () => {
               </Text>
               <TextInput
                 value={formatPriceDisplay(maxPrice)}
-                onChangeText={(t) => setMaxPrice(t.replace(/\D/g, ''))}
+                onChangeText={(t) => setMaxPrice(t.replace(/\D/g, ""))}
                 placeholder="#120,000,000"
                 placeholderTextColor="#9CA3AF"
                 keyboardType="numeric"
@@ -223,12 +226,14 @@ const PropertyFilterScreen = () => {
                   onPress={() => setBedRooms(num)}
                   activeOpacity={0.7}
                   className={`px-5 py-3.5 rounded-full border min-w-[52px] items-center ${
-                    selected ? 'bg-[#2463EB] border-[#2463EB]' : 'bg-white border-gray-200'
+                    selected
+                      ? "bg-[#2463EB] border-[#2463EB]"
+                      : "bg-white border-gray-200"
                   }`}
                 >
                   <Text
                     className={`font-inter font-medium text-sm ${
-                      selected ? 'text-white' : 'text-gray-800'
+                      selected ? "text-white" : "text-gray-800"
                     }`}
                   >
                     {num}
@@ -257,17 +262,19 @@ const PropertyFilterScreen = () => {
                   onPress={() => setStarRange(stars)}
                   activeOpacity={0.7}
                   className={`flex-row items-center gap-1 px-4 py-3.5 rounded-full border ${
-                    selected ? 'bg-[#2463EB] border-[#2463EB]' : 'bg-white border-gray-200'
+                    selected
+                      ? "bg-[#2463EB] border-[#2463EB]"
+                      : "bg-white border-gray-200"
                   }`}
                 >
                   <Star
                     size={16}
-                    fill={selected ? '#fff' : '#EAB308'}
-                    color={selected ? '#fff' : '#EAB308'}
+                    fill={selected ? "#fff" : "#EAB308"}
+                    color={selected ? "#fff" : "#EAB308"}
                   />
                   <Text
                     className={`font-inter font-medium text-sm ${
-                      selected ? 'text-white' : 'text-gray-800'
+                      selected ? "text-white" : "text-gray-800"
                     }`}
                   >
                     {stars}★

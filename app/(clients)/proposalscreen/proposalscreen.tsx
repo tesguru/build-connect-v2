@@ -175,7 +175,7 @@ export default function Proposalscreen() {
   const bidStatus = (bid.status || "").toLowerCase();
 
   const totalAmount = milestones.reduce(
-    (sum: number, m: any) => sum + (m.paymentAmount || 0),
+    (sum: number, m: any) => sum + Number(m.paymentAmount || 0),
     0,
   );
 

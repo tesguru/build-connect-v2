@@ -62,6 +62,7 @@ export const ClientBidCard: React.FC<ClientBidCardProps> = memo(
       `${bid.contractor.firstName} ${bid.contractor.lastName}`.trim();
     const isAccepted = bid.status?.toLowerCase() === "accepted";
     const statusConfig = getStatusConfig(bid.status);
+    const formattedBidAmount = Number(bid.bidAmount).toLocaleString();
 
     const handleNavigateToProposal = useCallback(() => {
       router.push({
@@ -112,7 +113,7 @@ export const ClientBidCard: React.FC<ClientBidCardProps> = memo(
         <View className="flex-row justify-between items-center">
           <Text className="text-xl font-interbold text-green-600">
             {currencySymbol}
-            {bid.bidAmount.toLocaleString()}
+            {formattedBidAmount}
           </Text>
 
           {isAccepted ? (

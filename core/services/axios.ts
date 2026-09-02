@@ -57,15 +57,6 @@ async function refreshAuthToken() {
   const newRefreshToken: string | undefined =
     result?.data?.refreshToken ?? result?.refreshToken;
 
-  console.log("🔄 Refresh Token Response:", {
-    success: result?.success,
-    statusCode: result?.statusCode,
-    hasData: !!result?.data,
-    hasAuthToken: !!authToken,
-    hasRefreshToken: !!newRefreshToken,
-    shape: result?.data ? "nested" : "flat-or-missing",
-  });
-
   if (!authToken || !newRefreshToken) {
     throw new Error("Token refresh failed: Invalid response structure");
   }
@@ -131,17 +122,11 @@ axiosInstance.interceptors.request.use(async (config) => {
     }
   }
 
-  console.log({ url: config.url, method: config.method });
   return config;
 });
 
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log("✅ Response:", {
-      url: response.config.url,
-      status: response.status,
-      data: response.data,
-    });
     return response;
   },
   async (error) => {
@@ -151,12 +136,6 @@ axiosInstance.interceptors.response.use(
     // Debug: inspect what's actually in SecureStore whenever a request
     // errors out. Safe here because this outer function is async, unlike
     // isAuthEndpoint below which must stay sync.
-    console.log("🔎 Auth check:", {
-      url: originalRequest?.url,
-      status,
-      authToken: await SecureStore.getItemAsync("authToken"),
-      refreshToken: await SecureStore.getItemAsync("refreshToken"),
-    });
 
     const isAuthEndpoint = (url: string | undefined) =>
       url?.includes("/auth/login") ||
@@ -237,13 +216,7 @@ axiosInstance.interceptors.response.use(
     }
 
     if (error.response) {
-      console.log("❌ API Error:", {
-        url: originalRequest?.url,
-        status: error.response.status,
-        data: error.response.data,
-      });
     } else {
-      console.log("❌ Network/Timeout Error:", error.message);
     }
 
     return Promise.reject(error);
