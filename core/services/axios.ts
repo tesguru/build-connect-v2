@@ -5,7 +5,7 @@ import Toast from "react-native-toast-message";
 import { AuthService } from "./auth/AuthService";
 
 const axiosInstance = axios.create({
-  baseURL: "https://api-buildconnect.ivantage.africa/v1",
+  baseURL: "https://buildconnect-api.ivantage.africa/v1",
   timeout: 60000,
 });
 

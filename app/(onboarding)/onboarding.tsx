@@ -1,4 +1,12 @@
-import React, { useState, useRef } from "react";
+import { arrowleft, level1, level2, level3 } from "@/constants/icon";
+import {
+  OnboardingImage1,
+  OnboardingImage2,
+  OnboardingImage3,
+} from "@/constants/image";
+import { useOnboardingStore } from "@/store/OnboardingStore";
+import { useRouter } from "expo-router";
+import React, { useRef, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -7,10 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
 import AppIntroSlider from "react-native-app-intro-slider";
-import { OnboardingImage1, OnboardingImage2, OnboardingImage3 } from "@/constants/image";
-import { arrowleft, level1, level2, level3 } from "@/constants/icon";
 
 interface Slide {
   key: string;
@@ -25,6 +30,7 @@ const OnboardingScreen = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const sliderRef = useRef<AppIntroSlider>(null);
   const router = useRouter();
+  const { completeOnboarding } = useOnboardingStore();
 
   const slides = [
     {
@@ -45,15 +51,21 @@ const OnboardingScreen = () => {
     },
     {
       key: "s3",
-      title: `Let Find Your Dream Property`,
-      description: `Start your journey today and make your real estate dream`,
+      title: "Let Find Your Dream Property",
+      description: "Start your journey today and make your real estate dream",
       image: OnboardingImage3,
       icon: level3,
     },
   ];
 
-  const handleSkip = () => {
+  // Shared finishing action — saves the flag, then navigates
+  const finishOnboarding = async () => {
+    await completeOnboarding(); // ← saves hasCompletedOnboarding = true
     router.push("/get_started");
+  };
+
+  const handleSkip = () => {
+    finishOnboarding();
   };
 
   const handleBack = (currentIndex: number) => {
@@ -66,7 +78,7 @@ const OnboardingScreen = () => {
     if (currentIndex < slides.length - 1) {
       sliderRef.current?.goToSlide(currentIndex + 1);
     } else {
-      router.push("/get_started"); 
+      finishOnboarding();
     }
   };
 
@@ -75,8 +87,8 @@ const OnboardingScreen = () => {
       <View className="flex-row px-8 pt-4 justify-between">
         {index > 0 ? (
           <TouchableOpacity onPress={() => handleBack(index)}>
-            <Image 
-              source={arrowleft} 
+            <Image
+              source={arrowleft}
               resizeMode="contain"
               style={{ width: 30, height: 30 }}
             />
@@ -107,7 +119,7 @@ const OnboardingScreen = () => {
   );
 
   return (
-    <View className="flex-1 ">
+    <View className="flex-1">
       <AppIntroSlider
         ref={sliderRef}
         data={slides}
