@@ -265,7 +265,7 @@ const ProfileScreen = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        <View className="items-center pt-8 pb-8 bg-white mx-4 mt-4 rounded-2xl border border-gray-100 shadow-sm">
+        <View className="items-center pt-8 pb-8 bg-white mx-4 mt-4 rounded-2xl border border-gray-100">
           <View className="relative">
             <Image source={AvatarImage} className="w-24 h-24 rounded-full" />
             <View className="absolute bottom-0 right-0 w-6 h-6 bg-blue-500 rounded-full border-2 border-white items-center justify-center">
