@@ -28,8 +28,11 @@ const BidsTab = () => {
     },
   ];
 
+  const activeDisplayName =
+    tabs.find((tab) => tab.name === activeTab)?.displayName ?? activeTab;
+
   return (
-    <AppLayout screenName={activeTab}>
+    <AppLayout screenName={activeDisplayName}>
       <View>
         <ScrollView
           horizontal

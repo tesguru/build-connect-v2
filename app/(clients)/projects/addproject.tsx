@@ -1,4 +1,3 @@
-import { useRouter } from "expo-router";
 import React from "react";
 import { ScrollView, Switch, Text, View } from "react-native";
 
@@ -12,6 +11,7 @@ import SuccessScreen from "@/components/Notifications/SucessScreen";
 import { reportImage } from "@/constants/icon";
 import { useProjects } from "@/core/hooks/useProjects";
 import { uploadFile } from "@/core/utils/fileUpload";
+import { handleApiError } from "@/core/utils/handleapierror";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import Toast from "react-native-toast-message";
@@ -49,10 +49,10 @@ type CreateProjectFormValues = z.infer<typeof createProjectSchema>;
 // Component
 // ─────────────────────────────────────────────────────────────────────────────
 const AddProject = () => {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [showSuccess, setShowSuccess] = React.useState(false);
 
-  const { submitBidMutation, submitBidSuccess } = useProjects();
+  const { submitBidMutation } = useProjects();
 
   // ── Form - USING FIRST FILE'S SCHEMA ─────────────────────────────────────
   const {
@@ -155,42 +155,36 @@ const AddProject = () => {
 
       submitBidMutation.mutate(payload, {
         onSuccess: () => {
-          router.push("/sign_up/client/account_success");
+          setShowSuccess(true);
         },
         onSettled: () => {
           setIsSubmitting(false);
         },
         onError: (err: any) => {
-          const message =
-            err?.response?.data?.message ||
-            err?.message ||
-            "Something went wrong. Please try again.";
-          Toast.show({
-            type: "error",
-            text1: "Submission Failed",
-            text2: message,
+          handleApiError(err, "Something went wrong. Please try again.", {
+            title: "Submission Failed",
+            fallbackMessage: "Something went wrong. Please try again.",
           });
         },
       });
     } catch (err: any) {
       setIsSubmitting(false);
-      Toast.show({
-        type: "error",
-        text1: "Upload Failed",
-        text2: err?.message || "Failed to upload file. Please try again.",
+      handleApiError(err, "Failed to upload file. Please try again.", {
+        title: "Upload Failed",
+        fallbackMessage: "Failed to upload file. Please try again.",
       });
     }
   };
 
   const isLoading = isSubmitting || submitBidMutation.isPending;
 
-  if (submitBidSuccess) {
+  if (showSuccess) {
     return (
       <SuccessScreen
         title="Project Posted Successfully"
         message="Your project has been posted. Builders will start submitting bids soon"
         buttonTitle="View my Projects"
-        navigateTo="/projects/projects"
+        navigateTo="/(tab)/mybids"
       />
     );
   }

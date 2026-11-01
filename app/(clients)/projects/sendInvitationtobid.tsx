@@ -15,6 +15,7 @@ import SuccessScreen from "@/components/Notifications/SucessScreen";
 import { reportImage } from "@/constants/icon";
 import { useBids } from "@/core/hooks/UseBids";
 import { uploadFile } from "@/core/utils/fileUpload";
+import { handleApiError } from "@/core/utils/handleapierror";
 
 const invitationSchema = z.object({
   deadline: z.date({ required_error: "Bid submission deadline is required" }),
@@ -81,24 +82,18 @@ export default function SendInvitationToBid() {
             setIsSubmitting(false);
           },
           onError: (err: any) => {
-            const message =
-              err?.response?.data?.message ||
-              err?.message ||
-              "Something went wrong. Please try again.";
-            Toast.show({
-              type: "error",
-              text1: "Invitation Failed",
-              text2: message,
+            handleApiError(err, "Something went wrong. Please try again.", {
+              title: "Invitation Failed",
+              fallbackMessage: "Something went wrong. Please try again.",
             });
           },
         },
       );
     } catch (err: any) {
       setIsSubmitting(false);
-      Toast.show({
-        type: "error",
-        text1: "Upload Failed",
-        text2: err?.message || "Failed to upload file. Please try again.",
+      handleApiError(err, "Failed to upload file. Please try again.", {
+        title: "Upload Failed",
+        fallbackMessage: "Failed to upload file. Please try again.",
       });
     }
   };
@@ -111,7 +106,7 @@ export default function SendInvitationToBid() {
         title="Invitation Sent"
         message="Invitation Sent Successfully"
         buttonTitle="View more Projects"
-        navigateTo="/projects/projects"
+        navigateTo="/(tab)/mybids"
       />
     );
   }

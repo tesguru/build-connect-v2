@@ -2,19 +2,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   Building2,
   Calendar,
-  Download,
   FileText,
   MapPin,
   User,
 } from "lucide-react-native";
 import React, { useState } from "react";
-import {
-  Linking,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Linking, ScrollView, Text, View } from "react-native";
 
 import AppLayout from "@/components/Layouts/AppLayout";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
@@ -391,34 +384,6 @@ export default function ClientContractViewScreen() {
             </View>
           ))}
         </View>
-
-        {/* ── Download Contract PDF Card ── */}
-        {canDownload && (
-          <View className="mx-4 mb-4 bg-white rounded-xl p-4 flex-row items-center gap-3">
-            <View className="bg-blue-50 rounded-xl p-3">
-              <FileText size={22} color="#2463EB" />
-            </View>
-            <View className="flex-1">
-              <Text className="font-interbold text-base mb-1">
-                Download Contract PDF
-              </Text>
-              <Text
-                className="text-gray-400 text-xs font-inter"
-                numberOfLines={2}
-              >
-                {downloadFilename}
-              </Text>
-            </View>
-            <TouchableOpacity
-              onPress={handleDownload}
-              disabled={isSubmitting}
-              className="bg-blue-50 rounded-xl p-3"
-              activeOpacity={0.7}
-            >
-              <Download size={18} color="#2463EB" />
-            </TouchableOpacity>
-          </View>
-        )}
 
         {/* ── Footer Notice ── */}
         <View className="mx-4 mb-4 bg-gray-50 rounded-xl py-4 px-4">

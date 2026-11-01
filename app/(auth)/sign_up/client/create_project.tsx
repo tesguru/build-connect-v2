@@ -16,6 +16,7 @@ import PageHeader from "@/components/Miscallaneous/PageHeader";
 import { reportImage } from "@/constants/icon";
 import { useProjects } from "@/core/hooks/useProjects";
 import { uploadFile } from "@/core/utils/fileUpload";
+import { handleApiError } from "@/core/utils/handleapierror";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Schema - from first file
@@ -165,23 +166,17 @@ export default function CreateProjectScreen() {
           setIsSubmitting(false);
         },
         onError: (err: any) => {
-          const message =
-            err?.response?.data?.message ||
-            err?.message ||
-            "Something went wrong. Please try again.";
-          Toast.show({
-            type: "error",
-            text1: "Submission Failed",
-            text2: message,
+          handleApiError(err, "Something went wrong. Please try again.", {
+            title: "Submission Failed",
+            fallbackMessage: "Something went wrong. Please try again.",
           });
         },
       });
     } catch (error: any) {
       setIsSubmitting(false);
-      Toast.show({
-        type: "error",
-        text1: "Upload Failed",
-        text2: error?.message ?? "Failed to upload files. Please try again.",
+      handleApiError(error, "Failed to upload files. Please try again.", {
+        title: "Upload Failed",
+        fallbackMessage: "Failed to upload files. Please try again.",
       });
     }
   };

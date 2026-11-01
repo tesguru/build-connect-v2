@@ -3,8 +3,6 @@ import SuccessScreen from "@/components/Notifications/SucessScreen";
 import React from "react";
 import { View } from "react-native";
 
-
-
 export default function ProfileSuccessScreen() {
   return (
     <KeyboardAvoidingLayout androidExtraPadding={40}>
@@ -12,7 +10,7 @@ export default function ProfileSuccessScreen() {
         <SuccessScreen
           title="You're all set!"
           message="Congratulations! Your account has been created successfully."
-          navigateTo="Dashboard"
+          navigateTo="/(tab)"
         />
       </View>
     </KeyboardAvoidingLayout>

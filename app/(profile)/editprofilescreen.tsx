@@ -3,7 +3,14 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { z } from "zod";
 
 import GradientButton from "@/components/Buttons/GradientButton";
@@ -12,7 +19,6 @@ import AuthHeader from "@/components/Miscallaneous/PageHeader";
 import { AvatarImage } from "@/constants/image";
 import { useAuth } from "@/core/hooks/useAuth";
 import { useAuthStore } from "@/store/Authstore";
-
 
 const editProfileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -45,11 +51,14 @@ const EditProfileScreen = () => {
     },
   });
 
- 
   const handleChangePhoto = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
-      Alert.alert("Permission Required", "Permission to access camera roll is required!");
+      Alert.alert(
+        "Permission Required",
+        "Permission to access camera roll is required!",
+      );
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -75,7 +84,6 @@ const EditProfileScreen = () => {
     }
   };
 
-
   const onSubmit = (data: EditProfileInput) => {
     if (user) {
       updateUser({ ...user, ...data });
@@ -87,8 +95,8 @@ const EditProfileScreen = () => {
       };
 
       changeProfileMutation.mutate(apiPayload);
-    }   
-  };    
+    }
+  };
 
   return (
     <View className="flex-1 bg-white">
@@ -98,7 +106,6 @@ const EditProfileScreen = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-     
         <View className="items-center pt-6 pb-4">
           <View className="relative">
             <Image
@@ -116,15 +123,13 @@ const EditProfileScreen = () => {
               />
             </TouchableOpacity> */}
           </View>
-          <TouchableOpacity onPress={handleChangePhoto} className="mt-3">
-            <Text className="text-blue-600 font-interbold text-base">Change Photo</Text>
-          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleChangePhoto}
+            className="mt-3"
+          ></TouchableOpacity>
         </View>
 
-      
         <View className="px-4">
-
-     
           <View className="flex-row gap-4">
             <View className="flex-1">
               <Controller
@@ -171,7 +176,6 @@ const EditProfileScreen = () => {
             </View>
           </View>
 
-        
           <FormInput
             label="Email Address"
             value={user?.email ?? ""}
@@ -208,11 +212,16 @@ const EditProfileScreen = () => {
             onPress={handleChangePassword}
             className="bg-white rounded-xl p-4 mt-6 border border-gray-200 flex-row items-center justify-between"
           >
-            <Text className="font-interbold text-base text-gray-900">Change Password</Text>
+            <Text className="font-interbold text-base text-gray-900">
+              Change Password
+            </Text>
             <Image
               source={require("@/assets/icons/arrow-left.png")}
               className="w-5 h-5"
-              style={{ tintColor: "#9CA3AF", transform: [{ rotate: "180deg" }] }}
+              style={{
+                tintColor: "#9CA3AF",
+                transform: [{ rotate: "180deg" }],
+              }}
             />
           </TouchableOpacity>
 

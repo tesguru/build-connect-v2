@@ -4,6 +4,7 @@ import KeyboardAvoidingLayout from "@/components/Layouts/KeyboardAvoidLayout";
 import PageHeader from "@/components/Miscallaneous/PageHeader";
 import { reportImage } from "@/constants/icon";
 import { uploadFile } from "@/core/utils/fileUpload";
+import { handleApiError } from "@/core/utils/handleapierror";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -62,10 +63,9 @@ export default function VerifyIdentityScreen() {
       router.replace("/sign_up/client/create_project");
 
     } catch (error: any) {
-      Toast.show({
-        type: "error",
-        text1: "Upload Failed",
-        text2: error?.message ?? "Failed to upload documents. Please try again.",
+      handleApiError(error, "Failed to upload documents. Please try again.", {
+        title: "Upload Failed",
+        fallbackMessage: "Failed to upload documents. Please try again.",
       });
     } finally {
       setIsUploading(false);

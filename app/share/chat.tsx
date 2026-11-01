@@ -18,6 +18,10 @@ import { FileUploadResult } from "@/components/Forms/FileUploadComponent";
 import AppLayout from "@/components/Layouts/AppLayout";
 import { useProjects } from "@/core/hooks/useProjects";
 import { uploadFile } from "@/core/utils/fileUpload";
+import {
+  getApiErrorMessage,
+  handleApiError,
+} from "@/core/utils/handleapierror";
 
 // Types
 interface Message {
@@ -319,7 +323,12 @@ const ChatScreen = () => {
 
       if (failed.length > 0) {
         const reasons = failed
-          .map((r) => (r as PromiseRejectedResult).reason?.message)
+          .map((r) =>
+            getApiErrorMessage(
+              (r as PromiseRejectedResult).reason,
+              "Please retry.",
+            ),
+          )
           .filter(Boolean)
           .join(", ");
         Toast.show({
@@ -345,10 +354,9 @@ const ChatScreen = () => {
       setAttachments([]);
       refetch();
     } catch (err: any) {
-      Toast.show({
-        type: "error",
-        text1: "Failed to send",
-        text2: err?.message || "Something went wrong",
+      handleApiError(err, "Something went wrong.", {
+        title: "Failed to Send",
+        fallbackMessage: "Something went wrong while sending your message.",
       });
     } finally {
       setIsSending(false);

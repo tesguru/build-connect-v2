@@ -132,7 +132,7 @@ export default function ExpressionOfInterestCard({
           title: "Accept Interest",
           message: `Add a review note for ${displayName} (optional)`,
           confirmBg: "bg-blue-700",
-          confirmLabel: "Yes, Accept",
+          confirmLabel: "Accept",
           inputPlaceholder:
             "e.g. Great profile, looking forward to working together...",
         }
@@ -140,7 +140,7 @@ export default function ExpressionOfInterestCard({
           title: "Reject Interest",
           message: `Add a review note for ${displayName} (optional)`,
           confirmBg: "bg-red-600",
-          confirmLabel: "Yes, Reject",
+          confirmLabel: "Reject",
           inputPlaceholder: "e.g. Not the right fit for this project...",
         };
 

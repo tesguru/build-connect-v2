@@ -10,6 +10,7 @@ import { reportImage } from "@/constants/icon";
 import { useBids } from "@/core/hooks/UseBids";
 import { LookupService } from "@/core/services/lookup/LookupService";
 import { uploadFile } from "@/core/utils/fileUpload";
+import { handleApiError } from "@/core/utils/handleapierror";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
@@ -176,23 +177,17 @@ export default function SubmitBidScreen() {
           setIsSubmitting(false);
         },
         onError: (err: any) => {
-          const message =
-            err?.response?.data?.message ||
-            err?.message ||
-            "Failed to submit bid.";
-          Toast.show({
-            type: "error",
-            text1: "Submission Failed",
-            text2: message,
+          handleApiError(err, "Failed to submit bid.", {
+            title: "Submission Failed",
+            fallbackMessage: "Failed to submit bid.",
           });
         },
       });
     } catch (err: any) {
       setIsSubmitting(false);
-      Toast.show({
-        type: "error",
-        text1: "Submission Failed",
-        text2: err?.message || "Failed to submit bid.",
+      handleApiError(err, "Failed to submit bid.", {
+        title: "Submission Failed",
+        fallbackMessage: "Failed to submit bid.",
       });
     }
   };
@@ -205,8 +200,8 @@ export default function SubmitBidScreen() {
       <SuccessScreen
         title="Bid Submitted"
         message="Your bid has been submitted successfully. The client will review it shortly."
-        buttonTitle="Return home"
-        navigateTo="/(tab)"
+        buttonTitle="Return to Bids"
+        navigateTo="/(tab)/mybids"
       />
     );
   }

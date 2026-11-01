@@ -3,13 +3,13 @@ import KeyboardAvoidingLayout from "@/components/Layouts/KeyboardAvoidLayout";
 import { arrowleft } from "@/constants/icon";
 import { useAuth } from "@/core/hooks/useAuth";
 import { uploadFile } from "@/core/utils/fileUpload";
+import { handleApiError } from "@/core/utils/handleapierror";
 import { useBuilderProfileStore } from "@/store/BuilderProfileStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Image, Text, TouchableOpacity, View } from "react-native";
-import Toast from "react-native-toast-message";
 import { z } from "zod";
 import Portfolio from "../../../../components/PagesComponent/Auth/BuilderAuthcomponents/Portfolio";
 
@@ -108,10 +108,9 @@ export default function PortfolioScreen() {
 
     } catch (error: any) {
       setIsUploading(false);
-      Toast.show({
-        type: "error",
-        text1: "Upload Failed",
-        text2: error?.message ?? "Failed to upload files. Please try again.",
+      handleApiError(error, "Failed to upload files. Please try again.", {
+        title: "Upload Failed",
+        fallbackMessage: "Failed to upload files. Please try again.",
       });
     }
   };

@@ -3,10 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import Toast from "react-native-toast-message";
 import { AuthService } from "../services/auth/AuthService";
-
-function getErrorMessage(err: any, fallback: string) {
-  return err?.response?.data?.message || err?.message || fallback;
-}
+import { handleApiError, showApiErrorToast } from "../utils/handleapierror";
 
 export function useAuth() {
   const setAuthData = useAuthStore().setAuthData;
@@ -21,11 +18,10 @@ export function useAuth() {
         data?.statusCode !== 201 &&
         data?.success !== true
       ) {
-        Toast.show({
-          type: "error",
-          text1: "Login Failed",
-          text2: data?.message || "Invalid credentials. Please try again.",
-        });
+        showApiErrorToast(
+          "Login Failed",
+          data?.message || "Invalid credentials. Please try again.",
+        );
         return;
       }
 
@@ -40,7 +36,7 @@ export function useAuth() {
         });
         router.replace({
           pathname: "/sign_up/verify_email",
-          params: { email: user.email, role: user.role, fromLogin: true },
+          params: { email: user.email, role: user.role, fromLogin: "true" },
         });
         return;
       }
@@ -50,10 +46,9 @@ export function useAuth() {
       router.push("/(tab)");
     },
     onError: (err: any) => {
-      Toast.show({
-        type: "error",
-        text1: "Login Failed",
-        text2: getErrorMessage(err, "Invalid credentials. Please try again."),
+      handleApiError(err, "Login failed. Please try again.", {
+        title: "Login Failed",
+        fallbackMessage: "Invalid credentials. Please try again.",
       });
     },
   });
@@ -75,10 +70,9 @@ export function useAuth() {
       }
     },
     onError: (err: any) => {
-      Toast.show({
-        type: "error",
-        text1: "Submit Failed",
-        text2: getErrorMessage(err, "Failed to create Profile."),
+      handleApiError(err, "Failed to create profile.", {
+        title: "Submit Failed",
+        fallbackMessage: "Failed to create profile.",
       });
     },
   });
@@ -106,10 +100,9 @@ export function useAuth() {
     },
 
     onError: (err: any) => {
-      Toast.show({
-        type: "error",
-        text1: "Signup Failed",
-        text2: getErrorMessage(err, "Registration failed. Please try again."),
+      handleApiError(err, "Registration failed. Please try again.", {
+        title: "Signup Failed",
+        fallbackMessage: "Registration failed. Please try again.",
       });
     },
   });
@@ -130,10 +123,9 @@ export function useAuth() {
       }
     },
     onError: (err: any) => {
-      Toast.show({
-        type: "error",
-        text1: "An error occurred",
-        text2: err instanceof Error ? err.message : "Invalid email address",
+      handleApiError(err, "Invalid email address.", {
+        title: "Unable to Send Email",
+        fallbackMessage: "Invalid email address.",
       });
     },
   });
@@ -154,10 +146,9 @@ export function useAuth() {
       }
     },
     onError: (err: any) => {
-      Toast.show({
-        type: "error",
-        text1: "An error occurred",
-        text2: err instanceof Error ? err.message : "Failed to change password",
+      handleApiError(err, "Failed to change password.", {
+        title: "Password Change Failed",
+        fallbackMessage: "Failed to change password.",
       });
     },
   });
@@ -178,10 +169,9 @@ export function useAuth() {
       }
     },
     onError: (err: any) => {
-      Toast.show({
-        type: "error",
-        text1: "An error occurred",
-        text2: err instanceof Error ? err.message : "An error occurred",
+      handleApiError(err, "Failed to update profile.", {
+        title: "Profile Update Failed",
+        fallbackMessage: "Failed to update profile.",
       });
     },
   });
@@ -193,11 +183,10 @@ export function useAuth() {
       const data = response?.data;
       const status = response?.status;
       if (status !== 200) {
-        Toast.show({
-          type: "error",
-          text1: "Verification Failed",
-          text2: data?.message || "Invalid OTP. Please try again.",
-        });
+        showApiErrorToast(
+          "Verification Failed",
+          data?.message || "Invalid OTP. Please try again.",
+        );
         return;
       }
 
@@ -222,10 +211,9 @@ export function useAuth() {
       }
     },
     onError: (err: any) => {
-      Toast.show({
-        type: "error",
-        text1: "Verification Failed",
-        text2: getErrorMessage(err, "Verification failed. Please try again."),
+      handleApiError(err, "Verification failed. Please try again.", {
+        title: "Verification Failed",
+        fallbackMessage: "Verification failed. Please try again.",
       });
     },
   });
@@ -236,11 +224,10 @@ export function useAuth() {
       const data = response?.data;
       const status = response?.status;
       if (status !== 200) {
-        Toast.show({
-          type: "error",
-          text1: "Failed to send OTP",
-          text2: data?.message || "Failed to send OTP. Please try again.",
-        });
+        showApiErrorToast(
+          "Failed to Send OTP",
+          data?.message || "Failed to send OTP. Please try again.",
+        );
         return;
       }
       Toast.show({
@@ -250,13 +237,9 @@ export function useAuth() {
       });
     },
     onError: (err: any) => {
-      Toast.show({
-        type: "error",
-        text1: "Failed to send OTP",
-        text2:
-          err instanceof Error
-            ? err.message
-            : "Failed to send OTP. Please try again.",
+      handleApiError(err, "Failed to send OTP. Please try again.", {
+        title: "Failed to Send OTP",
+        fallbackMessage: "Failed to send OTP. Please try again.",
       });
     },
   });
@@ -270,11 +253,10 @@ export function useAuth() {
         data?.statusCode !== 201 &&
         data?.success !== true
       ) {
-        Toast.show({
-          type: "error",
-          text1: "Reset Failed",
-          text2: data?.message || "Failed to reset password. Please try again.",
-        });
+        showApiErrorToast(
+          "Reset Failed",
+          data?.message || "Failed to reset password. Please try again.",
+        );
         return;
       }
       Toast.show({
@@ -285,13 +267,9 @@ export function useAuth() {
       router.replace("/sign_in/signin");
     },
     onError: (err: any) => {
-      Toast.show({
-        type: "error",
-        text1: "Reset Failed",
-        text2: getErrorMessage(
-          err,
-          "Failed to reset password. Please try again.",
-        ),
+      handleApiError(err, "Failed to reset password. Please try again.", {
+        title: "Reset Failed",
+        fallbackMessage: "Failed to reset password. Please try again.",
       });
     },
   });
@@ -318,10 +296,9 @@ export function useAuth() {
       }
     },
     onError: (err: any) => {
-      Toast.show({
-        type: "error",
-        text1: "Submit Failed",
-        text2: getErrorMessage(err, "Failed to request for account deletion."),
+      handleApiError(err, "Account deletion request failed.", {
+        title: "Request Failed",
+        fallbackMessage: "Account deletion request failed.",
       });
     },
   });
@@ -348,10 +325,9 @@ export function useAuth() {
       }
     },
     onError: (err: any) => {
-      Toast.show({
-        type: "error",
-        text1: "Submit Failed",
-        text2: getErrorMessage(err, "Failed to request for account deletion."),
+      handleApiError(err, "Account deletion request failed.", {
+        title: "Request Failed",
+        fallbackMessage: "Account deletion request failed.",
       });
     },
   });

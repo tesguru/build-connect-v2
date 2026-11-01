@@ -3,6 +3,7 @@ import Toast from "react-native-toast-message";
 
 import { useState } from "react";
 import { meetingService } from "../services/meeting/meetingService";
+import { handleApiError } from "../utils/handleapierror";
 
 export type {
   Project,
@@ -42,14 +43,9 @@ export const useMeetings = () => {
       }
     },
     onError: (error: any) => {
-      const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to send Revision request.";
-      Toast.show({
-        type: "error",
-        text1: "Submit Failed",
-        text2: errorMessage,
+      handleApiError(error, "Failed to schedule meeting.", {
+        title: "Submit Failed",
+        fallbackMessage: "Failed to schedule meeting. Please try again.",
       });
     },
   });

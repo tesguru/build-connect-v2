@@ -106,7 +106,7 @@ const Home = () => {
                 icon={AddCircle}
                 title="Find Projects"
                 subtitle="Browse new projects"
-                onPress={() => router.push("/findprojects/findprojects")}
+                onPress={() => router.push("/(tab)/findprojects")}
               />
             </View>
             <View className="flex-1">
@@ -114,7 +114,7 @@ const Home = () => {
                 icon={Code}
                 title="My Bids"
                 subtitle="Manage Bid works"
-                onPress={() => router.push("/mybids/bids")}
+                onPress={() => router.push("/(tab)/mybids")}
               />
             </View>
           </View>

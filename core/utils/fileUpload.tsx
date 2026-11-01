@@ -69,13 +69,12 @@ export const uploadFile = async (
 
     return response.data.data;
   } catch (error: any) {
-   
-    const message: string =
-      error?.response?.data?.message ??
-      error?.response?.data?.data?.message ??
-      error?.message ??
-      "Failed to upload file. Please try again.";
-
-    throw new Error(message);
+    // Preserve API/network errors so the shared error handler can read the
+    // server message and react to 401s; only synthesize a message for the
+    // `success: false` envelope above.
+    if (error?.response || error?.request || error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Failed to upload file. Please try again.");
   }
 };

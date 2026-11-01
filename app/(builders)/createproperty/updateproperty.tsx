@@ -25,6 +25,10 @@ import { useProperty } from "@/core/hooks/useProperty";
 import { LookupService } from "@/core/services/lookup/LookupService";
 import { rooms } from "@/core/utils/data";
 import { uploadFile } from "@/core/utils/fileUpload";
+import {
+  getApiErrorMessage,
+  handleApiError,
+} from "@/core/utils/handleapierror";
 import { useLocalSearchParams } from "expo-router";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -165,7 +169,12 @@ const UpdateProperty = () => {
       const failed = allResults.filter((r) => r.status === "rejected");
       if (failed.length > 0) {
         const reasons = failed
-          .map((r) => (r as PromiseRejectedResult).reason?.message)
+          .map((r) =>
+            getApiErrorMessage(
+              (r as PromiseRejectedResult).reason,
+              "Please retry.",
+            ),
+          )
           .filter(Boolean)
           .join(", ");
         Toast.show({
@@ -202,23 +211,18 @@ const UpdateProperty = () => {
         {
           onSettled: () => setIsUploading(false),
           onError: (error: any) => {
-            Toast.show({
-              type: "error",
-              text1: "Update Failed",
-              text2:
-                error?.response?.data?.message ??
-                error?.message ??
-                "Something went wrong.",
+            handleApiError(error, "Something went wrong.", {
+              title: "Update Failed",
+              fallbackMessage: "Something went wrong.",
             });
           },
         },
       );
     } catch (error: any) {
       setIsUploading(false);
-      Toast.show({
-        type: "error",
-        text1: "Upload Failed",
-        text2: error?.message ?? "Failed to upload files. Please try again.",
+      handleApiError(error, "Failed to upload files. Please try again.", {
+        title: "Upload Failed",
+        fallbackMessage: "Failed to upload files. Please try again.",
       });
     }
   };
@@ -231,7 +235,7 @@ const UpdateProperty = () => {
       <SuccessScreen
         title="Successfully!"
         message="Your Property Has Been Updated Successfully"
-        navigateTo="/(tab)"
+        navigateTo="/(tab)/properties"
         buttonTitle="Return Home"
       />
     );

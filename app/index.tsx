@@ -12,7 +12,6 @@ export default function Index() {
   const { isLogin } = useAuthStore();
   const { hasCompleted, isLoaded, loadOnboardingStatus } = useOnboardingStore();
 
-  // 1. Load onboarding flag on app start
   useEffect(() => {
     loadOnboardingStatus();
   }, []);
@@ -25,7 +24,7 @@ export default function Index() {
       if (isLogin) {
         router.replace("/(tab)");
       } else if (hasCompleted) {
-        router.replace("/(auth)/sign_in/signin");
+        router.replace("/sign_in/signin");
       } else {
         router.replace("/(onboarding)/onboarding");
       }

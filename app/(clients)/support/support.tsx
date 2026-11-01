@@ -2,7 +2,15 @@ import GradientButton from "@/components/Buttons/GradientButton";
 import AppLayout from "@/components/Layouts/AppLayout";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Clipboard, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Clipboard,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface FAQItem {
   id: string;
@@ -11,29 +19,32 @@ interface FAQItem {
 }
 
 const SupportScreen = () => {
-
   const [expandedFAQ, setExpandedFAQ] = useState<string | null>(null);
-     const router = useRouter();
+  const router = useRouter();
   const faqItems: FAQItem[] = [
     {
       id: "1",
       question: "How do i invites builders?",
-      answer: "You can invite builders by going to your project and clicking the 'Invite Builder' button. Enter the builder's email address and send the invitation.",
+      answer:
+        "You can invite builders by going to your project and clicking the 'Invite Builder' button. Enter the builder's email address and send the invitation.",
     },
     {
       id: "2",
       question: "How do payments work?",
-      answer: "Payments are processed securely through our escrow system. Funds are held until project milestones are completed and verified.",
+      answer:
+        "Payments are processed securely through our escrow system. Funds are held until project milestones are completed and verified.",
     },
     {
       id: "3",
       question: "Can i modify project milestones after creation?",
-      answer: "Yes, you can modify project milestones by going to your project details and clicking 'Edit Milestones'. Note that changes require builder approval.",
+      answer:
+        "Yes, you can modify project milestones by going to your project details and clicking 'Edit Milestones'. Note that changes require builder approval.",
     },
     {
       id: "4",
-      question: "What iif I have a dispute with a builder?",
-      answer: "If you have a dispute, you can submit a support ticket or contact our support team directly. We'll help mediate and resolve the issue.",
+      question: "What if I have a dispute with a builder?",
+      answer:
+        "If you have a dispute, you can submit a support ticket or contact our support team directly. We'll help mediate and resolve the issue.",
     },
   ];
 
@@ -47,23 +58,20 @@ const SupportScreen = () => {
   };
 
   const handleSubmitTicket = () => {
-   router.push("/support/submitticket");
+    router.push("/support/submitticket");
   };
 
   const handleMyTickets = () => {
-     router.push("/support/myticket");
+    router.push("/support/myticket");
   };
 
   return (
-
     <AppLayout screenName="Help/Support" fullHeightContent>
-        <View className="flex-1 bg-white">
-     
+      <View className="flex-1 bg-white">
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 40 }}
         >
-        
           <View className="px-4 pt-6">
             <Text className="font-interbold text-lg mb-4 text-gray-900">
               FAQ/Help Center
@@ -145,8 +153,6 @@ const SupportScreen = () => {
         </ScrollView>
       </View>
     </AppLayout>
-    
-
   );
 };
 

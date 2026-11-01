@@ -5,6 +5,7 @@ import SuccessScreen from "@/components/Notifications/SucessScreen";
 import { reportImage } from "@/constants/icon";
 import { useProperty } from "@/core/hooks/useProperty";
 import { uploadFile } from "@/core/utils/fileUpload";
+import { handleApiError } from "@/core/utils/handleapierror";
 import { useMortgageStore } from "@/store/MortgageStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
@@ -129,19 +130,17 @@ export default function DocumentsScreen() {
       createMortgageMutation.mutate(apiPayload, {
         onSettled: () => setIsUploading(false),
         onError: (error: any) => {
-          Toast.show({
-            type: "error",
-            text1: "Submission Failed",
-            text2: error?.response?.data?.message ?? error?.message ?? "Something went wrong.",
+          handleApiError(error, "Something went wrong.", {
+            title: "Submission Failed",
+            fallbackMessage: "Something went wrong.",
           });
         },
       });
     } catch (error: any) {
       setIsUploading(false);
-      Toast.show({
-        type: "error",
-        text1: "Upload Failed",
-        text2: error?.message ?? "Failed to upload documents. Please try again.",
+      handleApiError(error, "Failed to upload documents. Please try again.", {
+        title: "Upload Failed",
+        fallbackMessage: "Failed to upload documents. Please try again.",
       });
     }
   }, [formData, createMortgageMutation]);

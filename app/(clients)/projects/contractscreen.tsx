@@ -16,6 +16,7 @@ import SuccessScreen from "@/components/Notifications/SucessScreen";
 import PrimaryButton from "@/components/Buttons/Button";
 import { MarkEmoji } from "@/constants/icon";
 import { useBids } from "@/core/hooks/UseBids";
+import { handleApiError } from "@/core/utils/handleapierror";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -127,11 +128,10 @@ export default function ClientContractdetailsScreen() {
         setIsSubmitting(false);
       },
       onError: (err: any) => {
-        const message =
-          err?.response?.data?.message ||
-          err?.message ||
-          "Failed to send contract. Please try again.";
-        showError(message);
+        handleApiError(err, "Failed to send contract. Please try again.", {
+          title: "Contract Failed",
+          fallbackMessage: "Failed to send contract. Please try again.",
+        });
       },
     });
   };
@@ -147,11 +147,10 @@ export default function ClientContractdetailsScreen() {
         setIsSubmitting(false);
       },
       onError: (err: any) => {
-        const message =
-          err?.response?.data?.message ||
-          err?.message ||
-          "Failed to sign contract. Please try again.";
-        showError(message);
+        handleApiError(err, "Failed to sign contract. Please try again.", {
+          title: "Signature Failed",
+          fallbackMessage: "Failed to sign contract. Please try again.",
+        });
       },
     });
   };

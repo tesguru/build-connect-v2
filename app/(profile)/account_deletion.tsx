@@ -1,5 +1,6 @@
 import AppLayout from "@/components/Layouts/AppLayout";
 import { useAuth } from "@/core/hooks/useAuth";
+import { handleApiError } from "@/core/utils/handleapierror";
 import {
     AlertTriangle,
     CalendarDays,
@@ -218,8 +219,11 @@ const AccountDeletionScreen = () => {
           setModalVisible(false);
           refetch();
         },
-        onError: () => {
-          Alert.alert("Something went wrong", "Please try again.");
+        onError: (err: any) => {
+          handleApiError(err, "Please try again.", {
+            title: "Something Went Wrong",
+            fallbackMessage: "Please try again.",
+          });
         },
       },
     );
@@ -236,8 +240,11 @@ const AccountDeletionScreen = () => {
           onPress: () => {
             cancelProfileDeleteMutation.mutate(undefined, {
               onSuccess: () => refetch(),
-              onError: () => {
-                Alert.alert("Something went wrong", "Please try again.");
+              onError: (err: any) => {
+                handleApiError(err, "Please try again.", {
+                  title: "Something Went Wrong",
+                  fallbackMessage: "Please try again.",
+                });
               },
             });
           },

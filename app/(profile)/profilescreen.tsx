@@ -1,6 +1,7 @@
 import AuthHeader from "@/components/Miscallaneous/PageHeader";
 import { AvatarImage } from "@/constants/image";
 import { useAuth } from "@/core/hooks/useAuth";
+import { endSession } from "@/core/services/session/sessionManager";
 import { useAuthStore } from "@/store/Authstore";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -132,7 +133,7 @@ const MenuItem = ({
 );
 
 const ProfileScreen = () => {
-  const { user, clearAuthData } = useAuthStore();
+  const { user } = useAuthStore();
   const router = useRouter();
   const { getUserProfile } = useAuth();
 
@@ -234,8 +235,7 @@ const ProfileScreen = () => {
           text: "Logout",
           style: "destructive",
           onPress: async () => {
-            await clearAuthData();
-            router.replace("/sign_in/signin");
+            await endSession("manual");
           },
         },
       ],

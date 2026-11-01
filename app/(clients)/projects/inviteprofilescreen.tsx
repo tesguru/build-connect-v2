@@ -3,16 +3,14 @@ import AppLayout from "@/components/Layouts/AppLayout";
 import SuccessScreen from "@/components/Notifications/SucessScreen";
 import { useBids } from "@/core/hooks/UseBids";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Award, ExternalLink, MapPin, ShieldCheck } from "lucide-react-native";
+import { MapPin } from "lucide-react-native";
 import React from "react";
 import {
   ActivityIndicator,
   Image,
-  Linking,
   ScrollView,
   Text,
-  TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 export default function ContractorProfileScreen() {
@@ -43,7 +41,7 @@ export default function ContractorProfileScreen() {
         title="Invitation Sent"
         message="Invitation Sent Successfully"
         buttonTitle="View more Projects"
-        navigateTo="projects/projects"
+        navigateTo="/(tab)/mybids"
         params={{ projectId, initialTab: "Bids" }}
       />
     );
@@ -175,7 +173,7 @@ export default function ContractorProfileScreen() {
           )}
         </View>
 
-        <View className="pt-4 bg-white m-4 rounded-xl">
+        {/* <View className="pt-4 bg-white m-4 rounded-xl">
           <View className="flex-row items-center justify-between px-4 pb-4">
             <Text className="font-interbold text-xl">
               Certifications & Licenses
@@ -265,7 +263,7 @@ export default function ContractorProfileScreen() {
               </Text>
             </View>
           )}
-        </View>
+        </View> */}
 
         {portfolio?.total > 0 && (
           <View className="pt-4 bg-white m-4 rounded-xl">

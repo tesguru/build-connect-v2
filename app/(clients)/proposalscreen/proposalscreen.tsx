@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { ChevronDown, ChevronUp } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -17,6 +18,7 @@ import AcceptProposalModal from "@/components/Miscallaneous/AcceptProposalModal"
 import DeclineProposalModal from "@/components/Miscallaneous/DeclineProposalModal";
 import { useBids } from "@/core/hooks/UseBids";
 import { useProjects } from "@/core/hooks/useProjects";
+import { handleApiError } from "@/core/utils/handleapierror";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 
 function formatCurrency(amount: number, symbol: string) {
@@ -38,42 +40,26 @@ function SectionCard({
   );
 }
 
-function BreakdownRow({
-  label,
-  amount,
-  currencySymbol,
-  isLast,
-}: {
-  label: string;
-  amount: number;
-  currencySymbol: string;
-  isLast: boolean;
-}) {
-  return (
-    <View
-      className={`flex-row justify-between py-3 ${isLast ? "" : "border-b border-gray-100"}`}
-    >
-      <Text className="text-[15px] text-gray-600 font-inter flex-1 mr-4">
-        {label}
-      </Text>
-      <Text className="text-[15px] font-interbold text-gray-900">
-        {formatCurrency(amount, currencySymbol)}
-      </Text>
-    </View>
-  );
-}
-
-function TimelineItem({
+function MilestoneItem({
   milestone,
+  description,
+  amount,
   date,
   index,
   isLast,
+  currencySymbol,
 }: {
   milestone: string;
+  description?: string;
+  amount: number;
   date: string;
   index: number;
   isLast: boolean;
+  currencySymbol: string;
 }) {
+  const [expanded, setExpanded] = useState(false);
+  const hasDescription = !!description?.trim();
+
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "";
     return new Date(dateStr).toLocaleDateString("en-GB", {
@@ -85,6 +71,7 @@ function TimelineItem({
 
   return (
     <View className="flex-row">
+      {/* Timeline rail */}
       <View className="items-center mr-4">
         <View className="w-9 h-9 rounded-full bg-blue-50 border-2 border-blue-200 items-center justify-center">
           <Text className="text-blue-600 font-interbold text-xs">
@@ -93,13 +80,55 @@ function TimelineItem({
         </View>
         {!isLast && <View className="w-0.5 flex-1 bg-gray-200 mt-1 mb-1" />}
       </View>
+
+      {/* Content */}
       <View className={`flex-1 ${isLast ? "" : "pb-5"}`}>
-        <Text className="text-[15px] font-interbold text-gray-900">
-          {milestone}
-        </Text>
-        <Text className="text-[13px] text-gray-500 font-inter mt-0.5">
-          {formatDate(date)}
-        </Text>
+        <TouchableOpacity
+          activeOpacity={hasDescription ? 0.7 : 1}
+          onPress={() => hasDescription && setExpanded((prev) => !prev)}
+          className="bg-gray-50 rounded-xl p-3"
+        >
+          <View className="flex-row justify-between items-start">
+            <View className="flex-1 mr-3">
+              <Text className="text-[15px] font-interbold text-gray-900">
+                {milestone}
+              </Text>
+              {!!date && (
+                <Text className="text-[13px] text-gray-500 font-inter mt-0.5">
+                  {formatDate(date)}
+                </Text>
+              )}
+            </View>
+
+            <View className="items-end">
+              <Text className="text-[15px] font-interbold text-green-600">
+                {formatCurrency(Number(amount || 0), currencySymbol)}
+              </Text>
+              {hasDescription &&
+                (expanded ? (
+                  <ChevronUp
+                    size={18}
+                    color="#6B7280"
+                    style={{ marginTop: 6 }}
+                  />
+                ) : (
+                  <ChevronDown
+                    size={18}
+                    color="#6B7280"
+                    style={{ marginTop: 6 }}
+                  />
+                ))}
+            </View>
+          </View>
+
+          {hasDescription && expanded && (
+            <View className="mt-3 pt-3 border-t border-gray-200">
+              <Text className="text-[13px] text-gray-600 font-inter leading-5">
+                {description}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -222,11 +251,10 @@ export default function Proposalscreen() {
         },
         onError: (err: any) => {
           setIsSubmitting(false);
-          const message =
-            err?.response?.data?.message ||
-            err?.message ||
-            "Failed to create contract";
-          showError(message);
+          handleApiError(err, "Failed to create contract.", {
+            title: "Contract Failed",
+            fallbackMessage: "Failed to create contract.",
+          });
         },
       },
     );
@@ -253,11 +281,10 @@ export default function Proposalscreen() {
         showError("Failed to accept bid. Please try again.");
       }
     } catch (err: any) {
-      const message =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Something went wrong. Please try again.";
-      showError(message);
+      handleApiError(err, "Something went wrong. Please try again.", {
+        title: "Action Failed",
+        fallbackMessage: "Something went wrong. Please try again.",
+      });
     } finally {
       setIsAccepting(false);
     }
@@ -271,11 +298,10 @@ export default function Proposalscreen() {
       setIsDeclineModalVisible(false);
       router.back();
     } catch (err: any) {
-      const message =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Failed to decline bid. Please try again.";
-      showError(message);
+      handleApiError(err, "Failed to decline bid. Please try again.", {
+        title: "Action Failed",
+        fallbackMessage: "Failed to decline bid. Please try again.",
+      });
     } finally {
       setIsDeclining(false);
     }
@@ -362,20 +388,25 @@ export default function Proposalscreen() {
                 )}
               </View>
 
-              {/* Project Milestones Breakdown */}
+              {/* Project Breakdown (milestones + timeline combined) */}
               <SectionCard title="Project Breakdown">
                 {milestones.length > 0 ? (
                   <>
                     {milestones.map((item: any, index: number) => (
-                      <BreakdownRow
+                      <MilestoneItem
                         key={index}
-                        label={item.milestoneName}
+                        milestone={item.milestoneName}
+                        description={
+                          item.description ?? item.milestoneDescription
+                        }
                         amount={item.paymentAmount}
-                        currencySymbol={currencySymbol}
+                        date={item.completionDate}
+                        index={index}
                         isLast={index === milestones.length - 1}
+                        currencySymbol={currencySymbol}
                       />
                     ))}
-                    <View className="flex-row justify-between pt-4 mt-1 border-t-2 border-gray-900">
+                    <View className="flex-row justify-between pt-4 mt-4 border-t-2 border-gray-900">
                       <Text className="text-base font-interbold text-gray-900">
                         Total
                       </Text>
@@ -387,25 +418,6 @@ export default function Proposalscreen() {
                 ) : (
                   <Text className="text-sm text-gray-400 text-center py-4 font-inter">
                     No breakdown available
-                  </Text>
-                )}
-              </SectionCard>
-
-              {/* Project Timeline */}
-              <SectionCard title="Project Timeline">
-                {milestones.length > 0 ? (
-                  milestones.map((item: any, index: number) => (
-                    <TimelineItem
-                      key={index}
-                      milestone={item.milestoneName}
-                      date={item.completionDate}
-                      index={index}
-                      isLast={index === milestones.length - 1}
-                    />
-                  ))
-                ) : (
-                  <Text className="text-sm text-gray-400 text-center py-4 font-inter">
-                    No timeline available
                   </Text>
                 )}
               </SectionCard>

@@ -3,6 +3,7 @@ import DropdownField from "@/components/Forms/DropDown";
 import FormInput from "@/components/Forms/Formnput";
 import AppLayout from "@/components/Layouts/AppLayout";
 import { LookupService } from "@/core/services/lookup/LookupService";
+import { handleApiError } from "@/core/utils/handleapierror";
 
 import { useMortgageStore } from "@/store/MortgageStore";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,7 +46,12 @@ export default function EmploymentInfoScreen() {
             value: item.id,
           })),
         );
-      } catch (error) {}
+      } catch (error) {
+        handleApiError(error, "Employment status options could not be loaded.", {
+          title: "Unable to Load Options",
+          fallbackMessage: "Employment status options could not be loaded.",
+        });
+      }
     };
     fetchEmploymentStatus();
   }, []);

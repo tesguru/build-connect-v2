@@ -9,12 +9,12 @@ import colors from "@/constants/colors";
 import { reportImage } from "@/constants/icon";
 import { useSupport } from "@/core/hooks/useSupport";
 import { uploadFile } from "@/core/utils/fileUpload";
+import { handleApiError } from "@/core/utils/handleapierror";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, X } from "lucide-react-native";
 import React from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { Text, TouchableOpacity, View } from "react-native";
-import Toast from "react-native-toast-message";
 import { z } from "zod";
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
@@ -77,7 +77,11 @@ const SubmitTicket = () => {
         if (!item.file) continue;
 
         // No conversion needed — FileUploadComponent already returns FileUploadResult
-        const uploadResult = await uploadFile(item.file, "work_showcase", "Support Attachment");
+        const uploadResult = await uploadFile(
+          item.file,
+          "work_showcase",
+          "Support Attachment",
+        );
         attachmentFileIds.push(uploadResult.id); // ✅ uploadFile returns UploadedFile directly
       }
 
@@ -94,10 +98,9 @@ const SubmitTicket = () => {
       submitTicketMutation.mutate(apiPayload);
     } catch (error: any) {
       setIsUploading(false);
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: error?.message || "Failed to submit ticket",
+      handleApiError(error, "Failed to submit ticket.", {
+        title: "Submission Failed",
+        fallbackMessage: "Failed to submit ticket.",
       });
     }
   };
@@ -108,7 +111,7 @@ const SubmitTicket = () => {
         title="Ticket Submitted Successfully"
         message="Your support ticket has been submitted. Our team will get back to you shortly."
         buttonTitle="Back to Dashboard"
-        navigateTo={"/(tab)"}
+        navigateTo={"/(tab)/support"}
       />
     );
   }
@@ -122,8 +125,6 @@ const SubmitTicket = () => {
           flex: 1,
         }}
       >
-     
-
         {/* Subject */}
         <View className="pt-3">
           <Controller
@@ -213,13 +214,14 @@ const SubmitTicket = () => {
             >
               {/* Header row with remove button */}
               <View className="flex-row justify-between items-center mb-4">
-                <Text className="font-inter text-xl">Attachment {index + 1}</Text>
+                <Text className="font-inter text-xl">
+                  Attachment {index + 1}
+                </Text>
                 <TouchableOpacity onPress={() => remove(index)}>
                   <X size={24} color="#6b7280" />
                 </TouchableOpacity>
               </View>
 
-           
               <FileUploadComponent
                 control={control}
                 name={`attachments.${index}.file`}

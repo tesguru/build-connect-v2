@@ -1,8 +1,9 @@
-import { Home, House, Question, Vector } from '@/constants/icon';
-import { useAuthStore } from '@/store/Authstore';
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Image, View } from 'react-native';
+import { Home, House, Question, Vector } from "@/constants/icon";
+import { useAuthStore } from "@/store/Authstore";
+import { Tabs } from "expo-router";
+import React from "react";
+import { Image, View } from "react-native";
+
 
 const TabIcon = ({ focused, icon }: { focused: boolean; icon: any }) => (
   <View style={{ alignItems: "center", justifyContent: "center", height: 32 }}>
@@ -35,18 +36,19 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      backBehavior="history"
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#007bff',
-        tabBarInactiveTintColor: '#888',
+        tabBarActiveTintColor: "#007bff",
+        tabBarInactiveTintColor: "#888",
         tabBarLabelStyle: {
           fontSize: 11,
-          fontFamily: 'Inter_400Regular',
+          fontFamily: "Inter_400Regular",
           marginTop: 4,
           marginBottom: 4,
         },
         tabBarStyle: {
-          backgroundColor: '#fff',
+          backgroundColor: "#fff",
           height: 70,
           paddingBottom: 5,
           paddingTop: 2,
@@ -59,7 +61,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon={Home} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} icon={Home} />
+          ),
           tabBarLabel: "Home",
         }}
       />
@@ -67,15 +71,19 @@ export default function TabLayout() {
       <Tabs.Screen
         name="mybids"
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon={Vector} />,
-           tabBarLabel: isClient ? "Projects" : "My bids",
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} icon={Vector} />
+          ),
+          tabBarLabel: isClient ? "Projects" : "My bids",
         }}
       />
 
       <Tabs.Screen
         name="properties"
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon={House} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} icon={House} />
+          ),
           tabBarLabel: "Properties",
         }}
       />
@@ -83,10 +91,15 @@ export default function TabLayout() {
       <Tabs.Screen
         name="support"
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon={Question} />,
-          tabBarLabel: "Support" 
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} icon={Question} />
+          ),
+          tabBarLabel: "Support",
         }}
       />
+
+      {/* Reachable from Home, tab bar stays visible, but no tab button */}
+      <Tabs.Screen name="findprojects" options={{ href: null }} />
     </Tabs>
   );
 }

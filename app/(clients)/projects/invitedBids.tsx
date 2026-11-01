@@ -2,6 +2,7 @@ import InvitationCard from '@/components/Cards/InvitationCard'
 import AppLayout from '@/components/Layouts/AppLayout'
 import EmptyScreenComponent from '@/components/Miscallaneous/EmptyScreenComponent'
 import { useBids } from '@/core/hooks/UseBids'
+import { getApiErrorMessage } from '@/core/utils/handleapierror'
 import { useRouter } from 'expo-router'
 import React, { useMemo, useState } from 'react'
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'
@@ -189,7 +190,7 @@ const ClientBidInvitations = ({ projectId }: Props) => {
             <View className="flex-1 justify-center items-center p-4">
               <View className="bg-red-50 rounded-xl p-6 items-center max-w-md">
                 <Text className="text-red-500 text-center mb-4 font-inter">
-                  {error.message || 'Error loading invitations. Please try again.'}
+                  {getApiErrorMessage(error, 'Error loading invitations. Please try again.')}
                 </Text>
                 <TouchableOpacity
                   className="bg-blue-600 px-6 py-3 rounded-lg"

@@ -116,8 +116,8 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
       <SuccessScreen
         title="Successfully!"
         message="Congratulations! Your Interest Has Been Expressed Successfully"
-        navigateTo="/(builders)/findprojects/findprojects"
-        buttonTitle="Return to projects"
+        navigateTo="/(tabs)/findprojects"
+        buttonTitle="Return to projects Marketplace"
       />
     );
   }

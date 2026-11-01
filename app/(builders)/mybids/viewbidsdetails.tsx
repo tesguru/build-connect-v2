@@ -2,6 +2,7 @@ import AppLayout from "@/components/Layouts/AppLayout";
 import { useBids } from "@/core/hooks/UseBids";
 import { useCurrencyStore } from "@/store/useCurrencyStore";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { ChevronDown, ChevronUp } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -25,45 +26,26 @@ const SectionCard = ({
   </View>
 );
 
-const BreakdownRow = ({
-  label,
-  amount,
-  isLast,
-  currencySymbol,
-}: {
-  label: string;
-  amount: string;
-  isLast?: boolean;
-  currencySymbol: string;
-}) => {
-  const formatAmount = (value: number) =>
-    `${currencySymbol}${value.toLocaleString()}`;
-
-  return (
-    <View
-      className={`flex-row justify-between py-3 ${!isLast ? "border-b border-gray-100" : ""}`}
-    >
-      <Text className="text-[15px] text-gray-600 font-inter flex-1 mr-4">
-        {label}
-      </Text>
-      <Text className="text-[15px] font-interbold text-gray-900">
-        {formatAmount(parseFloat(amount || "0"))}
-      </Text>
-    </View>
-  );
-};
-
-const TimelineItem = ({
+const MilestoneItem = ({
   milestone,
+  description,
+  amount,
   date,
   index,
   isLast,
+  currencySymbol,
 }: {
   milestone: string;
+  description?: string;
+  amount: string;
   date: string;
   index: number;
   isLast: boolean;
+  currencySymbol: string;
 }) => {
+  const [expanded, setExpanded] = useState(false);
+  const hasDescription = !!description?.trim();
+
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "";
     return new Date(dateStr).toLocaleDateString("en-GB", {
@@ -73,8 +55,13 @@ const TimelineItem = ({
     });
   };
 
+  const formattedAmount = `${currencySymbol}${parseFloat(
+    amount || "0",
+  ).toLocaleString()}`;
+
   return (
     <View className="flex-row">
+      {/* Timeline rail */}
       <View className="items-center mr-4">
         <View className="w-9 h-9 rounded-full bg-blue-50 border-2 border-blue-200 items-center justify-center">
           <Text className="text-blue-600 font-interbold text-xs">
@@ -83,13 +70,55 @@ const TimelineItem = ({
         </View>
         {!isLast && <View className="w-0.5 flex-1 bg-gray-200 mt-1 mb-1" />}
       </View>
+
+      {/* Content */}
       <View className={`flex-1 ${!isLast ? "pb-5" : ""}`}>
-        <Text className="text-[15px] font-interbold text-gray-900">
-          {milestone}
-        </Text>
-        <Text className="text-[13px] text-gray-500 font-inter mt-0.5">
-          {formatDate(date)}
-        </Text>
+        <TouchableOpacity
+          activeOpacity={hasDescription ? 0.7 : 1}
+          onPress={() => hasDescription && setExpanded((prev) => !prev)}
+          className="bg-gray-50 rounded-xl p-3"
+        >
+          <View className="flex-row justify-between items-start">
+            <View className="flex-1 mr-3">
+              <Text className="text-[15px] font-interbold text-gray-900">
+                {milestone}
+              </Text>
+              {!!date && (
+                <Text className="text-[13px] text-gray-500 font-inter mt-0.5">
+                  {formatDate(date)}
+                </Text>
+              )}
+            </View>
+
+            <View className="items-end">
+              <Text className="text-[15px] font-interbold text-green-600">
+                {formattedAmount}
+              </Text>
+              {hasDescription &&
+                (expanded ? (
+                  <ChevronUp
+                    size={18}
+                    color="#6B7280"
+                    style={{ marginTop: 6 }}
+                  />
+                ) : (
+                  <ChevronDown
+                    size={18}
+                    color="#6B7280"
+                    style={{ marginTop: 6 }}
+                  />
+                ))}
+            </View>
+          </View>
+
+          {hasDescription && expanded && (
+            <View className="mt-3 pt-3 border-t border-gray-200">
+              <Text className="text-[13px] text-gray-600 font-inter leading-5">
+                {description}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -233,20 +262,23 @@ const ViewBidDetails = () => {
           )}
         </View>
 
-        {/* ── Project Breakdown ── */}
+        {/* ── Project Breakdown (breakdown + timeline combined) ── */}
         <SectionCard title="Project Breakdown">
           {milestones.length > 0 ? (
             <>
               {milestones.map((item: any, index: number) => (
-                <BreakdownRow
+                <MilestoneItem
                   key={index}
-                  label={item.milestoneName}
+                  milestone={item.milestoneName}
+                  description={item.description ?? item.milestoneDescription}
                   amount={item.paymentAmount}
+                  date={item.completionDate}
+                  index={index}
                   isLast={index === milestones.length - 1}
                   currencySymbol={currencySymbol || "$"}
                 />
               ))}
-              <View className="flex-row justify-between pt-4 mt-1 border-t-2 border-gray-900">
+              <View className="flex-row justify-between pt-4 mt-4 border-t-2 border-gray-900">
                 <Text className="text-base font-interbold text-gray-900">
                   Total
                 </Text>
@@ -259,25 +291,6 @@ const ViewBidDetails = () => {
           ) : (
             <Text className="text-sm text-gray-400 text-center py-4 font-inter">
               No breakdown available
-            </Text>
-          )}
-        </SectionCard>
-
-        {/* ── Project Timeline ── */}
-        <SectionCard title="Project Timeline">
-          {milestones.length > 0 ? (
-            milestones.map((item: any, index: number) => (
-              <TimelineItem
-                key={index}
-                milestone={item.milestoneName}
-                date={item.completionDate}
-                index={index}
-                isLast={index === milestones.length - 1}
-              />
-            ))
-          ) : (
-            <Text className="text-sm text-gray-400 text-center py-4 font-inter">
-              No timeline available
             </Text>
           )}
         </SectionCard>

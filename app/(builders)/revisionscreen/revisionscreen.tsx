@@ -15,6 +15,7 @@ import {
 } from "@/core/schemas/dashboardschema";
 import { LookupService } from "@/core/services/lookup/LookupService";
 import { uploadFile } from "@/core/utils/fileUpload";
+import { handleApiError } from "@/core/utils/handleapierror";
 import { useCurrencyStore } from "@/store/useCurrencyStore"; // ✅ Added
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
@@ -150,23 +151,27 @@ const Revisionscreen = () => {
       builderBidRevisionMutation.mutate(apiPayload, {
         onSettled: () => setIsUploading(false),
         onError: (error: any) => {
-          const message =
-            error?.response?.data?.data?.message ??
-            error?.response?.data?.message ??
-            error?.message ??
-            "Failed to submit revision.";
-          Toast.show({
-            type: "error",
-            text1: "Revision Failed",
-            text2: message,
-          });
+          const { message } = handleApiError(
+            error,
+            "Failed to submit revision.",
+            {
+              title: "Revision Failed",
+              fallbackMessage: "Failed to submit revision.",
+            },
+          );
           setPortfolioReferenceError(message);
         },
       });
     } catch (error: any) {
       setIsUploading(false);
-      const message = error?.message ?? "Failed to submit revision.";
-      Toast.show({ type: "error", text1: "Revision Failed", text2: message });
+      const { message } = handleApiError(
+        error,
+        "Failed to submit revision.",
+        {
+          title: "Revision Failed",
+          fallbackMessage: "Failed to submit revision.",
+        },
+      );
       setPortfolioReferenceError(message);
     }
   };
@@ -179,8 +184,8 @@ const Revisionscreen = () => {
       <SuccessScreen
         title="Request Revision Sent"
         message="Your revision request has been sent to the client. They have been notified and will review your request shortly."
-        buttonTitle="Return home"
-        navigateTo="/(tab)"
+        buttonTitle="Return Bids"
+        navigateTo="/(tab)/mybids"
         params={{ bidId }}
       />
     );

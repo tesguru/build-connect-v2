@@ -4,9 +4,7 @@ import PasswordInput from "@/components/Forms/PasswordInput";
 import KeyboardAvoidingLayout from "@/components/Layouts/KeyboardAvoidLayout";
 import AuthLink from "@/components/Miscallaneous/AuthLink";
 import { arrowleft } from "@/constants/icon";
-import {
-  BuildConnectImage
-} from "@/constants/image";
+import { BuildConnectImage } from "@/constants/image";
 import { useAuth } from "@/core/hooks/useAuth";
 import { LoginInput, loginSchema } from "@/core/schemas/authschema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,11 +13,8 @@ import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
-
-
-
 const SignInScreen = () => {
-   const router = useRouter();
+  const router = useRouter();
   const handleBack = () => {
     router.push("/get_started");
   };
@@ -82,7 +77,10 @@ const SignInScreen = () => {
             />
 
             {errors.email && (
-              <Text className="font-inter text-xs  pt-2" style={{ color: "red" }}>
+              <Text
+                className="font-inter text-xs  pt-2"
+                style={{ color: "red" }}
+              >
                 {errors.email.message}
               </Text>
             )}
@@ -104,17 +102,24 @@ const SignInScreen = () => {
             />
             <View className="flex-row justify-between items-start">
               {errors.password && (
-                <Text className="text-red-500 font-inter pt-2 text-xs flex-1">{errors.password.message}</Text>
+                <Text className="text-red-500 font-inter pt-2 text-xs flex-1">
+                  {errors.password.message}
+                </Text>
               )}
 
               <TouchableOpacity onPress={forgotPassword} className="pt-2">
-                <Text className="text-primary font-inter text-sm">Forgot password?</Text>
+                <Text className="text-primary font-inter text-sm">
+                  Forgot password?
+                </Text>
               </TouchableOpacity>
             </View>
-
           </View>
           <View className="pt-8">
-            <GradientButton loading={loginMutation.isPending} title="Continue" onPress={handleSubmit(onSubmit)} />
+            <GradientButton
+              loading={loginMutation.isPending}
+              title="Continue"
+              onPress={handleSubmit(onSubmit)}
+            />
           </View>
 
           {/* <View>
@@ -139,9 +144,9 @@ const SignInScreen = () => {
             </View> */}
             <View className="mt-12">
               <AuthLink
-                questionText="Dont have an account? "
-                linkText="Signup"
-                onPress={() => router.push("/sign_up/sign_up")}
+                questionText="Don't have an account? "
+                linkText="Get Started"
+                onPress={() => router.push("/get_started")}
                 className="justify-center "
                 questionClassName="text-black text-md"
                 linkClassName="text-primary "

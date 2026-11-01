@@ -9,6 +9,7 @@ import colors from "@/constants/colors";
 import { reportImage } from "@/constants/icon";
 import { useEscrow } from "@/core/hooks/useEscrow";
 import { uploadFile } from "@/core/utils/fileUpload";
+import { handleApiError } from "@/core/utils/handleapierror";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -108,22 +109,17 @@ const LogPayment = () => {
       createWalletFunding.mutate(apiPayload, {
         onSettled: () => setIsUploading(false),
         onError: (error: any) => {
-          Toast.show({
-            type: "error",
-            text1: "Submission Failed",
-            text2:
-              error?.response?.data?.message ??
-              error?.message ??
-              "Something went wrong.",
+          handleApiError(error, "Something went wrong.", {
+            title: "Submission Failed",
+            fallbackMessage: "Something went wrong.",
           });
         },
       });
     } catch (error: any) {
       setIsUploading(false);
-      Toast.show({
-        type: "error",
-        text1: "Upload Failed",
-        text2: error?.message ?? "Failed to process payment. Please try again.",
+      handleApiError(error, "Failed to process payment. Please try again.", {
+        title: "Upload Failed",
+        fallbackMessage: "Failed to process payment. Please try again.",
       });
     }
   };
