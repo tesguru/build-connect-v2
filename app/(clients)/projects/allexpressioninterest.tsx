@@ -174,10 +174,15 @@ export default function AllExpressionOfInterest() {
           {filteredInterests.length === 0 ? (
             <View className="flex-1 justify-center items-center py-20 px-4">
               <EmptyScreenComponent
-                message={
+                title={
                   selectedFilter !== "all"
                     ? `No ${capitalize(selectedFilter)} Expressions of Interest`
                     : "No Expressions of Interest Yet"
+                }
+                description={
+                  selectedFilter !== "all"
+                    ? "Try a different filter to see more results"
+                    : "When builders show interest in your projects, they will appear here"
                 }
               />
             </View>

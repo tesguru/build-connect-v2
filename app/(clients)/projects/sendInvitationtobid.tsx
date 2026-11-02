@@ -18,7 +18,7 @@ import { uploadFile } from "@/core/utils/fileUpload";
 import { handleApiError } from "@/core/utils/handleapierror";
 
 const invitationSchema = z.object({
-  deadline: z.date({ required_error: "Bid submission deadline is required" }),
+  deadline: z.date({ message: "Bid submission deadline is required" }),
   notes: z.string().optional(),
   document: z.any().nullable().optional(),
 });
@@ -150,7 +150,7 @@ export default function SendInvitationToBid() {
                 <FormTextArea
                   label="Additional Notes"
                   placeholder="Any specific requirements..."
-                  value={field.value}
+                  value={field.value ?? ""}
                   onChangeText={field.onChange}
                   hasError={!!errors.notes}
                   errorMessage={errors.notes?.message}
@@ -164,16 +164,14 @@ export default function SendInvitationToBid() {
             <Controller
               control={control}
               name="document"
-              render={({ field }) => (
+              render={() => (
                 <FileUploadComponent
                   title="Upload bid documents"
-                  image={reportImage}
+                  icon={reportImage}
                   label="Upload Documents"
                   note="PDF, drawings, specs (max. 20MB)"
                   control={control}
                   name="document"
-                  value={field.value}
-                  onChange={field.onChange}
                   error={errors.document?.message as string | undefined}
                   maxSizeMB={20}
                 />
@@ -186,6 +184,7 @@ export default function SendInvitationToBid() {
               title="Send Invitation"
               onPress={handleSubmit(onSubmit)}
               loading={isLoading}
+              loadingText="Uploading..."
               disabled={isLoading}
             />
           </View>

@@ -116,6 +116,7 @@ export default function VerifyIdentityScreen() {
           <GradientButton
             title="Continue"
             loading={isUploading}
+            loadingText="Uploading..."
             onPress={handleSubmit(onSubmit)}
           />
 

@@ -21,16 +21,12 @@ import {
 import React, { useState } from "react";
 import {
   ActivityIndicator,
-  Dimensions,
-  Image,
-  Modal,
+  Linking,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const ProjectDetailsScreen = ({ navigation }: any) => {
   const route = useRoute();
@@ -41,7 +37,6 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
     expressInterestSuccess,
   } = useProjects();
   const { data, isLoading, error } = singleProjectMarketPlaceQuery(projectId);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showExpressInterestModal, setShowExpressInterestModal] =
     useState(false);
 
@@ -52,6 +47,7 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
   // ── Extract flags from API data ──────────────────────────────────────────
   const canBid = projectData?.canBid ?? false;
   const hasExpressedInterest = projectData?.hasExpressedInterest ?? false;
+  const hasBid = projectData?.hasBid ?? false;
 
   const handleSubmitBid = () => {
     router.push({
@@ -111,12 +107,12 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
   };
 
   // ── Success State ──────────────────────────────────────────────────────
-  if (expressInterestSuccess) {
+  if (expressInterestSuccess == false) {
     return (
       <SuccessScreen
         title="Successfully!"
         message="Congratulations! Your Interest Has Been Expressed Successfully"
-        navigateTo="/(tabs)/findprojects"
+        navigateTo="/(tab)/findprojects"
         buttonTitle="Return to projects Marketplace"
       />
     );
@@ -172,6 +168,8 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
   const requiredSkills = projectData.requiredSkills || [];
   const attachedDocuments = projectData.attachedDocuments || [];
   const deadlinePassed = projectData.deadlinePassed || false;
+  const applicationDeadline = projectData.applicationDeadline || null;
+  const hasDeadline = !!applicationDeadline;
   const owner = projectData.owner || {};
   const images = projectData.images || [];
   const milestones = projectData.milestones || [];
@@ -199,55 +197,14 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
   ).length;
 
   // ── Determine which button to show ──────────────────────────────────────
-  const showExpressInterest = !hasExpressedInterest && !canBid;
-  const showAwaitingApproval = hasExpressedInterest && !canBid;
-  const showSubmitBid = hasExpressedInterest && canBid;
+  const showHasBid = hasBid;
+  const showExpressInterest = !hasBid && !hasExpressedInterest && !canBid;
+  const showAwaitingApproval = !hasBid && hasExpressedInterest && !canBid;
+  const showSubmitBid = !hasBid && hasExpressedInterest && canBid;
 
   return (
     <AppLayout screenName="Project Details">
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Hero Image Gallery */}
-        {images.length > 0 ? (
-          <View>
-            <ScrollView
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-            >
-              {images.map((img: any, index: number) => (
-                <TouchableOpacity
-                  key={img.fileId || index}
-                  activeOpacity={0.92}
-                  onPress={() => setSelectedImage(img.publicUrl)}
-                >
-                  <Image
-                    source={{ uri: img.publicUrl }}
-                    style={{ width: SCREEN_WIDTH, height: 240 }}
-                    resizeMode="cover"
-                  />
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-            {images.length > 1 && (
-              <View className="flex-row justify-center mt-2 gap-1 pb-1">
-                {images.map((_: any, i: number) => (
-                  <View key={i} className="w-2 h-2 rounded-full bg-blue-400" />
-                ))}
-              </View>
-            )}
-          </View>
-        ) : (
-          <View className="h-48 bg-gray-100 items-center justify-center">
-            <Image
-              source={{
-                uri: "https://via.placeholder.com/400x240/EAEAEA/808080?text=No+Image",
-              }}
-              style={{ width: SCREEN_WIDTH, height: 200 }}
-              resizeMode="cover"
-            />
-          </View>
-        )}
-
         <View className="px-6">
           <Text className="font-worksanssemibold text-2xl pt-4">{title}</Text>
 
@@ -355,7 +312,11 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
               </View>
 
               {/* Competition */}
-              <View className="flex-row items-center p-4 border-b border-gray-100">
+              <View
+                className={`flex-row items-center p-4 ${
+                  hasDeadline ? "border-b border-gray-100" : ""
+                }`}
+              >
                 <View className="w-12 h-12 bg-orange-50 rounded-xl items-center justify-center mr-4">
                   <Users size={22} color="#F59E0B" />
                 </View>
@@ -370,25 +331,34 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
                 </View>
               </View>
 
-              {/* Bid Deadline */}
-              <View className="flex-row items-center p-4">
-                <View className="w-12 h-12 bg-red-50 rounded-xl items-center justify-center mr-4">
-                  <AlertCircle size={22} color="#EF4444" />
-                </View>
-                <View className="flex-1">
-                  <Text className="font-inter text-sm text-gray-500 mb-1">
-                    Bid Deadline
-                  </Text>
-                  <Text className="font-worksanssemibold text-gray-900">
-                    {deadlinePassed ? "Deadline has passed" : "Not specified"}
-                  </Text>
-                  {deadlinePassed && (
-                    <Text className="text-red-600 text-xs mt-1 font-inter">
-                      Deadline has passed
+              {/* Bid Deadline - only shown when a deadline exists */}
+              {hasDeadline && (
+                <View className="flex-row items-center p-4">
+                  <View className="w-12 h-12 bg-red-50 rounded-xl items-center justify-center mr-4">
+                    <AlertCircle size={22} color="#EF4444" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="font-inter text-sm text-gray-500 mb-1">
+                      Bid Deadline
                     </Text>
-                  )}
+                    <Text className="font-worksanssemibold text-gray-900">
+                      {new Date(applicationDeadline).toLocaleDateString(
+                        "en-US",
+                        {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        },
+                      )}
+                    </Text>
+                    {deadlinePassed && (
+                      <Text className="text-red-600 text-xs mt-1 font-inter">
+                        Deadline has passed
+                      </Text>
+                    )}
+                  </View>
                 </View>
-              </View>
+              )}
             </View>
           </View>
 
@@ -525,12 +495,14 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
             </View>
           )}
 
+         
+
           {/* Project Documents */}
           {attachedDocuments.length > 0 && (
             <View className="pt-6">
               <View className="flex-row items-center justify-between mb-3">
                 <Text className="font-worksanssemibold text-xl">
-                  Attached Documents
+                  Approved Documents
                 </Text>
                 <View className="bg-blue-100 px-3 py-1 rounded-full">
                   <Text className="text-blue-800 font-worksanssemibold text-xs">
@@ -550,22 +522,9 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
                         : ""
                     }`}
                   >
-                    {doc.fileType?.startsWith("image/") && doc.publicUrl ? (
-                      <TouchableOpacity
-                        onPress={() => setSelectedImage(doc.publicUrl)}
-                        activeOpacity={0.85}
-                      >
-                        <Image
-                          source={{ uri: doc.publicUrl }}
-                          className="w-12 h-12 rounded-xl mr-3"
-                          resizeMode="cover"
-                        />
-                      </TouchableOpacity>
-                    ) : (
-                      <View className="w-12 h-12 bg-blue-50 rounded-xl items-center justify-center mr-3">
-                        <FileText size={24} color="#3B82F6" />
-                      </View>
-                    )}
+                    <View className="w-12 h-12 bg-blue-50 rounded-xl items-center justify-center mr-3">
+                      <FileText size={24} color="#3B82F6" />
+                    </View>
                     <View className="flex-1">
                       <Text
                         className="font-worksanssemibold text-gray-900 mb-1"
@@ -598,6 +557,15 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
 
           {/* ── ACTION BUTTONS ── */}
           <View className="pt-6 pb-8 gap-3">
+            {/* Case 0: User has already placed a bid */}
+            {showHasBid && (
+              <GradientButton
+                title="You Have Placed a Bid"
+                onPress={() => {}}
+                disabled
+              />
+            )}
+
             {/* Case 1: Show Express Interest - User hasn't expressed interest yet */}
             {showExpressInterest && (
               <GradientButton
@@ -634,7 +602,7 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
               />
             )}
 
-            {deadlinePassed && (
+            {deadlinePassed && !hasBid && (
               <View className="flex-row items-center justify-center mt-3 bg-red-50 p-3 rounded-lg">
                 <AlertCircle size={16} color="#EF4444" />
                 <Text className="text-red-600 ml-2 font-inter">
@@ -645,31 +613,6 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
           </View>
         </View>
       </ScrollView>
-
-      {/* Fullscreen image lightbox */}
-      <Modal
-        visible={!!selectedImage}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setSelectedImage(null)}
-      >
-        <TouchableOpacity
-          className="flex-1 bg-black/90 justify-center items-center"
-          activeOpacity={1}
-          onPress={() => setSelectedImage(null)}
-        >
-          {selectedImage && (
-            <Image
-              source={{ uri: selectedImage }}
-              style={{ width: SCREEN_WIDTH, height: SCREEN_WIDTH }}
-              resizeMode="contain"
-            />
-          )}
-          <Text className="text-white/50 font-inter text-sm mt-4">
-            Tap anywhere to close
-          </Text>
-        </TouchableOpacity>
-      </Modal>
 
       <ExpressInterestConfirmModal
         visible={showExpressInterestModal}

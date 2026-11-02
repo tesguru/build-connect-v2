@@ -40,7 +40,7 @@ const createProjectSchema = z.object({
   budgetMax: z.string().min(1, "Budget max is required"),
   durationMin: z.string().min(1, "Duration min is required"),
   durationMax: z.string().min(1, "Duration max is required"),
-  hasApprovedDrawings: z.boolean().default(false),
+  hasApprovedDrawings: z.boolean(),
   drawingFile: z.any().nullable().optional(),
 });
 
@@ -133,8 +133,8 @@ export default function CreateProjectScreen() {
         return;
       }
 
-      // ── File upload - using PortfolioScreen pattern ──────────────────────
-      const fileIds: Record<string, string | string[]> = {};
+      // ── File upload - prepare -> storage -> confirm ──────────────────────
+      const fileIds: string[] = [];
 
       if (data.hasApprovedDrawings && data.drawingFile) {
         const result = await uploadFile(
@@ -142,7 +142,7 @@ export default function CreateProjectScreen() {
           "work_showcase",
           "Building Drawing",
         );
-        fileIds.fileIds = [result.id];
+        fileIds.push(result.id);
       }
 
       const payload = {
@@ -155,7 +155,7 @@ export default function CreateProjectScreen() {
         durationMinimum: durationMin,
         durationMaximum: durationMax,
         isApprovedBuildingDrawings: data.hasApprovedDrawings,
-        metadata: fileIds,
+        fileIds,
       };
 
       submitBidMutation.mutate(payload, {
@@ -424,16 +424,14 @@ export default function CreateProjectScreen() {
                 <Controller
                   control={control}
                   name="drawingFile"
-                  render={({ field }) => (
+                  render={() => (
                     <FileUploadComponent
                       title="Tap to upload documents"
-                      image={reportImage}
+                      icon={reportImage}
                       label="Upload Drawing"
                       note="PDF, DWG, images"
                       control={control}
                       name="drawingFile"
-                      value={field.value}
-                      onChange={field.onChange}
                       maxSizeMB={20}
                     />
                   )}
@@ -457,6 +455,7 @@ export default function CreateProjectScreen() {
               title="Complete Setup"
               onPress={handleComplete}
               loading={isLoading}
+              loadingText="Uploading..."
               disabled={isLoading}
             />
             <TouchableOpacity

@@ -1,5 +1,12 @@
+import { Plus, X } from "lucide-react-native";
 import React from "react";
-import { ScrollView, Switch, Text, View } from "react-native";
+import {
+  ScrollView,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import GradientButton from "@/components/Buttons/GradientButton";
 import DropdownField from "@/components/Forms/DropDown";
@@ -13,7 +20,7 @@ import { useProjects } from "@/core/hooks/useProjects";
 import { uploadFile } from "@/core/utils/fileUpload";
 import { handleApiError } from "@/core/utils/handleapierror";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import Toast from "react-native-toast-message";
 import { z } from "zod";
 
@@ -39,8 +46,10 @@ const createProjectSchema = z.object({
   budgetMax: z.string().min(1, "Budget max is required"),
   durationMin: z.string().min(1, "Duration min is required"),
   durationMax: z.string().min(1, "Duration max is required"),
-  hasApprovedDrawings: z.boolean().default(false),
-  drawingFile: z.any().nullable().optional(),
+  hasApprovedDrawings: z.boolean(),
+  drawingFiles: z.array(
+    z.object({ file: z.any().nullable(), fileId: z.string().optional() }),
+  ),
 });
 
 type CreateProjectFormValues = z.infer<typeof createProjectSchema>;
@@ -60,7 +69,6 @@ const AddProject = () => {
     handleSubmit,
     watch,
     formState: { errors },
-    setValue,
   } = useForm<CreateProjectFormValues>({
     resolver: zodResolver(createProjectSchema),
     defaultValues: {
@@ -73,9 +81,15 @@ const AddProject = () => {
       durationMin: "",
       durationMax: "",
       hasApprovedDrawings: false,
-      drawingFile: null,
+      drawingFiles: [],
     },
   });
+
+  const {
+    fields: drawingFields,
+    append: appendDrawing,
+    remove: removeDrawing,
+  } = useFieldArray({ control, name: "drawingFiles" });
 
   const hasApprovedDrawings = watch("hasApprovedDrawings");
 
@@ -130,14 +144,20 @@ const AddProject = () => {
         return;
       }
 
-      let drawingFileId: string | undefined;
-      if (data.hasApprovedDrawings && data.drawingFile) {
-        const uploaded = await uploadFile(
-          data.drawingFile,
-          "work_showcase",
-          "Building Drawing",
+      let drawingFileIds: string[] = [];
+      if (data.hasApprovedDrawings) {
+        if (data.drawingFiles.length === 0) {
+          showError("Upload at least one approved drawing");
+          setIsSubmitting(false);
+          return;
+        }
+
+        const uploaded = await Promise.all(
+          data.drawingFiles.map((item) =>
+            uploadFile(item.file, "work_showcase", "Building Drawing"),
+          ),
         );
-        drawingFileId = uploaded.id;
+        drawingFileIds = uploaded.map((file) => file.id);
       }
 
       const payload = {
@@ -150,7 +170,7 @@ const AddProject = () => {
         durationMinimum: durationMin,
         durationMaximum: durationMax,
         isApprovedBuildingDrawings: data.hasApprovedDrawings,
-        metadata: drawingFileId ? { fileIds: [drawingFileId] } : {},
+        fileIds: drawingFileIds,
       };
 
       submitBidMutation.mutate(payload, {
@@ -391,24 +411,48 @@ const AddProject = () => {
 
             {hasApprovedDrawings ? (
               <View className="mt-4">
-                <Controller
-                  control={control}
-                  name="drawingFile"
-                  render={({ field }) => (
+                {drawingFields.map((field, index) => (
+                  <View
+                    key={field.id}
+                    className="border border-gray-300 rounded-xl p-4 mb-4"
+                  >
+                    <View className="flex-row justify-between items-center mb-2">
+                      <Text className="font-inter text-lg">
+                        Drawing {index + 1}
+                      </Text>
+                      <TouchableOpacity onPress={() => removeDrawing(index)}>
+                        <X size={24} color="#6b7280" />
+                      </TouchableOpacity>
+                    </View>
+
                     <FileUploadComponent
-                      title="Click to upload documents"
-                      image={reportImage}
-                      label="Upload Drawing"
-                      note="PDF, DWG, images (max. 20MB)"
+                      title="Click to upload drawing"
+                      icon={reportImage}
+                      label="Building Drawing"
+                      note="PDF, DWG, images (max. 10MB)"
                       control={control}
-                      name="drawingFile"
-                      value={field.value}
-                      onChange={field.onChange}
-                      error={errors.drawingFile?.message as string | undefined}
-                      maxSizeMB={20}
+                      name={`drawingFiles.${index}.file`}
+                      error={
+                        errors.drawingFiles?.[index]?.file?.message as
+                          | string
+                          | undefined
+                      }
+                      maxSizeMB={10}
                     />
-                  )}
-                />
+                  </View>
+                ))}
+
+                <TouchableOpacity
+                  onPress={() => appendDrawing({ file: null })}
+                  className="flex-row gap-2 justify-end mb-4"
+                >
+                  <Plus size={20} color="#2563eb" />
+                  <Text className="text-blue-600 font-inter">
+                    {drawingFields.length === 0
+                      ? "Add drawing"
+                      : "Add another drawing"}
+                  </Text>
+                </TouchableOpacity>
               </View>
             ) : (
               <View className="mt-4 border border-dashed border-gray-300 rounded-xl p-6 items-center justify-center">
@@ -428,6 +472,7 @@ const AddProject = () => {
               title="Add Project"
               onPress={handleSubmit(onSubmit)}
               loading={isLoading}
+              loadingText="Uploading..."
               disabled={isLoading}
             />
           </View>

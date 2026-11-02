@@ -1,7 +1,15 @@
-import React, { useEffect, useRef } from "react";
-import { TouchableOpacity, Text, ViewStyle, TextStyle, Animated, Easing } from "react-native";
-import { LinearGradient } from 'expo-linear-gradient';
 import colors from "@/constants/colors";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect, useRef } from "react";
+import {
+    Animated,
+    Easing,
+    Text,
+    TextStyle,
+    TouchableOpacity,
+    View,
+    ViewStyle,
+} from "react-native";
 
 type GradientButtonProps = {
     title: string;
@@ -11,6 +19,10 @@ type GradientButtonProps = {
     textStyle?: TextStyle;
     disabled?: boolean;
     loading?: boolean;
+    /** Label shown while loading. Defaults to "Loading..." */
+    loadingText?: string;
+    /** Real upload progress from 0 to 1. Omit for an indeterminate bar. */
+    progress?: number;
     gradientStart?: { x: number; y: number };
     gradientEnd?: { x: number; y: number };
 };
@@ -23,30 +35,45 @@ const GradientButton: React.FC<GradientButtonProps> = ({
     textStyle,
     disabled = false,
     loading = false,
+    loadingText = "Loading...",
+    progress,
     gradientStart = { x: 0, y: 0 },
     gradientEnd = { x: 1, y: 0 },
 }) => {
-    const spinValue = useRef(new Animated.Value(0)).current;
+    const slideValue = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        if (loading) {
-            Animated.loop(
-                Animated.timing(spinValue, {
-                    toValue: 1,
-                    duration: 1000,
-                    easing: Easing.linear,
-                    useNativeDriver: true,
-                })
-            ).start();
-        } else {
-            spinValue.setValue(0);
+        if (!loading || progress != null) {
+            slideValue.setValue(0);
+            return;
         }
-    }, [loading]);
 
-    const spin = spinValue.interpolate({
+        const loop = Animated.loop(
+            Animated.timing(slideValue, {
+                toValue: 1,
+                duration: 1200,
+                easing: Easing.inOut(Easing.ease),
+                useNativeDriver: true,
+            })
+        );
+        loop.start();
+
+        return () => loop.stop();
+    }, [loading, progress, slideValue]);
+
+    const translateX = slideValue.interpolate({
         inputRange: [0, 1],
-        outputRange: ['0deg', '360deg'],
+        outputRange: [-140, 420],
     });
+
+    const clampedProgress =
+        progress == null ? null : Math.min(Math.max(progress, 0), 1);
+
+    const label = !loading
+        ? title
+        : clampedProgress == null
+            ? loadingText
+            : `${loadingText} ${Math.round(clampedProgress * 100)}%`;
 
     return (
         <TouchableOpacity
@@ -54,9 +81,10 @@ const GradientButton: React.FC<GradientButtonProps> = ({
             activeOpacity={0.7}
             disabled={disabled || loading}
             style={style}
+            accessibilityState={{ busy: loading, disabled: disabled || loading }}
         >
             <LinearGradient
-                colors={colors.gradientColors}
+                colors={colors.gradientColors as [string, string]}
                 start={gradientStart}
                 end={gradientEnd}
                 style={{
@@ -67,47 +95,54 @@ const GradientButton: React.FC<GradientButtonProps> = ({
                     alignItems: 'center',
                     justifyContent: 'center',
                     opacity: disabled ? 0.5 : 1,
-                    flexDirection: 'row',
+                    overflow: 'hidden',
                 }}
             >
-                {loading ? (
-                    <>
-                        <Animated.View
-                            style={{
-                                width: 20,
-                                height: 20,
-                                borderRadius: 10,
-                                borderWidth: 3,
-                                borderColor: `${textColor}40`,
-                                borderTopColor: textColor,
-                                marginRight: 10,
-                                transform: [{ rotate: spin }],
-                            }}
-                        />
-                        <Text 
-                            className="font-inter" 
-                            style={{
-                                color: textColor,
-                                fontSize: 16,
-                                fontWeight: '600',
-                                ...textStyle,
-                            }}
-                        >
-                            Loading...
-                        </Text>
-                    </>
-                ) : (
-                    <Text 
-                        className="font-inter" 
+                <Text 
+                    className="font-inter" 
+                    style={{
+                        color: textColor,
+                        fontSize: 16,
+                        fontWeight: '600',
+                        ...textStyle,
+                    }}
+                >
+                    {label}
+                </Text>
+
+                {loading && (
+                    <View
                         style={{
-                            color: textColor,
-                            fontSize: 16,
-                            fontWeight: '600',
-                            ...textStyle,
+                            position: 'absolute',
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            height: 4,
+                            backgroundColor: `${textColor}33`,
+                            overflow: 'hidden',
                         }}
                     >
-                        {title}
-                    </Text>
+                        {clampedProgress == null ? (
+                            <Animated.View
+                                style={{
+                                    width: 140,
+                                    height: 4,
+                                    borderRadius: 2,
+                                    backgroundColor: textColor,
+                                    transform: [{ translateX }],
+                                }}
+                            />
+                        ) : (
+                            <View
+                                style={{
+                                    width: `${clampedProgress * 100}%` as `${number}%`,
+                                    height: 4,
+                                    borderRadius: 2,
+                                    backgroundColor: textColor,
+                                }}
+                            />
+                        )}
+                    </View>
                 )}
             </LinearGradient>
         </TouchableOpacity>

@@ -8,9 +8,9 @@ interface DropdownOption {
   value: string;
 }
 
-interface DropdownFieldProps<T extends FieldValues> {
+interface DropdownFieldProps<T extends FieldValues, TTransformed extends FieldValues = T> {
   name: Path<T>;
-  control: Control<T>;
+  control: Control<T, any, TTransformed>;
   label: string;
   placeholder: string;
   data: DropdownOption[];

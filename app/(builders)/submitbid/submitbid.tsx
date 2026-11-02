@@ -27,7 +27,7 @@ const milestoneSchema = z.object({
   description: z.string().trim().min(1, "Description is required"),
   completionDate: z.string().min(1, "Completion date is required"),
   paymentAmount: z.number().positive("Payment amount must be greater than 0"),
-  paymentPercentage: z.number().default(100),
+  paymentPercentage: z.number(),
   orderIndex: z.number().optional(),
 });
 
@@ -40,15 +40,6 @@ const submitBidSchema = z.object({
     .array(milestoneSchema)
     .min(1, "At least one milestone is required"),
 });
-
-type MilestoneInput = {
-  milestoneName: string;
-  description: string;
-  completionDate: string;
-  paymentAmount: number;
-  paymentPercentage: number;
-  orderIndex?: number;
-};
 
 type SubmitBidFormValues = z.infer<typeof submitBidSchema>;
 
@@ -425,17 +416,15 @@ export default function SubmitBidScreen() {
             <Controller
               control={control}
               name="portfolioReferences"
-              render={({ field }) => (
+              render={() => (
                 <FileUploadComponent
                   control={control}
                   name="portfolioReferences"
                   label="Portfolio Reference"
                   title="Upload Portfolio Reference"
                   note="PNG, JPG, PDF (max. 5MB)"
-                  image={reportImage}
+                  icon={reportImage}
                   maxSizeMB={5}
-                  value={field.value}
-                  onChange={field.onChange}
                   error={
                     errors.portfolioReferences?.message as string | undefined
                   }
@@ -449,6 +438,7 @@ export default function SubmitBidScreen() {
               title="Submit Bid"
               onPress={handleSubmit(onSubmit)}
               loading={isLoading}
+              loadingText="Uploading..."
               disabled={!amountsMatch || isLoading}
             />
           </View>

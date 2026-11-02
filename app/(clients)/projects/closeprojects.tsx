@@ -5,11 +5,13 @@ import StarRating from "@/components/Miscallaneous/Starrating";
 import { markicon } from "@/constants/icon";
 import { RatingInput, ratingSchema } from "@/core/schemas/dashboardschema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "expo-router";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Image, Text, View } from "react-native";
 
 const ClosedProjects = () => {
+  const router = useRouter();
   const {
     control,
     formState: { errors },
@@ -97,7 +99,10 @@ const ClosedProjects = () => {
             </Text>
 
 <View className="mx-2 my-6">
-  <GradientButton title="Close & Submit Feedback" />
+  <GradientButton
+    title="Close & Submit Feedback"
+    onPress={() => router.back()}
+  />
 </View>
           
           </View>

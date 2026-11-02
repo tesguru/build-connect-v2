@@ -43,12 +43,10 @@ const updatePropertySchema = z.object({
   bathrooms: z.string().min(1, "Bathrooms is required"),
   description: z.string().min(1, "Description is required"),
   keyFeatures: z.string().min(1, "Key features are required"),
-  mediaFiles: z
-    .array(
-      z.object({ file: z.any().nullable(), fileId: z.string().optional() }),
-    )
-    .default([]),
-  status: z.enum(["draft", "published"]).default("draft"),
+  mediaFiles: z.array(
+    z.object({ file: z.any().nullable(), fileId: z.string().optional() }),
+  ),
+  status: z.enum(["draft", "published"]),
 });
 
 type UpdatePropertyInput = z.infer<typeof updatePropertySchema>;
@@ -455,16 +453,14 @@ const UpdateProperty = () => {
                 <Controller
                   control={control}
                   name={`mediaFiles.${index}.file`}
-                  render={({ field }) => (
+                  render={() => (
                     <FileUploadComponent
                       title="Click to upload media"
-                      image={reportImage}
+                      icon={reportImage}
                       label="Property Image"
                       note="PNG, JPG, MP4 (max. 10MB)"
                       control={control}
                       name={`mediaFiles.${index}.file`}
-                      value={field.value}
-                      onChange={field.onChange}
                       error={
                         errors.mediaFiles?.[index]?.file?.message as
                           | string
@@ -492,6 +488,7 @@ const UpdateProperty = () => {
               title="Update Listing"
               onPress={handleSubmit(onSubmit)}
               loading={isLoading}
+              loadingText="Uploading..."
               disabled={isLoading}
             />
           </View>

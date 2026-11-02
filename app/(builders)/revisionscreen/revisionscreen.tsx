@@ -11,7 +11,6 @@ import { useBids } from "@/core/hooks/UseBids";
 import {
   BuilderRevisionInput,
   builderrevisionSchema,
-  RevisionInput,
 } from "@/core/schemas/dashboardschema";
 import { LookupService } from "@/core/services/lookup/LookupService";
 import { uploadFile } from "@/core/utils/fileUpload";
@@ -99,7 +98,7 @@ const Revisionscreen = () => {
   const isPaymentValid = totalMilestonePayments === bidAmount;
 
   // ── Submit ─────────────────────────────────────────────────────────────────
-  const onSubmit = async (data: RevisionInput) => {
+  const onSubmit = async (data: BuilderRevisionInput) => {
     try {
       const total = data.milestones.reduce(
         (sum, m) => sum + (Number(m.paymentAmount) || 0),
@@ -386,7 +385,7 @@ const Revisionscreen = () => {
                         onChangeText={field.onChange}
                         hasError={!!errors.milestones?.[index]?.description}
                         width="w-full"
-                        height={80}
+                        minHeight={80}
                       />
                     )}
                   />
@@ -471,17 +470,15 @@ const Revisionscreen = () => {
             <Controller
               control={control}
               name="portfolioReferences"
-              render={({ field }) => (
+              render={() => (
                 <FileUploadComponent
                   control={control}
                   name="portfolioReferences"
                   label="Portfolio Reference"
                   title="Upload Portfolio Reference"
                   note="PNG, JPG, PDF (max. 5MB)"
-                  image={reportImage}
+                  icon={reportImage}
                   maxSizeMB={5}
-                  value={field.value}
-                  onChange={field.onChange}
                   error={
                     portfolioReferenceError ||
                     (errors.portfolioReferences?.message as string)
@@ -497,6 +494,7 @@ const Revisionscreen = () => {
               title="Submit Revision"
               onPress={handleSubmit(onSubmit)}
               loading={isLoading}
+              loadingText="Uploading..."
               disabled={!isPaymentValid || isLoading}
             />
           </View>

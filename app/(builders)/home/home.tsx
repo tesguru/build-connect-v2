@@ -72,8 +72,8 @@ const Home = () => {
 
   const handleNotification = () => router.push("/notification/notification");
   const handleCreateProperty = () =>
-    router.replace("/(builders)/createproperty/createproperty");
-  const handleAllProjects = () => router.push("/findprojects/findprojects");
+    router.push("/(builders)/createproperty/createproperty");
+  const handleAllProjects = () => router.push("/(tab)/findprojects");
   const handleAllBids = () => router.push("/mybids/bids");
   const handleAllProperties = () =>
     router.push("/(builders)/properties/properties");

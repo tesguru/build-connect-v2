@@ -44,7 +44,7 @@ const MortgageApplicationsScreen = () => {
                 title="No Applications Found"
                 description="You haven't applied for any mortgage yet"
                 buttonText="Browse Properties"
-                onButtonPress={() => router.push('/(client)/properties')}
+                onButtonPress={() => router.push('/(clients)/properties/properties')}
               />
             </View>
           ) : (

@@ -297,7 +297,10 @@ const ClientPropertiesScreen = () => {
               </Text>
             </View>
           ) : propertiesList.length === 0 ? (
-            <EmptyScreenComponent message="No properties found" />
+            <EmptyScreenComponent
+              title="No Properties Found"
+              description="Try adjusting your search or filters, or check back later for new listings"
+            />
           ) : (
             <ScrollView
               showsVerticalScrollIndicator={false}

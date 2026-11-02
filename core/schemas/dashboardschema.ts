@@ -193,7 +193,7 @@ export const scheduleMeetingSchema = z.object({
     .max(100, "Title is too long"),
 
   attendees: z
-    .number({ invalid_type_error: "Please enter number of attendees" })
+    .number({ error: "Please enter number of attendees" })
     .min(1, "At least 1 attendee is required"),
 
   date:     z.string().min(1, "Please select a date"),
@@ -211,7 +211,7 @@ export const scheduleMeetingSchema = z.object({
 export const builderrevisionSchema = z.object({
   message: z.string().min(1, "Revision message is required"),
   bidAmount: z
-    .number({ invalid_type_error: "Bid amount is required" })
+    .number({ error: "Bid amount is required" })
     .min(1, "Bid amount must be greater than 0"),
   proposedTimeline: z.string().trim().min(1, "Proposed timeline is required"),
   proposal: z
@@ -223,13 +223,13 @@ export const builderrevisionSchema = z.object({
     .array(
       z.object({
         milestoneName: z.string().trim().min(1, "Milestone name is required"),
-        description: z.string().optional().default(""),
+        description: z.string(),
         completionDate: z.string().min(1, "Completion date is required"),
         paymentAmount: z
-          .number({ invalid_type_error: "Payment amount is required" })
+          .number({ error: "Payment amount is required" })
           .min(1, "Payment amount must be greater than 0"),
-        paymentPercentage: z.number().min(0).max(100).default(100),
-        orderIndex: z.number().default(1), // ← default 1, not 0
+        paymentPercentage: z.number().min(0).max(100),
+        orderIndex: z.number(),
       })
     )
     .min(1, "At least one milestone is required"),

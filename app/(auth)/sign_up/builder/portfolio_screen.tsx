@@ -158,6 +158,7 @@ export default function PortfolioScreen() {
               title="Complete Setup"
               onPress={handleComplete}
               loading={isLoading}
+              loadingText="Uploading..."
             />
           </View>
         </View>

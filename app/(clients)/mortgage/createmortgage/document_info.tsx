@@ -204,7 +204,7 @@ if (mortgageSuccess) {
                 control={control}
                 name="idDocumentFile"
                 title="Click to upload ID document"
-                image={reportImage}
+                icon={reportImage}
                 label="ID Document"
                 note="PNG, JPG, PDF (max. 5MB)"
                 maxSizeMB={5}
@@ -225,7 +225,7 @@ if (mortgageSuccess) {
                 control={control}
                 name="proofOfIncomeFile"
                 title="Click to upload proof of income"
-                image={reportImage}
+                icon={reportImage}
                 label="Proof of Income"
                 note="PNG, JPG, PDF (max. 5MB)"
                 maxSizeMB={5}
@@ -246,7 +246,7 @@ if (mortgageSuccess) {
                 control={control}
                 name="bankStatementFile"
                 title="Click to upload bank statement"
-                image={reportImage}
+                icon={reportImage}
                 label="Bank Statement"
                 note="PNG, JPG, PDF (max. 5MB)"
                 maxSizeMB={5}
@@ -261,6 +261,7 @@ if (mortgageSuccess) {
               title="Submit Application"
               onPress={handleComplete}
               loading={isLoading}
+              loadingText="Uploading..."
               disabled={isLoading}
             />
           </View>

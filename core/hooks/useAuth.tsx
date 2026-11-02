@@ -43,7 +43,7 @@ export function useAuth() {
 
       setAuthData(authToken, refreshToken, user);
       Toast.show({ type: "success", text1: "Login Successful", text2: "" });
-      router.push("/(tab)");
+      router.replace("/(tab)");
     },
     onError: (err: any) => {
       handleApiError(err, "Login failed. Please try again.", {
@@ -66,7 +66,7 @@ export function useAuth() {
           text1: "Profile Updated",
           text2: "Your profile updated successfully.",
         });
-        router.push("/(tab)");
+        router.replace("/(tab)");
       }
     },
     onError: (err: any) => {

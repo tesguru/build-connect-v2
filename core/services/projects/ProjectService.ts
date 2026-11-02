@@ -2,23 +2,18 @@ import { ENDPOINTS } from "@/constants/endpoints";
 import axiosInstance from "../axios";
 
 export interface CreateProjectPayload {
-  title: string;
+  name: string;
   description: string;
   location: string;
-  projectTypeId: string;
-  budget: string;
-  timelineId?: string;
-  startDate: string;
-  endDate: string;
-  milestones: Array<{
-    name: string;
-    description?: string;
-    completionDate: string;
-    amount: number;
-  }>;
-  mediaFileIds: string[];
+  budgetMinimum: number;
+  budgetMaximum: number;
+  currency: string;
+  durationMinimum: number;
+  durationMaximum: number;
+  isApprovedBuildingDrawings: boolean;
+  /** Confirmed upload IDs from prepare-upload → confirm-upload. */
   fileIds: string[];
-  metadata: Record<string, any>;
+  metadata?: Record<string, any>;
 }
 
 export const ProjectService = {

@@ -251,6 +251,7 @@ const SubmitTicket = () => {
         <View className="pt-6">
           <GradientButton
             loading={isUploading || submitTicketMutation.isPending}
+            loadingText="Uploading..."
             title="Submit Ticket"
             onPress={handleSubmit(onSubmit)}
           />

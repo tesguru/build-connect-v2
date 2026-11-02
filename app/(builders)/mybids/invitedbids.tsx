@@ -128,10 +128,15 @@ export default function InvitedInvitations() {
       return (
         <View className="flex-1 justify-center items-center py-20 px-4">
           <EmptyScreenComponent
-            message={
+            title={
               selectedFilter !== "all"
                 ? `No "${capitalize(selectedFilter)}" Invitations`
                 : "No Invitations Found"
+            }
+            description={
+              selectedFilter !== "all"
+                ? "Try a different filter to see more results"
+                : "Invitations from clients will appear here"
             }
           />
         </View>

@@ -204,7 +204,7 @@ const LogPayment = () => {
               <FormTextArea
                 label="Note (Optional)"
                 placeholder="Add a note about this payment..."
-                value={field.value}
+                value={field.value ?? ""}
                 onChangeText={field.onChange}
                 hasError={!!errors.note}
                 errorMessage={errors.note?.message}
@@ -220,16 +220,14 @@ const LogPayment = () => {
           <Controller
             control={control}
             name="proofDocument"
-            render={({ field }) => (
+            render={() => (
               <FileUploadComponent
                 title="Click to upload proof of payment"
-                image={reportImage}
+                icon={reportImage}
                 label="Proof Document (Optional)"
                 note="PNG, JPG, PDF (max. 5MB)"
                 control={control}
                 name="proofDocument"
-                value={field.value}
-                onChange={field.onChange}
                 error={errors.proofDocument?.message as string | undefined}
                 maxSizeMB={5}
               />
@@ -243,6 +241,7 @@ const LogPayment = () => {
             title="Log Payment"
             onPress={handleSubmit(onSubmit)}
             loading={isLoading}
+            loadingText="Uploading..."
             disabled={isLoading}
           />
         </View>
