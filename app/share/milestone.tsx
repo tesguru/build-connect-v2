@@ -17,6 +17,10 @@ function formatDueDate(date: string) {
   });
 }
 
+function getStatus(item: any): string {
+  return item?.statusDetails?.value ?? item?.status ?? "pending";
+}
+
 function statusToProgress(status: string) {
   if (status === "completed") return 100;
   if (status === "in_progress") return 50;
@@ -65,8 +69,9 @@ export default function Milestone() {
 
   const statusCounts = milestones.reduce(
     (acc: Record<string, number>, item: any) => {
-      if (item.status && acc[item.status] !== undefined) {
-        acc[item.status] += 1;
+      const status = getStatus(item);
+      if (acc[status] !== undefined) {
+        acc[status] += 1;
       }
       return acc;
     },
@@ -101,7 +106,7 @@ export default function Milestone() {
   const filteredMilestones =
     selectedFilter === "all"
       ? milestones
-      : milestones.filter((item: any) => item.status === selectedFilter);
+      : milestones.filter((item: any) => getStatus(item) === selectedFilter);
 
   const role = useAuthStore().user?.role;
   const router = useRouter();
@@ -163,8 +168,8 @@ export default function Milestone() {
                   milestoneName={item.name}
                   dueDate={formatDueDate(item.completionDate)}
                   budget={`${currencySymbol} ${item.amount != null ? item.amount.toLocaleString() : "0"}`}
-                  progress={statusToProgress(item.status)}
-                  status={formatStatusLabel(item.status)}
+                  progress={statusToProgress(getStatus(item))}
+                  status={formatStatusLabel(getStatus(item))}
                   isFirst={index === 0}
                   isLast={index === filteredMilestones.length - 1}
                   onPress={() =>

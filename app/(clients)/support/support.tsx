@@ -24,7 +24,7 @@ const SupportScreen = () => {
   const faqItems: FAQItem[] = [
     {
       id: "1",
-      question: "How do i invites builders?",
+      question: "How do i invite builders?",
       answer:
         "You can invite builders by going to your project and clicking the 'Invite Builder' button. Enter the builder's email address and send the invitation.",
     },

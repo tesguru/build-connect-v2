@@ -69,6 +69,8 @@ export function useBids() {
       queryClient.invalidateQueries({ queryKey: ["getSingleProject"] });
       queryClient.invalidateQueries({ queryKey: ["singleBidQuery"] });
       queryClient.invalidateQueries({ queryKey: ["getAllProjects"] });
+       queryClient.invalidateQueries({ queryKey: ["contractByBidQuery"] });
+      queryClient.invalidateQueries({ queryKey: ["myInvitations"] });
       setRespondToInvitationSuccess(true);
     },
     onError: (err: any) => handleApiError(err),
@@ -138,6 +140,10 @@ export function useBids() {
     mutationFn: BidService.signContract,
     onSuccess: (response: any) => {
       if (!isOk(response)) return;
+          queryClient.invalidateQueries({ queryKey: ["contractByBidQuery"] });
+      queryClient.invalidateQueries({ queryKey: ["singleContract"] });
+      queryClient.invalidateQueries({ queryKey: ["getSingleProject"] });
+       queryClient.invalidateQueries({ queryKey: ["contractByBidQuery"] });
       setSignSuccess(true);
     },
     onError: (err: any) => handleApiError(err),

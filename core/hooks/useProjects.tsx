@@ -97,7 +97,7 @@ export function useProjects() {
     onError: (err: any) =>
       handleApiError(
         err,
-        "Error submitting bid revision request. Please try again.",
+        "Error submitting b revision request. Please try again.",
       ),
   });
 

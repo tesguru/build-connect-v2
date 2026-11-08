@@ -2,6 +2,8 @@ import GradientButton from "@/components/Buttons/GradientButton";
 import DropdownField from "@/components/Forms/DropDown";
 import FormInput from "@/components/Forms/Formnput";
 import AppLayout from "@/components/Layouts/AppLayout";
+import KeyboardAvoidingLayout from "@/components/Layouts/KeyboardAvoidLayout";
+
 import { LookupService } from "@/core/services/lookup/LookupService";
 import { handleApiError } from "@/core/utils/handleapierror";
 
@@ -91,6 +93,7 @@ export default function EmploymentInfoScreen() {
 
   return (
     <AppLayout screenName="Employment Info">
+         <KeyboardAvoidingLayout androidExtraPadding={30}>
       <FormProvider {...methods}>
         <View className="p-4 flex-1">
           <ScrollView
@@ -340,6 +343,7 @@ export default function EmploymentInfoScreen() {
           </View>
         </View>
       </FormProvider>
+      </KeyboardAvoidingLayout>
     </AppLayout>
   );
 }

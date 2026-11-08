@@ -2,7 +2,7 @@
   "expo": {
     "name": "Build Connect",
     "slug": "build_connect_v2",
-    "version": "1.0.0",
+       "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/play_store_512.png",
     "scheme": "buildconnectv2",
@@ -11,6 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.buildconnect.ivantage",
+       "buildNumber": "2",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }

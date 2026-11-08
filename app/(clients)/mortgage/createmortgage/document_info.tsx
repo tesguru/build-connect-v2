@@ -1,6 +1,7 @@
 import GradientButton from "@/components/Buttons/GradientButton";
 import FileUploadComponent from "@/components/Forms/FileUploadComponent";
 import AppLayout from "@/components/Layouts/AppLayout";
+import KeyboardAvoidingLayout from "@/components/Layouts/KeyboardAvoidLayout";
 import SuccessScreen from "@/components/Notifications/SucessScreen";
 import { reportImage } from "@/constants/icon";
 import { useProperty } from "@/core/hooks/useProperty";
@@ -175,6 +176,7 @@ if (mortgageSuccess) {
   
   return (
     <AppLayout screenName="Document Info">
+          <KeyboardAvoidingLayout>
       <FormProvider {...methods}>
         <View className="p-4 flex-1">
         
@@ -267,6 +269,7 @@ if (mortgageSuccess) {
           </View>
         </View>
       </FormProvider>
+      </KeyboardAvoidingLayout>
     </AppLayout>
   );
 }

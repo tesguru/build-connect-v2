@@ -194,7 +194,7 @@ const CreateProperty = () => {
         title="Successfully!"
         message="Congratulations! Your Property Has Been Created Successfully"
         navigateTo="/(tab)/properties"
-        buttonTitle="Return Home"
+        buttonTitle="Return properties page"
       />
     );
   }

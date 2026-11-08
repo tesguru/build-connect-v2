@@ -1,3 +1,4 @@
+
 import colors from "@/constants/colors";
 import { SplashImage } from "@/constants/image";
 import strings from "@/constants/strings";
@@ -9,29 +10,30 @@ import { Image, Text, View } from "react-native";
 
 export default function Index() {
   const router = useRouter();
+
   const { isLogin } = useAuthStore();
-  const { hasCompleted, isLoaded, loadOnboardingStatus } = useOnboardingStore();
+
+  const {
+    hasCompleted,
+    isLoaded,
+    loadOnboardingStatus,
+  } = useOnboardingStore();
 
   useEffect(() => {
     loadOnboardingStatus();
   }, []);
 
-  // 2. Route based on both flags
   useEffect(() => {
     if (!isLoaded) return;
 
-    const timeout = setTimeout(() => {
-      if (isLogin) {
-        router.replace("/(tab)");
-      } else if (hasCompleted) {
-        router.replace("/sign_in/signin");
-      } else {
-        router.replace("/(onboarding)/onboarding");
-      }
-    }, 2000);
-
-    return () => clearTimeout(timeout);
-  }, [isLogin, hasCompleted, isLoaded]);
+    if (isLogin) {
+      router.replace("/(tab)");
+    } else if (hasCompleted) {
+      router.replace("/sign_in/signin");
+    } else {
+      router.replace("/(onboarding)/onboarding");
+    }
+  }, [isLogin, hasCompleted, isLoaded, router]);
 
   return (
     <View className="flex-1 items-center justify-center p-16 bg-primary">
@@ -40,6 +42,7 @@ export default function Index() {
         style={{ width: 300, height: 100 }}
         resizeMode="contain"
       />
+
       <Text
         className="mt-1 text-white font-work-sans"
         style={{ marginTop: 1, color: colors.color_white }}

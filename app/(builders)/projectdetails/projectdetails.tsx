@@ -107,7 +107,7 @@ const ProjectDetailsScreen = ({ navigation }: any) => {
   };
 
   // ── Success State ──────────────────────────────────────────────────────
-  if (expressInterestSuccess == false) {
+  if (expressInterestSuccess) {
     return (
       <SuccessScreen
         title="Successfully!"
